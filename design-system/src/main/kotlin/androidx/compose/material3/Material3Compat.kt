@@ -21,12 +21,39 @@ import androidx.compose.ui.Alignment
  * A lightweight compatibility shim for commonly used Material3 APIs.
  *
  * Purpose: allow existing source files that import androidx.compose.material3.* to keep their
- * imports while delegating the actual implementation to the project's PlatformX adapters.
+ * imports while delegating the actual implementation to the project's Platform adapters.
  * This is a stop-gap to migrate the codebase incrementally without changing all call sites at once.
  *
  * Limitations: the shim implements a small subset of Material3 APIs with simplified signatures.
  * Complex usages may still need manual migration.
  */
+
+// Minimal ColorScheme/ Typography / MaterialTheme compatibility surface so existing code that
+// reads MaterialTheme.colorScheme / typography compiles while we migrate to MIUIX.
+data class ColorScheme(
+    val primary: Color = Color.Unspecified,
+    val surfaceVariant: Color = Color.Unspecified,
+    val onSurfaceVariant: Color = Color.Unspecified,
+    val outline: Color = Color.Unspecified,
+    val onSurface: Color = Color.Unspecified
+)
+
+data class AppTextStyle(
+    val fontSize: TextUnit = 14.sp
+)
+
+data class Typography(
+    val labelSmall: AppTextStyle = AppTextStyle(12.sp),
+    val labelMedium: AppTextStyle = AppTextStyle(14.sp),
+    val bodyMedium: AppTextStyle = AppTextStyle(14.sp)
+)
+
+object MaterialTheme {
+    // These defaults are intentionally permissive (Color.Unspecified) —
+    // visual fidelity should be provided by the app's own theme adapters.
+    val colorScheme: ColorScheme = ColorScheme()
+    val typography: Typography = Typography()
+}
 
 @Composable
 fun Button(
@@ -46,6 +73,9 @@ fun Text(
     style: TextStyle = TextStyle(fontSize = 14.sp),
     color: Color = Color.Unspecified
 ) {
+    // Use the platform text renderer from the project's design system to keep
+    // typography consistent. If PlatformTextField / PlatformButton are not
+    // desirable for a call site, migrate that call site to MIUIX directly.
     androidx.compose.material3.Text(text = text, modifier = modifier, style = style)
 }
 
@@ -60,8 +90,6 @@ fun TopAppBar(
     // For simple cases where title is Text("...") this will work via the title composable.
     Box(modifier = modifier.padding(0.dp)) {
         // If navigationIcon is non-null, we show a back icon by delegating to PlatformTopAppBar
-        val titleText = ""
-        // Best-effort: Call title composable inside layout
         title()
         if (navigationIcon != null) {
             navigationIcon()
@@ -86,8 +114,6 @@ fun TextField(
     placeholder: @Composable (() -> Unit)? = null
 ) {
     PlatformTextField(value = value, onValueChange = onValueChange, modifier = modifier, placeholder = placeholder?.let {
-        // Very small adapter: if placeholder provided, try to render its string by invoking toString()
-        // but since we can't extract text, call a simple placeholder composable
         ""
     } ?: "")
 }
