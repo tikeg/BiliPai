@@ -1,0 +1,44 @@
+name: MIUIX Verify
+on:
+  push:
+    branches: [ MIUIX ]
+  workflow_dispatch: {}
+
+jobs:
+  compile:
+    name: Compile app (Kotlin)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Compile :app:compileDebugKotlin
+        run: ./gradlew :app:compileDebugKotlin --no-daemon --stacktrace
+
+      - name: Upload compile logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: miuix-compile-logs
+          path: build/reports
