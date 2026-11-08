@@ -72,7 +72,7 @@
 
 在插件中心启用“去广告增强”，可在“视频标签屏蔽词”中添加、删除关键词，按视频实际标签过滤首页推荐、搜索结果和详情相关推荐。修改规则后刷新对应列表生效；未配置标签词时不增加标签请求，查询失败或超时时保留未确认命中的视频。
 
-导入第三方插件前，请检查来源与权限声明。开发说明见 [插件开发指南](docs/PLUGIN_DEVELOPMENT.md)、[Kotlin 插件 SDK](plugins/sdk/README.md) 与 [JS 插件示例](examples/plugins/README.md)。
+导入第三方插件前，请检查来源与权限声明。开发说明见 [插件目录](plugins/)、[Kotlin 插件 SDK](plugin-sdk/src/main/java/com/android/purebilibili/plugin/sdk/) 与 [JS 插件示例](plugins/tools/create-plugin.js)。
 
 ## 最近更新
 
@@ -90,8 +90,8 @@
 环境：JDK 21、Android SDK 37。
 
 ```bash
-git clone https://github.com/jay3-yy/BiliPai.git
-cd BiliPai
+git clone https://github.com/tikeg/bilipai.git
+cd bilipai
 ./gradlew :app:assembleDev
 ```
 
@@ -99,7 +99,7 @@ Miuix 依赖从 GitHub Packages 获取，需在本机 `~/.gradle/gradle.properti
 
 ## 参与贡献
 
-欢迎通过 [Issue](https://github.com/jay3-yy/BiliPai/issues/new/choose) 反馈问题、提出建议，也欢迎提交 [Pull Request](https://github.com/jay3-yy/BiliPai/pulls)，一起完善功能和翻译。
+欢迎通过 [Issue](https://github.com/tikeg/bilipai/issues/new/choose) 反馈问题、提出建议，也欢迎提交 [Pull Request](https://github.com/tikeg/bilipai/pulls)，一起完善功能和翻译。
 
 ## 致谢
 

@@ -72,7 +72,7 @@ Built-in plugins cover sponsor skipping, ad filtering, Anime4K, danmaku, eye car
 
 Enable **去广告增强** (ad filtering) in the plugin center and edit **视频标签屏蔽词** to block keywords in actual video tags across home recommendations, search results and related videos. Refresh the list after changing rules. With no tag keywords, no extra tag requests are made; failed or timed-out lookups keep videos whose tags could not be checked.
 
-Review the source and declared permissions before importing third-party plugins. See the [plugin development guide](docs/PLUGIN_DEVELOPMENT.md), [Kotlin plugin SDK](plugins/sdk/README.md) and [JS plugin examples](examples/plugins/README.md).
+Review the source and declared permissions before importing third-party plugins. See the [plugins directory](plugins/), [Kotlin plugin SDK](plugin-sdk/src/main/java/com/android/purebilibili/plugin/sdk/) and [JS plugin examples](plugins/tools/create-plugin.js).
 
 ## Recent updates
 
@@ -90,8 +90,8 @@ See [CHANGELOG.md](CHANGELOG.md) for details.
 Use JDK 21 and Android SDK 37.
 
 ```bash
-git clone https://github.com/jay3-yy/BiliPai.git
-cd BiliPai
+git clone https://github.com/tikeg/bilipai.git
+cd bilipai
 ./gradlew :app:assembleDev
 ```
 
@@ -99,7 +99,7 @@ Miuix dependencies require GitHub Packages access. Set `gpr.user` and `gpr.key` 
 
 ## Contributing
 
-Share bugs and ideas through [Issues](https://github.com/jay3-yy/BiliPai/issues/new/choose), or help improve features and translations with a [pull request](https://github.com/jay3-yy/BiliPai/pulls).
+Share bugs and ideas through [Issues](https://github.com/tikeg/bilipai/issues/new/choose), or help improve features and translations with a [pull request](https://github.com/tikeg/bilipai/pulls).
 
 ## Acknowledgements
 
