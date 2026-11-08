@@ -1,16 +1,16 @@
 package dev.bilipai.samples.watchcompass
 
-import com.android.purebilibili.plugin.sdk.PluginCapability
-import com.android.purebilibili.plugin.sdk.PluginCapabilityManifest
-import com.android.purebilibili.plugin.sdk.PluginVideoCandidate
-import com.android.purebilibili.plugin.sdk.RecommendationFeedbackSignals
-import com.android.purebilibili.plugin.sdk.RecommendationGroup
-import com.android.purebilibili.plugin.sdk.RecommendationGroupItem
-import com.android.purebilibili.plugin.sdk.RecommendationMode
-import com.android.purebilibili.plugin.sdk.RecommendationPluginApi
-import com.android.purebilibili.plugin.sdk.RecommendationRequest
-import com.android.purebilibili.plugin.sdk.RecommendationResult
-import com.android.purebilibili.plugin.sdk.RecommendedVideo
+import app.bilipai.plugin.sdk.PluginCapability
+import app.bilipai.plugin.sdk.PluginCapabilityManifest
+import app.bilipai.plugin.sdk.PluginVideoCandidate
+import app.bilipai.plugin.sdk.RecommendationFeedbackSignals
+import app.bilipai.plugin.sdk.RecommendationGroup
+import app.bilipai.plugin.sdk.RecommendationGroupItem
+import app.bilipai.plugin.sdk.RecommendationMode
+import app.bilipai.plugin.sdk.RecommendationPluginApi
+import app.bilipai.plugin.sdk.RecommendationRequest
+import app.bilipai.plugin.sdk.RecommendationResult
+import app.bilipai.plugin.sdk.RecommendedVideo
 import kotlin.math.ln
 
 class WatchCompassPlugin : RecommendationPluginApi<PluginVideoCandidate> {

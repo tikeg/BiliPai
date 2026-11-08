@@ -14,7 +14,7 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
-PACKAGE = "com.android.bilipai.tv"
+PACKAGE = "app.bilipai.tv"
 ROOT = Path(__file__).resolve().parents[1]
 
 

@@ -5,10 +5,10 @@ plugins {
 }
 
 android {
-    namespace = "com.android.bilipai.tv"
+    namespace = "app.bilipai.tv"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig {
-        applicationId = "com.android.bilipai.tv"
+        applicationId = "app.bilipai.tv"
         minSdk = 26
         targetSdk = 37
         versionCode = 3

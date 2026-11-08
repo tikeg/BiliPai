@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.purebilibili.data.core"
+    namespace = "app.bilipai.data.core"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig { minSdk = 26 }
     compileOptions {

@@ -63,5 +63,5 @@ if [[ "$features" != *android.software.leanback* && "$features" != *android.hard
   echo "Refusing to install TV APK on a device without TV features: $device_serial" >&2; exit 1
 fi
 "$adb_bin" -s "$device_serial" install -r "$apk_path"
-"$adb_bin" -s "$device_serial" shell am start -W -n com.android.bilipai.tv/.TvActivity
+"$adb_bin" -s "$device_serial" shell am start -W -n app.bilipai.tv/.TvActivity
 echo "BiliPai TV is open on $device_serial. Use arrows, Enter and the emulator Back button."

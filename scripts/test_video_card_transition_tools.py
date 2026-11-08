@@ -156,7 +156,7 @@ class TransitionReportTest(unittest.TestCase):
     def test_sampler_rejects_debug_and_smooth_without_adb(self):
         script = str(Path(__file__).with_name("release_card_transition_sample.sh"))
         for variant in ("debug", "smooth"):
-            env = dict(os.environ, PKG="com.android.purebilibili." + variant)
+            env = dict(os.environ, PKG="app.bilipai." + variant)
             result = subprocess.run(["bash", script, "start"], env=env,
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.assertEqual(1, result.returncode)
@@ -178,7 +178,7 @@ if joined == 'devices':
 elif joined.startswith('shell pm path'):
     print('package:/data/app/base.apk')
 elif joined.startswith('shell dumpsys activity'):
-    print('topResumedActivity=ActivityRecord{ test com.android.purebilibili/.MainActivity}')
+    print('topResumedActivity=ActivityRecord{ test app.bilipai/.MainActivity}')
 elif joined.startswith('shell pidof'):
     print('123')
 elif joined.startswith('shell date'):
@@ -198,7 +198,7 @@ elif 'setprop' in joined:
             calls = directory / "calls.txt"
             env = dict(os.environ, PATH=str(directory)+os.pathsep+os.environ["PATH"],
                        OUT_DIR=str(directory / "raw"), MOCK_GFX=gfx(), MOCK_ADB_CALLS=str(calls),
-                       PKG="com.android.purebilibili")
+                       PKG="app.bilipai")
             script = str(Path(__file__).resolve().with_name("release_card_transition_sample.sh"))
             start = subprocess.run(["bash", script, "start", "--label", "before build",
                                     "--report-dir", str(directory / "reports")], env=env, cwd=folder,

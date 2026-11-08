@@ -1,0 +1,113 @@
+package app.bilipai.core.ui.components
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.unit.Dp
+import app.bilipai.core.theme.AppUiStyle
+import app.bilipai.core.theme.LocalAppUiStyle
+import app.bilipai.core.ui.renderer.material3.AppMaterial3CircularProgressIndicator
+import app.bilipai.core.ui.renderer.material3.AppMaterial3LinearProgressIndicator
+import app.bilipai.core.ui.renderer.miuix.AppMiuixCircularProgressIndicator
+import app.bilipai.core.ui.renderer.miuix.AppMiuixLinearProgressIndicator
+
+@Composable
+fun AppCircularProgressIndicator(
+    progress: () -> Float,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    strokeWidth: Dp = Dp.Unspecified,
+    trackColor: Color = Color.Unspecified,
+    strokeCap: StrokeCap? = null,
+) {
+    when (LocalAppUiStyle.current) {
+        AppUiStyle.MATERIAL3 -> AppMaterial3CircularProgressIndicator(
+            progress = progress,
+            modifier = modifier,
+            color = color,
+            strokeWidth = strokeWidth,
+            trackColor = trackColor,
+            strokeCap = strokeCap,
+        )
+        AppUiStyle.MIUIX -> AppMiuixCircularProgressIndicator(
+            progress = progress,
+            modifier = modifier,
+            color = color,
+            strokeWidth = strokeWidth,
+            trackColor = trackColor,
+        )
+    }
+}
+
+@Composable
+fun AppCircularProgressIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    strokeWidth: Dp = Dp.Unspecified,
+    trackColor: Color = Color.Unspecified,
+    strokeCap: StrokeCap? = null,
+) {
+    when (LocalAppUiStyle.current) {
+        AppUiStyle.MATERIAL3 -> AppMaterial3CircularProgressIndicator(
+            modifier = modifier,
+            color = color,
+            strokeWidth = strokeWidth,
+            trackColor = trackColor,
+            strokeCap = strokeCap,
+        )
+        AppUiStyle.MIUIX -> AppMiuixCircularProgressIndicator(
+            modifier = modifier,
+            color = color,
+            strokeWidth = strokeWidth,
+            trackColor = trackColor,
+        )
+    }
+}
+
+@Composable
+fun AppLinearProgressIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    trackColor: Color = Color.Unspecified,
+    strokeCap: StrokeCap? = null,
+) {
+    when (LocalAppUiStyle.current) {
+        AppUiStyle.MATERIAL3 -> AppMaterial3LinearProgressIndicator(
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            strokeCap = strokeCap,
+        )
+        AppUiStyle.MIUIX -> AppMiuixLinearProgressIndicator(
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+        )
+    }
+}
+
+@Composable
+fun AppLinearProgressIndicator(
+    progress: () -> Float,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    trackColor: Color = Color.Unspecified,
+    strokeCap: StrokeCap? = null,
+) {
+    when (LocalAppUiStyle.current) {
+        AppUiStyle.MATERIAL3 -> AppMaterial3LinearProgressIndicator(
+            progress = progress,
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+            strokeCap = strokeCap,
+        )
+        AppUiStyle.MIUIX -> AppMiuixLinearProgressIndicator(
+            progress = progress,
+            modifier = modifier,
+            color = color,
+            trackColor = trackColor,
+        )
+    }
+}

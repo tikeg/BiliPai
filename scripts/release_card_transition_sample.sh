@@ -2,7 +2,7 @@
 # No builds/installs. No continuous ADB polling or recording during the sampling window.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PKG="${PKG:-com.android.purebilibili}"
+PKG="${PKG:-app.bilipai}"
 DEVICE=""
 OUT_DIR="${OUT_DIR:-docs/perf/raw}"
 REPORT_DIR=""
@@ -17,7 +17,7 @@ Usage:
   release_card_transition_sample.sh stop  [--device SERIAL] [--phase OPENING|RETURNING|PredictiveCommit|PredictiveCancel]
   release_card_transition_sample.sh abort [--device SERIAL]
 
-Only release/dev packages. Set PKG=com.android.purebilibili.dev for dev.
+Only release/dev packages. Set PKG=app.bilipai.dev for dev.
 Keep the same OUT_DIR for start/stop. Report directory and label are saved in the session.
 --config adds manually recorded settings; unavailable settings are "unknown", never guessed.
 --phase is ONLY for a deliberately single-phase sample; normally diagnostics attribute phases.
@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
 done
-case "$PKG" in com.android.purebilibili|com.android.purebilibili.dev) ;; *)
+case "$PKG" in app.bilipai|app.bilipai.dev) ;; *)
   echo "Only release/dev packages are allowed: $PKG" >&2; exit 1 ;; esac
 case "$PHASE" in ""|OPENING|RETURNING|PredictiveCommit|PredictiveCancel) ;; *)
   echo "Invalid phase: $PHASE" >&2; exit 1 ;; esac
@@ -114,7 +114,7 @@ START_EPOCH="$(read_session START_EPOCH)"
 [[ -n "$BASE" && -n "$REPORT_BASE" && "$PID" =~ ^[0-9]+$ && "$START_EPOCH" =~ ^[0-9]+$ ]] || {
   echo "Invalid session: $STATE_FILE" >&2; exit 1;
 }
-case "$PKG" in com.android.purebilibili|com.android.purebilibili.dev) ;; *) echo "Invalid session package" >&2; exit 1 ;; esac
+case "$PKG" in app.bilipai|app.bilipai.dev) ;; *) echo "Invalid session package" >&2; exit 1 ;; esac
 [[ "$LOG_LEVEL" =~ ^[A-Za-z0-9]*$ ]] || { echo "Invalid saved log property" >&2; exit 1; }
 restore_log_level() { adb_cmd shell "setprop log.tag.VideoCardMotion \"$LOG_LEVEL\"" >/dev/null 2>&1 || true; }
 if [[ "$MODE" == checkpoint ]]; then

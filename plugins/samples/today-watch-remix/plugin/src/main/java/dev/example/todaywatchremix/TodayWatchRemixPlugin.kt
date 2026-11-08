@@ -1,13 +1,13 @@
 package dev.example.todaywatchremix
 
-import com.android.purebilibili.plugin.sdk.PluginCapability
-import com.android.purebilibili.plugin.sdk.PluginCapabilityManifest
-import com.android.purebilibili.plugin.sdk.PluginVideoCandidate
-import com.android.purebilibili.plugin.sdk.RecommendationMode
-import com.android.purebilibili.plugin.sdk.RecommendationPluginApi
-import com.android.purebilibili.plugin.sdk.RecommendationRequest
-import com.android.purebilibili.plugin.sdk.RecommendationResult
-import com.android.purebilibili.plugin.sdk.RecommendedVideo
+import app.bilipai.plugin.sdk.PluginCapability
+import app.bilipai.plugin.sdk.PluginCapabilityManifest
+import app.bilipai.plugin.sdk.PluginVideoCandidate
+import app.bilipai.plugin.sdk.RecommendationMode
+import app.bilipai.plugin.sdk.RecommendationPluginApi
+import app.bilipai.plugin.sdk.RecommendationRequest
+import app.bilipai.plugin.sdk.RecommendationResult
+import app.bilipai.plugin.sdk.RecommendedVideo
 
 class TodayWatchRemixPlugin : RecommendationPluginApi<PluginVideoCandidate> {
     override val capabilityManifest = PluginCapabilityManifest(

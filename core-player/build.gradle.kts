@@ -1,7 +1,7 @@
 plugins { id("com.android.library") }
 
 android {
-    namespace = "com.android.purebilibili.player.core"
+    namespace = "app.bilipai.player.core"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig { minSdk = 26 }
     compileOptions {

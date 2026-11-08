@@ -97,25 +97,25 @@ try {
     }
 
     Assert-AuditRejectsProbe -Name "style" -Metric 'style_feature' -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 val illegalStyle = UiStyle.IOS
 "@
 
     Assert-AuditRejectsProbe -Name "local" -Metric 'local_feature' -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 val illegalLocal = LocalUiPreset.current
 "@
 
     Assert-AuditRejectsProbe -Name "renderer" -Metric 'renderer_feature' -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
-import com.android.purebilibili.core.ui.renderer.material3.Material3ButtonRenderer
+import app.bilipai.core.ui.renderer.material3.Material3ButtonRenderer
 "@
 
     Assert-AuditRejectsProbe -Name "ios" -Metric 'ios_feature_callers' -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 fun illegalIos() {
     IOSGroup()
@@ -123,9 +123,9 @@ fun illegalIos() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_import" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Material3\.Button'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Material3\.Button'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 import androidx.compose.material3.Button
 
@@ -135,9 +135,9 @@ fun illegalVendor() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_qualified_material3" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Material3\.Scaffold'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Material3\.Scaffold'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 fun illegalVendor() {
     androidx.compose.material3.Scaffold {}
@@ -145,9 +145,9 @@ fun illegalVendor() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_qualified_cupertino" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Cupertino\.CupertinoSlider'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Cupertino\.CupertinoSlider'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 fun illegalVendor() {
     io.github.alexzhirkevich.cupertino.CupertinoSlider(value = 0f, onValueChange = {})
@@ -155,9 +155,9 @@ fun illegalVendor() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_qualified_miuix" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Miuix\.Button'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=Miuix\.Button'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 fun illegalVendor() {
     top.yukonga.miuix.kmp.basic.Button(onClick = {}) {}
@@ -165,15 +165,15 @@ fun illegalVendor() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_material_omissions" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.HorizontalDivider',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Icon',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ListItem',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ScrollableTabRow',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Snackbar',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.SnackbarHost',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Text'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.HorizontalDivider',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Icon',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ListItem',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ScrollableTabRow',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Snackbar',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.SnackbarHost',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Text'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -195,11 +195,11 @@ fun illegalVendor() {
 "@
 
     Assert-AuditRejectsProbe -Name "vendor_material_wildcard" -Metric 'vendor_component_feature' -ExpectedPatterns @(
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Icon',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ScrollableTabRow',
-        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Text'
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Icon',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.ScrollableTabRow',
+        'VENDOR_COMPONENT_VIOLATION path=app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe\.kt evidence=.*Material3\.Text'
     ) -Source @"
-package com.android.purebilibili.feature.auditprobe
+package app.bilipai.feature.auditprobe
 
 import androidx.compose.material3.*
 

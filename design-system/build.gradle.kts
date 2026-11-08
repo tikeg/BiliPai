@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.purebilibili.designsystem"
+    namespace = "app.bilipai.designsystem"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0

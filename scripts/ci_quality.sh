@@ -14,32 +14,32 @@ case "$MODE" in
   performance)
     GRADLE_TASKS=(
       :ci-lint:test
-        --tests 'com.android.purebilibili.lint.PerformanceDetectorTest'
-        --tests 'com.android.purebilibili.lint.ModelStabilityDetectorTest'
+        --tests 'app.bilipai.lint.PerformanceDetectorTest'
+        --tests 'app.bilipai.lint.ModelStabilityDetectorTest'
       :app:lintDebug -Pbili.ciChecks=performance
       :app:testDebugUnitTest
-        --tests 'com.android.purebilibili.core.ui.transition.BlurRenderEffectCacheTest'
-        --tests 'com.android.purebilibili.core.ui.performance.AppDisplayModePreferenceTest'
-        --tests 'com.android.purebilibili.core.ui.performance.RuntimeVisualGuardTrackerTest'
+        --tests 'app.bilipai.core.ui.transition.BlurRenderEffectCacheTest'
+        --tests 'app.bilipai.core.ui.performance.AppDisplayModePreferenceTest'
+        --tests 'app.bilipai.core.ui.performance.RuntimeVisualGuardTrackerTest'
       :design-system:testDebugUnitTest
-        --tests 'com.android.purebilibili.core.ui.adaptive.RuntimeVisualGuardPolicyTest'
-        --tests 'com.android.purebilibili.core.ui.adaptive.RuntimeVisualGuardSignalPolicyTest'
+        --tests 'app.bilipai.core.ui.adaptive.RuntimeVisualGuardPolicyTest'
+        --tests 'app.bilipai.core.ui.adaptive.RuntimeVisualGuardSignalPolicyTest'
     )
     ;;
   correctness)
     GRADLE_TASKS=(
       :app:testDebugUnitTest
-        --tests 'com.android.purebilibili.feature.settings.AppUpdateCheckerTest'
-        --tests 'com.android.purebilibili.core.store.SerializedSettingsCacheWriterTest'
-        --tests 'com.android.purebilibili.core.store.AppNavigationSettingsMappingPolicyTest.gestureRotationAndTranslationPreferencesAreIndependent'
-        --tests 'com.android.purebilibili.core.store.AppNavigationSettingsMappingPolicyTest.populatedPreferences_mapToNavigationSettingsCorrectly'
-        --tests 'com.android.purebilibili.core.store.ThemeSelectionMigrationPolicyTest'
+        --tests 'app.bilipai.feature.settings.AppUpdateCheckerTest'
+        --tests 'app.bilipai.core.store.SerializedSettingsCacheWriterTest'
+        --tests 'app.bilipai.core.store.AppNavigationSettingsMappingPolicyTest.gestureRotationAndTranslationPreferencesAreIndependent'
+        --tests 'app.bilipai.core.store.AppNavigationSettingsMappingPolicyTest.populatedPreferences_mapToNavigationSettingsCorrectly'
+        --tests 'app.bilipai.core.store.ThemeSelectionMigrationPolicyTest'
     )
     ;;
   style)
     GRADLE_TASKS=(
       :ci-lint:test
-        --tests 'com.android.purebilibili.lint.StyleDetectorTest'
+        --tests 'app.bilipai.lint.StyleDetectorTest'
       :app:lintDebug -Pbili.ciChecks=style
     )
     ;;

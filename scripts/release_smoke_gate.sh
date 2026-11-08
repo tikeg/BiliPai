@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PACKAGE="com.android.purebilibili"
-MAIN_ACTIVITY="com.android.purebilibili/.MainActivity"
+PACKAGE="app.bilipai"
+MAIN_ACTIVITY="app.bilipai/.MainActivity"
 REPORT_FILE="docs/releases/6.0.0-regression-smoke.md"
 RAW_DIR="docs/releases/raw"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
@@ -63,9 +63,9 @@ unit_status="PASS"
 unit_detail=""
 if [[ "$skip_unit" -eq 0 ]]; then
   if ./gradlew :app:testDebugUnitTest \
-      --tests com.android.purebilibili.feature.video.player.BackgroundPlaybackPolicyTest \
-      --tests com.android.purebilibili.ShortcutDeepLinkRouteTest \
-      --tests com.android.purebilibili.core.util.BilibiliUrlParserRegressionTest >/tmp/release-smoke-unit-${TIMESTAMP}.log 2>&1; then
+      --tests app.bilipai.feature.video.player.BackgroundPlaybackPolicyTest \
+      --tests app.bilipai.ShortcutDeepLinkRouteTest \
+      --tests app.bilipai.core.util.BilibiliUrlParserRegressionTest >/tmp/release-smoke-unit-${TIMESTAMP}.log 2>&1; then
     unit_detail="Background/PiP policy + shortcut/deeplink parser unit tests passed"
   else
     unit_status="FAIL"

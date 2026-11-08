@@ -7,10 +7,10 @@ from pathlib import Path
 
 ROOT = Path(r"C:\Users\i1290\Documents\ChatGPT\BiliPai")
 SRC = ROOT / "halcyon_ref/app/src/main/java/com/ella/music"
-DST = ROOT / "app/src/main/java/com/android/purebilibili/feature/audio/lyrics/halcyon"
+DST = ROOT / "app/src/main/java/app/bilipai/feature/audio/lyrics/halcyon"
 DST.mkdir(parents=True, exist_ok=True)
 
-PKG = "package com.android.purebilibili.feature.audio.lyrics.halcyon"
+PKG = "package app.bilipai.feature.audio.lyrics.halcyon"
 
 # Files to copy almost wholesale (rendering only).
 COPY_FILES = [

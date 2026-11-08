@@ -17,13 +17,13 @@ local.properties
 # 🔥 忽略 Gradle 构建产物目录。
 #
 # 注意：`**/build/` 同时会匹配 Java 包目录（例如
-# `com/android/purebilibili/build/`），因此必须紧跟以下否定规则，
+# `app/bilipai/build/`），因此必须紧跟以下否定规则，
 # 否则 build-logic 的插件源码会被静默忽略、无法提交。
 **/build/
-!build-logic/src/main/java/com/android/purebilibili/build/
-!build-logic/src/main/java/com/android/purebilibili/build/**
-!app/src/main/java/com/android/purebilibili/build/
-!app/src/main/java/com/android/purebilibili/build/**
+!build-logic/src/main/java/app/bilipai/build/
+!build-logic/src/main/java/app/bilipai/build/**
+!app/src/main/java/app/bilipai/build/
+!app/src/main/java/app/bilipai/build/**
 
 # 🔥 忽略 Kotlin 编译器临时文件和错误日志
 *.compiler.options
@@ -136,7 +136,7 @@ docs/wiki/MIUIX_ALIGNMENT.md
 docs/wiki/NATIVE_THEME_COMPONENT_MIGRATION.md
 docs/wiki/THEME_SIMPLIFICATION_PHASE0_BASELINE.md
 docs/perf/
-app/src/test/java/com/android/purebilibili/docs/UiDesignDocumentationStructureTest.kt
+app/src/test/java/app/bilipai/docs/UiDesignDocumentationStructureTest.kt
 
 # Local Reasonix session settings and metadata
 .reasonix/
@@ -151,7 +151,7 @@ reasonix.toml
 /AI.txt
 /STRUCTURE_GUIDELINES.adoc
 /app-tv/README.md
-/app/src/main/java/com/android/purebilibili/feature/video/ambient/README.md
+/app/src/main/java/app/bilipai/feature/video/ambient/README.md
 /artwork/brand-motion/AGENTS.md
 /artwork/brand-motion/README.md
 /artwork/settings-icons/README.md

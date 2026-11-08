@@ -1,0 +1,653 @@
+// 文件路径: feature/home/components/cards/StoryVideoCard.kt
+package app.bilipai.feature.home.components.cards
+
+import app.bilipai.core.ui.transition.videoCardSourceAnchor
+import app.bilipai.core.ui.AppContentColors
+
+import coil3.request.crossfade
+import app.bilipai.core.ui.components.AppIcon
+import app.bilipai.core.ui.components.AppText
+
+import app.bilipai.core.ui.AppSpacingTokens
+
+import app.bilipai.core.ui.MediaContrastPalette
+import app.bilipai.core.ui.FeedTitleHierarchy
+import app.bilipai.core.ui.feedContentTypography
+
+import androidx.compose.foundation.background
+import app.bilipai.core.ui.components.appActionClickable
+import app.bilipai.core.ui.components.appActionWithFeedback
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
+import app.bilipai.feature.home.LocalHomeCardCoverLoadingAllowed
+import app.bilipai.core.ui.components.PageAwareAsyncImage
+import app.bilipai.core.util.homeCoverDecodePolicy
+import coil3.request.ImageRequest
+import app.bilipai.core.util.FormatUtils
+import app.bilipai.core.util.iOSCardTapEffect
+import app.bilipai.core.util.animateEnter
+import app.bilipai.core.util.CardPositionManager
+import app.bilipai.core.ui.transition.videoCardSourceBoundsInRoot
+import app.bilipai.core.ui.components.LocalPageImageLoadingAllowed
+import app.bilipai.data.model.response.VideoItem
+import app.bilipai.feature.plugin.rememberSponsorFeedBadgeLabel
+import app.bilipai.core.util.rememberHapticFeedback
+import app.bilipai.core.util.HapticType
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.onClick as semanticClick
+import kotlinx.coroutines.launch
+import androidx.compose.ui.input.pointer.pointerInput
+//  共享元素过渡
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
+
+import app.bilipai.core.ui.LocalSharedTransitionScope
+import app.bilipai.core.ui.LocalAnimatedVisibilityScope
+import app.bilipai.core.ui.LocalSharedTransitionEnabled
+import app.bilipai.core.ui.videoCardTitleMaxLines
+import app.bilipai.core.ui.videoCardTitleOverflow
+import app.bilipai.core.ui.AppShapes
+import app.bilipai.core.ui.ContainerLevel
+import app.bilipai.core.theme.BiliPink
+import app.bilipai.core.store.HomeDurationStyle
+import app.bilipai.core.ui.adaptive.MotionTier
+import app.bilipai.core.ui.adaptive.adaptiveCardHoverEffect
+import app.bilipai.core.ui.components.UpBadgeName
+import app.bilipai.core.ui.components.AppDropdownMenu
+import app.bilipai.core.ui.components.AppDropdownMenuItem
+import app.bilipai.core.ui.components.resolveUpStatsText
+import app.bilipai.core.ui.transition.LocalVideoCardSharedElementSourceRoute
+import app.bilipai.core.ui.transition.LocalMiuixVideoCardTransitionState
+import app.bilipai.core.ui.transition.LocalVideoSharedTransitionSpeedSettings
+import app.bilipai.core.ui.transition.recordNativeVideoCardLayer
+import app.bilipai.core.ui.transition.resolveVideoCardSharedTransitionMotionSpec
+import app.bilipai.core.ui.transition.shouldEnableVideoCoverSharedTransition
+import app.bilipai.core.ui.transition.shouldUseVideoCardShellSharedBounds
+import app.bilipai.feature.home.HomeCoverRequestSpec
+import app.bilipai.feature.home.resolveHomeCoverImageSource
+import app.bilipai.feature.home.resolveHomeCardEnterAnimationEnabledAtMount
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import kotlin.math.roundToInt
+
+/**
+ *  故事卡片 - 影院海报风格
+ *
+ * 特点：
+ * - 封面比例由首页卡片样式统一配置
+ * - 大圆角 (24dp)
+ * - 标题叠加在封面底部
+ * - 沉浸电影感
+ */
+@Composable
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalLayoutApi::class)
+internal fun StoryVideoCard(
+    video: VideoItem,
+    index: Int = 0,  //  [新增] 索引用于动画延迟
+    animationEnabled: Boolean = true,  //  卡片动画开关
+    motionTier: MotionTier = MotionTier.Normal,
+    transitionEnabled: Boolean = false, //  卡片过渡动画开关
+    sharedElementSourceRoute: String? = null,
+    isReturningFromVideoDetail: Boolean = false,
+    isQuickReturningFromVideoDetail: Boolean = false,
+    scrollLiteModeEnabled: Boolean = false,
+    isDataSaverActive: Boolean = false,
+    preferLowQualityCover: Boolean = false,
+    coverRequestSpec: HomeCoverRequestSpec? = null,
+    showCoverGlassBadges: Boolean = false,
+    showInfoGlassBadges: Boolean = false,
+    showUpBadge: Boolean? = null,
+    showUpAvatar: Boolean? = null,
+    homeDurationStyle: HomeDurationStyle = HomeDurationStyle.OUTSIDE_COVER,
+    coverAspectRatio: Float = app.bilipai.core.ui.videoCardCoverAspectRatio(),
+    cardHorizontalPadding: Dp = AppSpacingTokens.None,
+    compactMetadata: Boolean = true,
+    titleMinLines: Int = 1,
+    titleMaxLines: Int = 2,
+    showPublishTime: Boolean = false,
+    upFollowerCount: Int? = null,
+    upVideoCount: Int? = null,
+    onDismiss: (() -> Unit)? = null,    //  [新增] 删除/过滤回调（长按触发）
+    onUpClick: ((Long) -> Unit)? = null,
+    onLongClick: ((VideoItem) -> Unit)? = null, // [修复] 长按预览回调
+    modifier: Modifier = Modifier,
+    onClick: (String, Long) -> Unit
+) {
+    val sponsorStatusLabel = rememberSponsorFeedBadgeLabel(video.bvid)
+    val contentTypography = feedContentTypography(
+        titleHierarchy = if (compactMetadata) {
+            FeedTitleHierarchy.Compact
+        } else {
+            FeedTitleHierarchy.Standard
+        },
+    )
+    val haptic = rememberHapticFeedback(app.bilipai.core.ui.AppHapticScene.MENUS)
+    val longPressHaptic = rememberHapticFeedback(app.bilipai.core.ui.AppHapticScene.LONG_PRESS)
+
+    val isLongPressEnabled = app.bilipai.core.ui.LocalVideoCardLongPressEnabled.current
+    val cardCornerRadius = AppShapes.containerCornerDp(ContainerLevel.ProminentCard)
+    val cardShape = AppShapes.container(ContainerLevel.ProminentCard)
+    val coverShape = cardShape
+    val durationText = remember(video.duration) { FormatUtils.formatDuration(video.duration) }
+    val viewText = remember(video.stat.view) { FormatUtils.formatStat(video.stat.view.toLong()) }
+    val danmakuText = remember(video.stat.danmaku) { FormatUtils.formatStat(video.stat.danmaku.toLong()) }
+    val showDurationOnCover = homeDurationStyle == HomeDurationStyle.OVERLAY_TEXT_ONLY
+    val coverOverlayTextStyle = remember {
+        TextStyle(shadow = resolveVideoCardCoverOverlayTextShadow())
+    }
+    val scrollLitePolicy = remember {
+        resolveStoryVideoCardScrollLiteVisualPolicy(
+            scrollLiteModeEnabled = false
+        )
+    }
+    val badgeStylePolicy = remember(showCoverGlassBadges, showInfoGlassBadges) {
+        resolveHomeVideoGlassBadgeStylePolicy(
+            showCoverGlassBadges = showCoverGlassBadges,
+            showInfoGlassBadges = showInfoGlassBadges
+        )
+    }
+    val premiumBadgeLabel = remember(video.rights) {
+        resolveVideoPremiumBadgeLabel(video.rights)
+    }
+    val cardVisibility = rememberVideoCardVisibility(video.bvid, video.cid)
+    val cardVisibleInWindow = cardVisibility.visible
+    val useLowQualityCover = isDataSaverActive && preferLowQualityCover
+    val coverSource = remember(video.bvid, video.id, video.cid, video.title, video.pic, useLowQualityCover, coverRequestSpec) {
+        resolveHomeCoverImageSource(video, useLowQualityCover, coverRequestSpec)
+    }
+    val coverUrl = coverSource.url
+    val coverCacheKey = coverSource.cacheKey
+    var measuredCoverSize by remember(coverCacheKey) {
+        mutableStateOf(androidx.compose.ui.unit.IntSize.Zero)
+    }
+    val publishTimeRowText = rememberVideoCardPublishTimeText(video, showPublishTime, cardVisibleInWindow)
+    val emphasizePublishTime = false
+
+    //  [新增] 长按删除菜单状态
+    var showDismissMenu by remember { mutableStateOf(false) }
+
+    //  获取屏幕尺寸用于计算归一化坐标
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val localSharedElementSourceRoute = LocalVideoCardSharedElementSourceRoute.current
+    val effectiveSharedElementSourceRoute = remember(sharedElementSourceRoute, localSharedElementSourceRoute) {
+        sharedElementSourceRoute ?: localSharedElementSourceRoute
+    }
+
+    //  记录卡片位置
+    val cardCoordinates = remember { object { var value: LayoutCoordinates? = null } }
+    val coverCoordinates = remember { object { var value: LayoutCoordinates? = null } }
+    val sharedSourceInstanceId = rememberSaveable(video.bvid) {
+        CardPositionManager.newVideoCardSourceInstanceId()
+    }
+    val sourceEnabled = transitionEnabled && LocalSharedTransitionEnabled.current
+    val onDemandSource = LocalHomeScrollTickProvider.current != null && sourceEnabled
+    val sourceInteraction = remember(video.bvid, video.cid, effectiveSharedElementSourceRoute) {
+        VideoCardSourceInteraction()
+    }
+    val sourcePreparationAllowed by rememberUpdatedState(
+        onDemandSource && LocalPageImageLoadingAllowed.current && cardVisibleInWindow &&
+            app.bilipai.core.ui.rememberVisualWorkActive() &&
+            LocalHomeCardScrolling.current?.value != true
+    )
+    val sourceInstanceOwnsReturn = isVideoCardSharedSourceInstanceOwner(
+        sharedSourceInstanceId, CardPositionManager.lastClickedVideoSourceInstanceId,
+    )
+    val isSharedReturnTarget = isVideoCardSharedReturnTarget(
+        video.bvid, effectiveSharedElementSourceRoute, CardPositionManager.lastClickedVideoSourceKey,
+    ) && sourceInstanceOwnsReturn
+    // Home sources mount for input or their own navigation session. Other lists keep
+    // their existing eager source preparation; disabling transitions skips capture entirely.
+    val prepareCardTransition = sourceEnabled && (
+        !onDemandSource || (sourcePreparationAllowed && sourceInteraction.preparing) || isSharedReturnTarget
+    )
+    val captureState = if (prepareCardTransition) rememberVideoCardCaptureState(video.bvid) else null
+    val captureScope = if (prepareCardTransition) rememberCoroutineScope() else null
+    val triggerCardClick by rememberUpdatedState(appActionWithFeedback {
+        if (CardPositionManager.isVideoNavigationDebounceActive()) {
+            // 防抖窗口内的点击注定被导航层拒绝；不得覆写在飞转场的全局记录与冻结像素。
+            return@appActionWithFeedback
+        }
+        cardCoordinates.value?.takeIf { it.isAttached }?.videoCardSourceBoundsInRoot()?.let { bounds ->
+            CardPositionManager.recordVideoCardPosition(
+                bvid = video.bvid,
+                sourceRoute = effectiveSharedElementSourceRoute,
+                bounds = bounds,
+                screenWidth = screenWidthPx,
+                screenHeight = screenHeightPx,
+                isSingleColumn = !transitionEnabled,
+                sourceCornerDp = cardCornerRadius.value.roundToInt(),
+                coverBounds = coverCoordinates.value?.takeIf { it.isAttached }?.videoCardSourceBoundsInRoot(),
+                sourceLayout = app.bilipai.core.ui.transition.VideoCardSourceLayout.STACKED,
+                sourceChromeSnapshot = app.bilipai.core.ui.transition.VideoCardSourceChromeSnapshot(
+                    title = video.title,
+                    ownerName = video.owner.name,
+                    ownerFaceUrl = video.owner.face,
+                    recommendationReason = video.recommendationReason,
+                    followed = video.isFollowed,
+                    viewText = viewText,
+                    danmakuText = danmakuText,
+                    durationText = durationText,
+                    infoPresentation = app.bilipai.core.ui.transition
+                        .resolveVideoCardSourceInfoPresentation(
+                            publishTimeText = "",
+                            showStatsInInfo = false,
+                        ),
+                    coverUrl = coverUrl,
+                    coverCacheKey = coverCacheKey,
+                    coverDecodeWidthPx = coverRequestSpec?.widthPx ?: 0,
+                    coverDecodeHeightPx = coverRequestSpec?.heightPx ?: 0,
+                ),
+                sourceInstanceId = sharedSourceInstanceId,
+            )
+            if (captureState != null && captureScope != null) {
+                val owner = captureState.freezeOnClick()
+                if (owner != null) captureScope.launch { captureState.captureAfterEntry(owner) }
+            }
+        }
+        onClick(video.bvid, video.cid)
+    })
+
+    val requestCardClick by rememberUpdatedState {
+        if (onDemandSource) {
+            if (!CardPositionManager.isVideoNavigationDebounceActive()) {
+                sourceInteraction.requestClick()
+            }
+        } else triggerCardClick()
+    }
+    if (sourceInteraction.preparing) {
+        VideoCardPreparedClickEffect(
+            sourceInteraction, captureState, onDemandSource && sourcePreparationAllowed,
+            onClick = { triggerCardClick() },
+        )
+    }
+
+    //  尝试获取共享元素作用域
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalAnimatedVisibilityScope.current
+    val sharedTransitionSpeedSettings = LocalVideoSharedTransitionSpeedSettings.current
+    val effectiveTransitionEnabled = prepareCardTransition
+    val coverSharedEnabled = shouldEnableVideoCoverSharedTransition(
+        transitionEnabled = effectiveTransitionEnabled && LocalSharedTransitionEnabled.current,
+        hasSharedTransitionScope = sharedTransitionScope != null,
+        hasAnimatedVisibilityScope = animatedVisibilityScope != null
+    )
+    val isQuickReturnLimited = isReturningFromVideoDetail && isQuickReturningFromVideoDetail
+    val useCardShellSharedBounds = shouldUseVideoCardShellSharedBounds(
+        sourceRoute = effectiveSharedElementSourceRoute,
+        transitionEnabled = coverSharedEnabled
+    ) && ((onDemandSource && sourceInteraction.preparing) || sourceInstanceOwnsReturn)
+    val coverCrossfadeEnabled = shouldEnableVideoCardCoverCrossfade(
+        isScrollInProgress = false,
+        isReturningFromDetail = isReturningFromVideoDetail,
+        useCoverSharedBounds = useCardShellSharedBounds ||
+            (LocalMiuixVideoCardTransitionState.current.enabled && isSharedReturnTarget),
+        isSharedReturnTarget = isSharedReturnTarget,
+    )
+    val context = LocalContext.current
+    val coverImageRequest = remember(context, coverUrl, coverCacheKey, coverRequestSpec, coverCrossfadeEnabled) {
+        ImageRequest.Builder(context)
+            .data(coverUrl)
+            .homeCoverDecodePolicy()
+            .apply { coverRequestSpec?.let { size(it.widthPx, it.heightPx) } }
+            .crossfade(coverCrossfadeEnabled)
+            .memoryCacheKey(coverCacheKey)
+            .diskCacheKey(coverCacheKey)
+            .build()
+    }
+    val coverWorkAllowed = LocalPageImageLoadingAllowed.current && cardVisibleInWindow
+    RegisterVisibleHomeCover(
+        allowed = coverWorkAllowed,
+        bvid = video.bvid,
+        url = coverUrl,
+        cacheKey = coverCacheKey,
+        widthPx = coverRequestSpec?.widthPx ?: measuredCoverSize.width,
+        heightPx = coverRequestSpec?.heightPx ?: measuredCoverSize.height,
+    )
+    val transitionAdaptiveInfo = app.bilipai.core.ui.transition
+        .LocalVideoTransitionAdaptiveInfo.current
+    val cardSharedTransitionMotionSpec = remember(
+        effectiveSharedElementSourceRoute,
+        effectiveTransitionEnabled,
+        sharedTransitionSpeedSettings,
+        transitionAdaptiveInfo,
+    ) {
+        resolveVideoCardSharedTransitionMotionSpec(
+            sourceRoute = effectiveSharedElementSourceRoute,
+            transitionEnabled = effectiveTransitionEnabled,
+            speedSettings = sharedTransitionSpeedSettings,
+            adaptiveInfo = transitionAdaptiveInfo,
+        )
+    }
+
+    val cardShellShape = cardShape
+    val homeCardScrolling = LocalHomeCardScrolling.current
+    val homeCardTransitionAtMount = LocalHomeCardTransitionRunning.current
+    val enterAnimationEnabledAtMount = remember(video.bvid) {
+        resolveHomeCardEnterAnimationEnabledAtMount(
+            baseAnimationEnabled = animationEnabled,
+            // Mount-only sampling must not subscribe every neighboring card to transition changes.
+            isReturningFromDetail = isReturningFromVideoDetail ||
+                Snapshot.withoutReadObservation { homeCardTransitionAtMount?.value == true },
+            isSwitchingCategory = CardPositionManager.isSwitchingCategory,
+            // Sample once; a card mounted while scrolling stays visible after settling.
+            isScrollInProgress = scrollLiteModeEnabled || homeCardScrolling?.value == true
+        )
+    }
+    val coordinateEnterWithTransition = remember(animationEnabled, transitionEnabled) {
+        animationEnabled && transitionEnabled
+    }
+
+    Column(
+        modifier = modifier
+            .testTag("home_story_video_card")
+            .then(cardVisibility.observerModifier)
+            .fillMaxWidth()
+            .adaptiveCardHoverEffect(shape = cardShellShape)
+            .videoCardSourceAnchor(video.bvid, cardShellShape)
+            .padding(horizontal = cardHorizontalPadding, vertical = AppSpacingTokens.Small)
+            .animateEnter(
+                index = index,
+                key = Unit,
+                animationEnabled = enterAnimationEnabledAtMount,
+                motionTier = motionTier,
+                coordinateWithSharedTransition = coordinateEnterWithTransition
+            )
+            //  [新增] 记录卡片位置
+            .recordNativeVideoCardLayer(
+                layer = captureState?.cardLayer,
+                freezeProvider = { captureState?.freezeCard() == true },
+                bvid = video.bvid,
+                sourceRoute = effectiveSharedElementSourceRoute,
+                enabled = prepareCardTransition,
+                landingFeedbackEnabled = true,
+                onRecorded = captureState?.let { { it.onCardRecorded() } },
+            )
+            .onPlaced { coordinates -> cardCoordinates.value = coordinates }
+            .semantics { semanticClick(label = "播放视频") { requestCardClick(); true } }
+            .then(
+                if (onDemandSource) Modifier.pointerInput(sourceInteraction) {
+                    // Observe before clickable/long-press handlers without consuming their events.
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        if (sourcePreparationAllowed) sourceInteraction.press()
+                        try {
+                            // Finish the down event before observing later moves/up: the
+                            // existing clickable is allowed to consume this initial down.
+                            awaitPointerEvent(PointerEventPass.Final)
+                            waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        } finally {
+                            sourceInteraction.release()
+                        }
+                    }
+                } else Modifier
+            )
+            .pointerInput(isLongPressEnabled, onDismiss, onLongClick) {
+                 val hasLongPressAction = isLongPressEnabled && (onDismiss != null || onLongClick != null)
+                 if (hasLongPressAction) {
+                     detectTapGestures(
+                         onLongPress = {
+                             if (onLongClick != null) {
+                                 longPressHaptic(HapticType.HEAVY)
+                                 onLongClick(video)
+                             } else if (onDismiss != null) {
+                                 longPressHaptic(HapticType.HEAVY)
+                                 showDismissMenu = true
+                             }
+                         },
+                         onTap = {
+                             requestCardClick()
+                         }
+                     )
+                 }
+            }
+            .then(
+                 if (!isLongPressEnabled || (onDismiss == null && onLongClick == null)) {
+                     Modifier.iOSCardTapEffect(
+                         pressScale = 1f,
+                         pressTranslationY = 0f,
+                         // Deferred navigation owns its feedback; do not also emit it here.
+                         hapticEnabled = !onDemandSource
+                     ) {
+                         requestCardClick()
+                     }
+                 } else Modifier
+            )
+    ) {
+        // 卡片容器 (封面)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .videoCardShellReturnCoverAlpha(
+                    enabled = useCardShellSharedBounds,
+                    bvid = video.bvid,
+                    sourceRoute = effectiveSharedElementSourceRoute,
+                    isReturningFromDetail = isReturningFromVideoDetail,
+                )
+                .testTag("home_story_video_cover")
+                .aspectRatio(coverAspectRatio)
+                .onPlaced { coordinates -> coverCoordinates.value = coordinates }
+                .then(if (coverRequestSpec == null) {
+                    Modifier.onSizeChanged { measuredCoverSize = it }
+                } else Modifier)
+                .clip(coverShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant) // 封面占位色
+        ) {
+            // 封面比例由首页卡片样式统一配置。
+            PageAwareAsyncImage(
+                model = coverImageRequest,
+                dimInDarkTheme = true,
+                loadingAllowed = LocalHomeCardCoverLoadingAllowed.current
+                    ?: LocalPageImageLoadingAllowed.current,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .recordNativeVideoCardLayer(
+                        layer = captureState?.coverOverlayLayer,
+                        freezeProvider = { captureState?.freezeCover() == true },
+                        bvid = video.bvid,
+                        sourceRoute = effectiveSharedElementSourceRoute,
+                        enabled = prepareCardTransition,
+                        onRecorded = captureState?.let { { it.onCoverRecorded() } },
+                    ),
+            ) {
+            app.bilipai.core.ui.components.VideoStatusBadges(
+                labels = (video.statusLabels + listOfNotNull(sponsorStatusLabel))
+                    .ifEmpty { listOfNotNull(premiumBadgeLabel) },
+                modifier = Modifier.align(Alignment.TopEnd).padding(AppSpacingTokens.Small),
+            )
+            //  时长标签 (保留在封面上)
+            if (showDurationOnCover) {
+                AppText(
+                    text = durationText,
+                    color = MediaContrastPalette.Foreground,
+                    style = contentTypography.coverBadge
+                        .copy(fontWeight = FontWeight.Medium)
+                        .merge(coverOverlayTextStyle),
+                    maxLines = 1,
+                    softWrap = false,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(AppSpacingTokens.Small + AppSpacingTokens.Micro)
+                )
+            }
+            }
+        }
+
+        Column(
+            modifier = Modifier.videoCardShellReturnChromeAlpha(
+                enabled = useCardShellSharedBounds,
+                bvid = video.bvid,
+                sourceRoute = effectiveSharedElementSourceRoute,
+                isReturningFromDetail = isReturningFromVideoDetail,
+                isQuickReturnFromDetail = isQuickReturningFromVideoDetail,
+            )
+        ) {
+        AppText(
+            text = video.title,
+            color = AppContentColors.primaryText(),
+            style = contentTypography.title,
+            minLines = titleMinLines,
+            maxLines = videoCardTitleMaxLines(titleMaxLines),
+            overflow = videoCardTitleOverflow(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(if (compactMetadata) AppSpacingTokens.ExtraSmall + AppSpacingTokens.Micro else AppSpacingTokens.Small))
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (scrollLitePolicy.showSecondaryStatsRow && video.stat.view > 0) {
+                FlowRow(
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(HORIZONTAL_VIDEO_STAT_ROW_SPACING_DP.dp),
+                    verticalArrangement = Arrangement.spacedBy(HORIZONTAL_VIDEO_STAT_WRAP_SPACING_DP.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    HorizontalVideoStatRow(
+                        playText = viewText,
+                        danmakuText = if (video.stat.danmaku > 0) {
+                            danmakuText
+                        } else {
+                            ""
+                        },
+                    )
+                    if (publishTimeRowText.isNotBlank()) {
+                        AppText(
+                            text = publishTimeRowText,
+                            color = AppContentColors.secondaryText(),
+                            style = contentTypography.statistic,
+                            overflow = TextOverflow.Visible,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+            }
+
+            val upClickMid = video.owner.mid.takeIf { it > 0L && onUpClick != null }
+            val upNameModifier = if (upClickMid != null) {
+                Modifier.fillMaxWidth().appActionClickable { onUpClick?.invoke(upClickMid) }
+            } else {
+                Modifier.fillMaxWidth()
+            }
+
+            UpBadgeName(
+                name = video.owner.name,
+                metaText = resolveUpStatsText(
+                    followerCount = upFollowerCount,
+                    videoCount = upVideoCount
+                ),
+                leadingContent = if ((showUpAvatar ?: app.bilipai.core.ui.LocalUpBadgeVisibility.current.showAvatars) && video.owner.face.isNotEmpty()) {
+                    {
+                        val avatarContext = LocalContext.current
+                        val face = video.owner.face
+                        val avatarRequest = remember(avatarContext, face) {
+                            ImageRequest.Builder(avatarContext)
+                                .data(FormatUtils.fixImageUrl(face))
+                                .size(96, 96)
+                                .crossfade(100)
+                                .build()
+                        }
+                        PageAwareAsyncImage(
+                            model = avatarRequest,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(AppSpacingTokens.ExtraLarge)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                } else null,
+                nameLeadingContent = if (video.recommendationReason.isNotBlank() || video.isFollowed) {
+                    {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            VideoRecommendationBadge(video.recommendationReason)
+                            if (video.isFollowed) VideoRecommendationBadge("已关注")
+                        }
+                    }
+                } else null,
+                nameStyle = contentTypography.author.copy(fontWeight = FontWeight.Medium),
+                nameColor = AppContentColors.secondaryText(),
+                metaColor = AppContentColors.accent(),
+                badgeTextColor = AppContentColors.secondaryText().copy(alpha = 0.85f),
+                badgeBackgroundColor = AppContentColors.secondaryText().copy(alpha = 0.12f),
+                showUpBadge = showUpBadge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                metaMaxLines = Int.MAX_VALUE,
+                metaOverflow = TextOverflow.Visible,
+                modifier = upNameModifier
+            )
+
+            if (!scrollLitePolicy.showSecondaryStatsRow) {
+                VideoCardDurationPublishRow(
+                    durationText = "",
+                    publishTimeText = publishTimeRowText,
+                    emphasizePublishTime = emphasizePublishTime,
+                    publishTimeColor = AppContentColors.secondaryText().copy(alpha = 0.72f),
+                    topSpacing = if (compactMetadata) AppSpacingTokens.ExtraSmall else AppSpacingTokens.Small
+                )
+            }
+
+        }
+        }
+    }
+
+    //  [新增] 长按删除菜单
+    AppDropdownMenu(
+        expanded = showDismissMenu,
+        onDismissRequest = { showDismissMenu = false }
+    ) {
+        AppDropdownMenuItem(
+            text = {
+                AppText(
+                    "不感兴趣",
+                    color = AppContentColors.primaryText()
+                )
+            },
+            onClick = {
+                showDismissMenu = false
+                onDismiss?.invoke()
+            }
+        )
+    }
+}

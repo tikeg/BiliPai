@@ -92,7 +92,7 @@ assert '__ANIMATIONS__' not in preview
 assert 'https://' not in preview
 assert (Path(__file__).parent/'lottie.min.js').is_file()
 assert (Path(__file__).parent/'LOTTIE-WEB-LICENSE.md').is_file()
-player=(ROOT/'brand-motion/src/main/java/com/android/purebilibili/core/ui/BlueSnowMaidAnimation.kt').read_text()
+player=(ROOT/'brand-motion/src/main/java/app/bilipai/core/ui/BlueSnowMaidAnimation.kt').read_text()
 for state,resource,duration,fallback in re.findall(r'(\w+)\(R.raw.(\w+), (\d+)L, R.drawable.(\w+)',player):
     timeline=json.loads((ROOT/'brand-motion/src/main/res/raw'/f'{resource}.json').read_text())
     assert (timeline['op']-timeline['ip'])/timeline['fr']*1000==int(duration), f'{state}: resource/player duration mismatch'

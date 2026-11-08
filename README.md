@@ -72,7 +72,7 @@
 
 在插件中心启用“去广告增强”，可在“视频标签屏蔽词”中添加、删除关键词，按视频实际标签过滤首页推荐、搜索结果和详情相关推荐。修改规则后刷新对应列表生效；未配置标签词时不增加标签请求，查询失败或超时时保留未确认命中的视频。
 
-导入第三方插件前，请检查来源与权限声明。开发说明见 [插件目录](plugins/)、[Kotlin 插件 SDK](plugin-sdk/src/main/java/com/android/purebilibili/plugin/sdk/) 与 [JS 插件示例](plugins/tools/create-plugin.js)。
+导入第三方插件前，请检查来源与权限声明。开发说明见 [插件目录](plugins/)、[Kotlin 插件 SDK](plugin-sdk/src/main/java/app/bilipai/plugin/sdk/) 与 [JS 插件示例](plugins/tools/create-plugin.js)。
 
 ## 最近更新
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.purebilibili.miuixnavigation"
+    namespace = "app.bilipai.miuixnavigation"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig { minSdk = 26 }
     compileOptions {

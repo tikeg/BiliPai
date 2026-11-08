@@ -12,7 +12,7 @@ import tarfile
 
 ARCHIVE_SHA256 = '08f9ee11f9a08c2dee76d0a07ea824c8a09ea4db9456e32ac4f6dfb34d28392c'
 ROOT = Path(__file__).resolve().parents[1]
-THEME = ROOT / 'app/src/main/java/com/android/purebilibili/core/theme'
+THEME = ROOT / 'app/src/main/java/app/bilipai/core/theme'
 
 
 def scalar(value):

@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.purebilibili.designtokens"
+    namespace = "app.bilipai.designtokens"
     compileSdk {
         version = release(37) { minorApiLevel = 0 }
     }

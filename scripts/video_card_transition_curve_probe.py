@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def tokens(root=ROOT):
-    policy = (root / "app/src/main/java/com/android/purebilibili/core/ui/transition/VideoSharedTransitionPolicy.kt").read_text()
-    easing = (root / "design-system/src/main/java/com/android/purebilibili/core/ui/motion/AppMotionTokens.kt").read_text()
+    policy = (root / "app/src/main/java/app/bilipai/core/ui/transition/VideoSharedTransitionPolicy.kt").read_text()
+    easing = (root / "design-system/src/main/java/app/bilipai/core/ui/motion/AppMotionTokens.kt").read_text()
     def constant(name):
         match = re.search(rf"const val {name}\s*=\s*([\d.]+)f?", policy)
         if not match:

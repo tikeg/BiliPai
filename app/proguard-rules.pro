@@ -13,7 +13,7 @@
 # 这是兼容隔离，不代表已确认它们是生成错误字节码的根因。
 # 只约束两个类的优化边界；不保留全部成员，静态方法仍可裁剪、混淆和优化。
 # 避免为单个卡片路径全局关闭类合并。
--keep,allowshrinking,allowobfuscation class com.android.purebilibili.feature.home.components.cards.VideoCardKt
+-keep,allowshrinking,allowobfuscation class app.bilipai.feature.home.components.cards.VideoCardKt
 -keep,allowshrinking,allowobfuscation class androidx.compose.foundation.text.HeightInLinesModifierKt
 
 # 调度器的 API 34 分支与缺失 API 回退必须留在独立方法边界内。

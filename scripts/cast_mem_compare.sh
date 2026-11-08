@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PKG="com.android.purebilibili"
-ACTIVITY="com.android.purebilibili.MainActivity"
-CAST_PKG="com.android.purebilibili:cast"
-TEST_PKG="com.android.purebilibili.test"
+PKG="app.bilipai"
+ACTIVITY="app.bilipai.MainActivity"
+CAST_PKG="app.bilipai:cast"
+TEST_PKG="app.bilipai.test"
 TEST_RUNNER="androidx.test.runner.AndroidJUnitRunner"
-TEST_CLASS="com.android.purebilibili.feature.cast.CastProcessIsolationTest"
+TEST_CLASS="app.bilipai.feature.cast.CastProcessIsolationTest"
 DEVICE=""
 REPORT_FILE="docs/perf/6.0.0-multiprocess-cast-report.md"
 

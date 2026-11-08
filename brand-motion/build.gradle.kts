@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.bilipai.brandmotion"
+    namespace = "app.bilipai.brandmotion"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig { minSdk = 26 }
     buildFeatures { compose = true }

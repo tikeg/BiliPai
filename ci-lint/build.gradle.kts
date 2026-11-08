@@ -15,7 +15,7 @@ dependencies {
 }
 
 tasks.jar {
-    manifest.attributes["Lint-Registry-v2"] = "com.android.purebilibili.lint.CiIssueRegistry"
+    manifest.attributes["Lint-Registry-v2"] = "app.bilipai.lint.CiIssueRegistry"
 }
 
 tasks.test {

@@ -2,7 +2,7 @@
 # 正式版首页手动滚动采样：start 清零计数，stop 在滚动完成后导出结果。
 set -euo pipefail
 
-PKG="${PKG:-com.android.purebilibili}"
+PKG="${PKG:-app.bilipai}"
 DEVICE=""
 OUT_DIR="${OUT_DIR:-docs/perf/raw}"
 
@@ -18,7 +18,7 @@ Workflow:
   3) Leave the app visible on Home and run stop.
 
 Notes:
-  - Defaults to the release package com.android.purebilibili; PKG must not end in .debug.
+  - Defaults to the release package app.bilipai; PKG must not end in .debug.
   - No ADB reads occur during the manual sampling window.
   - stop saves gfxinfo framestats, memory before/after, and the final screen screenshot.
 EOF

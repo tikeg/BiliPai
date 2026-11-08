@@ -8,14 +8,14 @@ plugins {
     // JSON 序列化插件
     id("org.jetbrains.kotlin.plugin.serialization")
     // Compose 预组合兼容补丁：guard LayoutNodeSubcompositionsState 的 detached-root owner 查找
-    id("com.android.bilipai.compose-detached-owner-guard")
+    id("app.bilipai.compose-detached-owner-guard")
     // 弹窗退出后可能仍收到锚点布局回调，不再更新已移除的窗口。
-    id("com.android.bilipai.compose-popup-window-guard")
+    id("app.bilipai.compose-popup-window-guard")
     // Foundation 拖拽兼容补丁：在进入拖拽状态前过滤不受支持的输入类型。
-    id("com.android.bilipai.compose-drag-start-guard")
+    id("app.bilipai.compose-drag-start-guard")
     // 导航分发器被父级级联释放后，容忍子页面重复清理及延后的启用状态更新。
-    id("com.android.bilipai.navigationevent-disposal-guard")
-    id("com.android.bilipai.workmanager-namespace-guard")
+    id("app.bilipai.navigationevent-disposal-guard")
+    id("app.bilipai.workmanager-namespace-guard")
     // Room 数据库编译插件
     id("com.google.devtools.ksp")
     // 🔥 Firebase 相关插件
@@ -124,7 +124,7 @@ val buildReleaseTag = providers.gradleProperty("bili.build.releaseTag")
     .get()
 
 android {
-    namespace = "com.android.purebilibili"
+    namespace = "app.bilipai"
     androidResources {
         generateLocaleConfig = true
         // localeFilters is forwarded to aapt2's -c option; use Android resource qualifier syntax.
@@ -137,7 +137,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.android.purebilibili"
+        applicationId = "app.bilipai"
         minSdk = 26
         targetSdk = 37
         // 版本名按发行计划确定；versionCode 每次发布单调 +1

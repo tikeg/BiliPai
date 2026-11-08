@@ -9,7 +9,7 @@ group = "com.github.jay3-yy.BiliPai"
 version = "0.1.0-SNAPSHOT"
 
 android {
-    namespace = "com.android.purebilibili.plugin.sdk"
+    namespace = "app.bilipai.plugin.sdk"
     compileSdk = 37
 
     defaultConfig {

@@ -300,17 +300,17 @@ if (Test-Path -LiteralPath $exceptionsFile -PathType Leaf) {
 }
 
 $productionRoot = Join-Path $RepoRoot "app/src/main/java"
-$featureRoot = Join-Path $RepoRoot "app/src/main/java/com/android/purebilibili/feature"
+$featureRoot = Join-Path $RepoRoot "app/src/main/java/app/bilipai/feature"
 $testRoots = @(
     (Join-Path $RepoRoot "app/src/test"),
     (Join-Path $RepoRoot "design-system/src/test")
 )
-$coreUiRoot = Join-Path $RepoRoot "app/src/main/java/com/android/purebilibili/core/ui"
+$coreUiRoot = Join-Path $RepoRoot "app/src/main/java/app/bilipai/core/ui"
 $designSystemRoot = Join-Path $RepoRoot "design-system"
 $designSystemBuildFile = Join-Path $designSystemRoot "build.gradle.kts"
 
 $production = Get-KotlinSources $productionRoot
-$features = @($production | Where-Object { $_.Path -like "app/src/main/java/com/android/purebilibili/feature/*" })
+$features = @($production | Where-Object { $_.Path -like "app/src/main/java/app/bilipai/feature/*" })
 $tests = @($testRoots | ForEach-Object { Get-KotlinSources $_ })
 $coreUi = Get-KotlinSources $coreUiRoot
 $designSystem = Get-KotlinSources $designSystemRoot
@@ -334,7 +334,7 @@ if ($SyntheticFeatureFile) {
         throw "Synthetic feature file not found: $syntheticPath"
     }
     $synthetic = [pscustomobject]@{
-        Path = "app/src/main/java/com/android/purebilibili/feature/__audit_probe__/IllegalStyleProbe.kt"
+        Path = "app/src/main/java/app/bilipai/feature/__audit_probe__/IllegalStyleProbe.kt"
         Text = Get-Content -Raw -LiteralPath $syntheticPath
     }
     $production = @($production) + $synthetic

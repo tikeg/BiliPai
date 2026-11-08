@@ -15,24 +15,24 @@ dependencies {
 gradlePlugin {
     plugins {
         create("composePopupWindowGuard") {
-            id = "com.android.bilipai.compose-popup-window-guard"
-            implementationClass = "com.android.purebilibili.build.ComposePopupWindowGuardPlugin"
+            id = "app.bilipai.compose-popup-window-guard"
+            implementationClass = "app.bilipai.build.ComposePopupWindowGuardPlugin"
         }
         create("navigationEventDisposalGuard") {
-            id = "com.android.bilipai.navigationevent-disposal-guard"
-            implementationClass = "com.android.purebilibili.build.NavigationEventDisposalGuardPlugin"
+            id = "app.bilipai.navigationevent-disposal-guard"
+            implementationClass = "app.bilipai.build.NavigationEventDisposalGuardPlugin"
         }
         create("composeDragStartGuard") {
-            id = "com.android.bilipai.compose-drag-start-guard"
-            implementationClass = "com.android.purebilibili.build.ComposeDragStartGuardPlugin"
+            id = "app.bilipai.compose-drag-start-guard"
+            implementationClass = "app.bilipai.build.ComposeDragStartGuardPlugin"
         }
         create("composeDetachedOwnerGuard") {
-            id = "com.android.bilipai.compose-detached-owner-guard"
-            implementationClass = "com.android.purebilibili.build.ComposeDetachedOwnerGuardPlugin"
+            id = "app.bilipai.compose-detached-owner-guard"
+            implementationClass = "app.bilipai.build.ComposeDetachedOwnerGuardPlugin"
         }
         create("workManagerNamespaceGuard") {
-            id = "com.android.bilipai.workmanager-namespace-guard"
-            implementationClass = "com.android.purebilibili.build.WorkManagerNamespaceGuardPlugin"
+            id = "app.bilipai.workmanager-namespace-guard"
+            implementationClass = "app.bilipai.build.WorkManagerNamespaceGuardPlugin"
         }
     }
 }

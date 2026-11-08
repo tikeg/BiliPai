@@ -2,7 +2,7 @@
 # 低侵入采集 debug 版「视频卡片进/出详情」期间的帧耗时与内存。
 set -euo pipefail
 
-PKG="${PKG:-com.android.purebilibili.debug}"
+PKG="${PKG:-app.bilipai.debug}"
 DEVICE=""
 DURATION=""
 OUT_DIR="${OUT_DIR:-docs/perf/raw}"

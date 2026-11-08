@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PKG="com.android.purebilibili"
-ACTIVITY="com.android.purebilibili.MainActivity"
+PKG="app.bilipai"
+ACTIVITY="app.bilipai.MainActivity"
 DEVICE=""
 WARMUP_SECONDS=8
 LOOPS=20

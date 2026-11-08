@@ -184,7 +184,7 @@ jobs:
           apk_files = sorted(dist_dir.glob("*.apk"))
           payload = {
               "schemaVersion": 1,
-              "appId": "com.android.purebilibili",
+              "appId": "app.bilipai",
               "versionName": os.environ["VERSION_NAME"],
               "versionCode": int(os.environ["VERSION_CODE"]),
               "gitCommitSha": os.environ["GITHUB_SHA"],

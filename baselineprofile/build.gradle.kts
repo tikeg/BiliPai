@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.purebilibili.baselineprofile"
+    namespace = "app.bilipai.baselineprofile"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0

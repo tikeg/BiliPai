@@ -1,0 +1,1732 @@
+// File: feature/video/ui/section/VideoInfoSection.kt
+package app.bilipai.feature.video.ui.section
+
+import app.bilipai.core.ui.components.rememberFollowActionWithConfirmation
+import app.bilipai.core.ui.AppContentColors
+
+import coil3.request.crossfade
+import app.bilipai.core.ui.components.AppIcon
+import app.bilipai.core.ui.motion.folmeExpandEnterTransition
+import app.bilipai.core.ui.motion.folmeExpandExitTransition
+import app.bilipai.core.ui.components.AppText
+
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import app.bilipai.core.ui.components.AppLazyColumn as LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+//  已改用 AppContentColors.accent()
+import app.bilipai.core.util.FormatUtils
+import app.bilipai.data.repository.VideoRepository
+import app.bilipai.data.model.response.UgcSeason
+import app.bilipai.data.model.response.VideoStaff
+import app.bilipai.data.model.response.ViewInfo
+import app.bilipai.data.model.response.VideoTag
+import app.bilipai.core.ui.common.TextSelectionPolicy
+import app.bilipai.core.ui.common.copyOnLongPress
+import app.bilipai.feature.video.ui.components.VideoCardSkeleton
+import app.bilipai.core.ui.common.AppSelectionContainer as SelectionContainer
+import androidx.compose.ui.draw.rotate
+import app.bilipai.core.ui.common.copyOnClick
+import app.bilipai.core.ui.UserAvatarCornerMarkBadge
+import app.bilipai.core.ui.AppSurfaceTokens
+import app.bilipai.core.ui.resolveUserAvatarCornerMark
+import app.bilipai.core.ui.components.AppIconButton
+import app.bilipai.core.ui.components.AppSurface
+import app.bilipai.core.ui.components.resolveUpNameColor
+import app.bilipai.core.ui.components.UserUpBadge
+import app.bilipai.core.theme.AppUiStyle
+import app.bilipai.core.theme.LocalAppUiStyle
+import app.bilipai.core.ui.transition.LocalVideoSharedTransitionSpeedSettings
+import app.bilipai.core.ui.transition.resolveVideoMetadataSharedTransitionMotionSpec
+import app.bilipai.core.ui.transition.shouldEnableVideoCoverSharedTransition
+import app.bilipai.core.ui.transition.shouldEnableVideoMetadataSharedTransition
+import app.bilipai.core.ui.transition.shouldUseVideoCardShellSharedBounds
+import app.bilipai.core.ui.transition.videoMetadataSharedElementBoundsTransformSpec
+import app.bilipai.data.model.response.BgmInfo
+import app.bilipai.data.model.response.AiSummaryData
+import app.bilipai.data.model.response.Owner
+import app.bilipai.data.model.response.Stat
+import app.bilipai.data.model.response.VideoItem
+import app.bilipai.feature.video.screen.buildVideoNavigationOptions
+import app.bilipai.feature.video.ui.FollowButtonTone
+import app.bilipai.feature.video.ui.FollowTextTone
+import app.bilipai.feature.video.ui.feedback.followActionAnchor
+import app.bilipai.feature.video.ui.resolveVideoFollowVisualPolicy
+import app.bilipai.feature.home.components.cards.ElegantVideoCard
+import app.bilipai.feature.home.resolveHomeFeedCardLayout
+import app.bilipai.core.store.HomeFeedCardStyle
+import app.bilipai.core.store.SettingsManager
+import app.bilipai.feature.video.ui.components.ShimmerContainer
+import app.bilipai.feature.video.ui.components.SkeletonBox
+import app.bilipai.feature.video.ui.VideoDetailShapes
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.bilipai.core.ui.AppShapes
+import app.bilipai.core.ui.ContainerLevel
+
+private val useMiuixSpring: Boolean
+    @Composable get() = app.bilipai.core.theme.LocalAppUiStyle.current ==
+        app.bilipai.core.theme.AppUiStyle.MIUIX
+
+internal const val VIDEO_DESCRIPTION_URL_TAG = "VIDEO_DESCRIPTION_URL"
+private val VIDEO_DESCRIPTION_URL_PATTERN =
+    """((https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])""".toRegex()
+private val VIDEO_DESCRIPTION_INLINE_BVID_PATTERN =
+    Regex("""(?<![A-Za-z0-9])BV[a-zA-Z0-9]{10}(?![A-Za-z0-9])""", RegexOption.IGNORE_CASE)
+private val VIDEO_DESCRIPTION_TOPIC_PATTERN =
+    Regex("""#[^#\s，。,.!?！？；;:：、]+#?""")
+private val VIDEO_DESCRIPTION_MENTION_PATTERN =
+    Regex("""@[^\s@,，。:：;；!！?？/\\]{1,32}""")
+
+internal fun buildVideoDescriptionAnnotatedString(
+    desc: String,
+    urlColor: Color,
+    linkListener: androidx.compose.ui.text.LinkInteractionListener? = null
+): AnnotatedString = buildVideoDescriptionAnnotatedString(
+    desc = desc,
+    descV2 = emptyList(),
+    urlColor = urlColor,
+    linkListener = linkListener
+)
+
+/**
+ * 构建简介富文本。descV2 非空时按分段渲染:type=2 的 @提及带 biz_id,
+ * 点击直达 space.bilibili.com/{mid};纯文本回退时 @xxx 高亮并跳用户搜索。
+ */
+internal fun buildVideoDescriptionAnnotatedString(
+    desc: String,
+    descV2: List<app.bilipai.data.model.response.VideoDescSegment>,
+    urlColor: Color,
+    linkListener: androidx.compose.ui.text.LinkInteractionListener? = null
+): AnnotatedString {
+    if (descV2.isEmpty()) {
+        return buildRawDescriptionAnnotatedString(desc, urlColor, linkListener)
+    }
+    return buildAnnotatedString {
+        descV2.forEach { segment ->
+            if (segment.type == 2 && segment.bizId > 0 && segment.rawText.isNotBlank()) {
+                withLink(
+                    androidx.compose.ui.text.LinkAnnotation.Clickable(
+                        tag = "https://space.bilibili.com/${segment.bizId}",
+                        styles = null,
+                        linkInteractionListener = linkListener,
+                    )
+                ) {
+                    withStyle(SpanStyle(color = urlColor, textDecoration = TextDecoration.Underline)) {
+                        append("@${segment.rawText}")
+                    }
+                }
+            } else {
+                append(buildRawDescriptionAnnotatedString(segment.rawText, urlColor, linkListener))
+            }
+        }
+    }
+}
+
+private fun buildRawDescriptionAnnotatedString(
+    desc: String,
+    urlColor: Color,
+    linkListener: androidx.compose.ui.text.LinkInteractionListener?
+): AnnotatedString {
+    data class LinkMatch(
+        val range: IntRange,
+        val annotation: String,
+        val displayText: String,
+        val priority: Int,
+        val underline: Boolean = true
+    )
+
+    val matches = mutableListOf<LinkMatch>()
+    VIDEO_DESCRIPTION_URL_PATTERN.findAll(desc).forEach { match ->
+        matches += LinkMatch(
+            range = match.range,
+            annotation = match.value,
+            displayText = match.value,
+            priority = 0
+        )
+    }
+    VIDEO_DESCRIPTION_INLINE_BVID_PATTERN.findAll(desc).forEach { match ->
+        val overlapsUrl = matches.any { existing ->
+            match.range.first <= existing.range.last && match.range.last >= existing.range.first
+        }
+        if (!overlapsUrl) {
+            matches += LinkMatch(
+                range = match.range,
+                annotation = "https://www.bilibili.com/video/${match.value}",
+                displayText = match.value,
+                priority = 1
+            )
+        }
+    }
+    VIDEO_DESCRIPTION_TOPIC_PATTERN.findAll(desc).forEach { match ->
+        val overlapsUrl = matches.any { existing ->
+            match.range.first <= existing.range.last && match.range.last >= existing.range.first
+        }
+        if (!overlapsUrl) {
+            val topic = match.value.removePrefix("#").removeSuffix("#").trim()
+            if (topic.isNotEmpty()) {
+                val encoded = java.net.URLEncoder.encode(topic, java.nio.charset.StandardCharsets.UTF_8.name())
+                matches += LinkMatch(
+                    range = match.range,
+                    annotation = "bilibili://search?keyword=$encoded",
+                    displayText = match.value,
+                    priority = 2,
+                    underline = false
+                )
+            }
+        }
+    }
+    VIDEO_DESCRIPTION_MENTION_PATTERN.findAll(desc).forEach { match ->
+        val overlapsUrl = matches.any { existing ->
+            match.range.first <= existing.range.last && match.range.last >= existing.range.first
+        }
+        if (!overlapsUrl) {
+            val mention = match.value.removePrefix("@").trim()
+            if (mention.isNotEmpty()) {
+                val encoded = java.net.URLEncoder.encode(mention, java.nio.charset.StandardCharsets.UTF_8.name())
+                matches += LinkMatch(
+                    range = match.range,
+                    // desc_v2 缺失时拿不到 mid,回退到站内用户搜索页。
+                    annotation = "https://search.bilibili.com/upuser?keyword=$encoded",
+                    displayText = match.value,
+                    priority = 2
+                )
+            }
+        }
+    }
+    matches.sortWith(compareBy<LinkMatch> { it.range.first }.thenBy { it.priority })
+
+    return buildAnnotatedString {
+        var lastIndex = 0
+        matches.forEach { match ->
+            if (lastIndex < match.range.first) {
+                append(desc.substring(lastIndex, match.range.first))
+            }
+            withLink(
+                androidx.compose.ui.text.LinkAnnotation.Clickable(
+                    tag = match.annotation,
+                    styles = null,
+                    linkInteractionListener = linkListener,
+                )
+            ) {
+                withStyle(
+                    SpanStyle(
+                        color = urlColor,
+                        textDecoration = if (match.underline) TextDecoration.Underline else TextDecoration.None
+                    )
+                ) {
+                    append(match.displayText)
+                }
+            }
+            lastIndex = match.range.last + 1
+        }
+        if (lastIndex < desc.length) {
+            append(desc.substring(lastIndex))
+        }
+    }
+}
+
+/**
+ * Video Info Section Components
+ *
+ * Contains components for displaying video information:
+ * - VideoTitleSection: Video title with expand/collapse
+ * - VideoTitleWithDesc: Title + stats + description
+ * - UpInfoSection: UP owner info with follow button
+ * - DescriptionSection: Video description
+ *
+ * Requirement Reference: AC3.1 - Video info components in dedicated file
+ */
+
+internal fun resolveVideoInfoInitialExpandedState(
+    hasDescription: Boolean,
+    hasTags: Boolean,
+    defaultExpanded: Boolean = false
+): Boolean = defaultExpanded && (hasDescription || hasTags)
+
+/**
+ * Video Title Section (Bilibili official style: compact layout)
+ */
+@Composable
+fun VideoTitleSection(
+    info: ViewInfo,
+    animateLayout: Boolean = true,
+    onUpClick: (Long) -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val publishTimeRowText = remember(info.pubdate, info.tname, info.title) {
+        resolvePublishTimeRowText(
+            pubdate = info.pubdate,
+            partitionName = info.tname,
+            title = info.title
+        )
+    }
+    val emphasizePublishTime = remember(info.tname, info.title) {
+        shouldEmphasizePrecisePublishTime(
+            partitionName = info.tname,
+            title = info.title
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+    ) {
+        // Title row (expandable)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            SelectionContainer(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (animateLayout) Modifier.animateContentSize() else Modifier)
+            ) {
+                AppText(
+                    text = info.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = if (expanded) Int.MAX_VALUE else 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = AppContentColors.primaryText(),
+                    modifier = Modifier,
+                    tapToCopyEnabled = false,
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            app.bilipai.core.ui.components.AppIconButton(
+                onClick = { expanded = !expanded },
+                modifier = Modifier.size(40.dp),
+            ) {
+                AppIcon(
+                    imageVector = if (expanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = if (expanded) "收起标题" else "展开标题",
+                    tint = AppContentColors.secondaryText(),
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(2.dp))
+
+        // Stats row (views, danmaku)
+        AppText(
+            text = "${FormatUtils.formatStat(info.stat.view.toLong())}  \u2022  ${FormatUtils.formatStat(info.stat.danmaku.toLong())}\u5f39\u5e55",
+            style = MaterialTheme.typography.bodySmall,
+            color = AppContentColors.secondaryText(),
+            maxLines = 1
+        )
+
+        if (publishTimeRowText.isNotBlank()) {
+            Spacer(Modifier.height(6.dp))
+            if (emphasizePublishTime) {
+                AppSurface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.78f),
+                    shape = app.bilipai.core.ui.AppShapes.container(
+                        app.bilipai.core.ui.ContainerLevel.Field
+                    )
+                ) {
+                    AppText(
+                        text = publishTimeRowText,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = AppContentColors.secondaryText(),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+            } else {
+                AppText(
+                    text = publishTimeRowText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Video Title with Description (Official layout: title + stats + description)
+ *  Description and tags hidden by default, shown on expand
+ */
+
+
+/**
+ * PiliPlus 风格的标题前缀徽标：盾牌+播放角标图标 + 类别文案（如“赞助/恰饭”）。
+ */
+@Composable
+fun VideoDetailSponsorLabelChip(
+    label: String,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
+) {
+    AppSurface(
+        modifier = modifier,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                AppIcon(
+                    imageVector = Icons.Outlined.Shield,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+                AppIcon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    modifier = Modifier.size(9.dp)
+                )
+            }
+            AppText(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                lineHeight = MaterialTheme.typography.labelSmall.fontSize,
+                maxLines = maxLines
+            )
+        }
+    }
+}
+
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class, androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+@Composable
+fun VideoTitleWithDesc(
+    info: ViewInfo,
+    videoTags: List<VideoTag> = emptyList(),  //  视频标签
+    onlineCount: String = "",
+    showOnlineCount: Boolean = true,
+    transitionEnabled: Boolean = false,  // 🔗 共享元素过渡开关
+    isQuickReturnLimitedForSharedElements: Boolean = false,
+    sourceRouteForSharedElement: String? = null,
+    animateLayout: Boolean = true,
+    onDescriptionUrlClick: ((String) -> Unit)? = null,
+    onBgmClick: (BgmInfo) -> Unit = {},
+    onTagClick: (String) -> Unit = {},
+    // PiliPlus 式标题前缀徽标（赞助/恰饭等），空串不展示
+    sponsorLabel: String = "",
+    showDescriptionAndTags: Boolean = true,
+    expandedOverride: Boolean? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    // 信息行末尾的紧凑入口插槽（AI 总结 / 视频笔记图标）
+    trailingStatsContent: (@Composable () -> Unit)? = null,
+) {
+    val context = LocalContext.current
+    val isMaterial3 = LocalAppUiStyle.current == AppUiStyle.MATERIAL3
+    val horizontalPadding = if (isMaterial3) 16.dp else 12.dp
+    val defaultExpanded by app.bilipai.core.store.SettingsManager
+        .getVideoInfoDefaultExpanded(context)
+        .collectAsStateWithLifecycle(initialValue = false)
+    val argueMsgShown by app.bilipai.core.store.SettingsManager
+        .getVideoArgueMsgShown(context)
+        .collectAsStateWithLifecycle(initialValue = true)
+    // 展开状态改为“用户意图优先”：用户手动切换过之后，晚到的描述/标签数据不再重置它。
+    // 原实现把 videoTags.size 放进 remember 的 key，标签异步回填时会重算初始值，
+    // 既会覆盖用户的手动收起，也会让标签区重新播放展开动画并下推下方内容。
+    var localExpanded by remember(info.bvid) { mutableStateOf<Boolean?>(null) }
+    val expanded = expandedOverride
+        ?: localExpanded
+        ?: resolveVideoInfoInitialExpandedState(
+            hasDescription = info.desc.isNotBlank(),
+            hasTags = videoTags.isNotEmpty(),
+            defaultExpanded = defaultExpanded
+        )
+    val toggleExpanded: () -> Unit = {
+        val next = !expanded
+        localExpanded = next
+        onExpandedChange?.invoke(next)
+    }
+    val publishTimeRowText = remember(info.pubdate, info.tname, info.title) {
+        resolvePublishTimeRowText(
+            pubdate = info.pubdate,
+            partitionName = info.tname,
+            title = info.title
+        )
+    }
+    val emphasizePublishTime = remember(info.tname, info.title) {
+        shouldEmphasizePrecisePublishTime(
+            partitionName = info.tname,
+            title = info.title
+        )
+    }
+    // PiliPlus 同款：信息行直接展示完整 yyyy-MM-dd HH:mm
+    val fullPublishTimeText = remember(info.pubdate) {
+        FormatUtils.formatPrecisePublishTime(timestampSeconds = info.pubdate)
+    }
+    val onlineCountText = remember(showOnlineCount, onlineCount) {
+        resolveVideoDetailOnlineCountText(
+            showOnlineCount = showOnlineCount,
+            onlineCount = onlineCount
+        )
+    }
+    val videoBadges = remember(info.isUpowerExclusive, info.isUpowerPreview, info.isCooperation) {
+        resolveVideoDetailBadges(info)
+    }
+
+    //  尝试获取共享元素作用域
+    val sharedTransitionScope = app.bilipai.core.ui.LocalSharedTransitionScope.current
+    val animatedVisibilityScope = app.bilipai.core.ui.LocalAnimatedVisibilityScope.current
+    val coverSharedEnabled = shouldEnableVideoCoverSharedTransition(
+        transitionEnabled = transitionEnabled,
+        hasSharedTransitionScope = sharedTransitionScope != null,
+        hasAnimatedVisibilityScope = animatedVisibilityScope != null
+    )
+    val useCardContainerSharedBounds = shouldUseVideoCardShellSharedBounds(
+        sourceRoute = sourceRouteForSharedElement,
+        transitionEnabled = coverSharedEnabled
+    )
+    val metadataSharedEnabled = shouldEnableVideoMetadataSharedTransition(
+        coverSharedEnabled = coverSharedEnabled,
+        isQuickReturnLimited = isQuickReturnLimitedForSharedElements,
+        useCardContainerSharedBounds = useCardContainerSharedBounds
+    )
+    val sharedTransitionSpeedSettings = LocalVideoSharedTransitionSpeedSettings.current
+    val metadataSharedTransitionMotionSpec = remember(
+        metadataSharedEnabled,
+        sharedTransitionSpeedSettings
+    ) {
+        resolveVideoMetadataSharedTransitionMotionSpec(
+            transitionEnabled = metadataSharedEnabled,
+            speedSettings = sharedTransitionSpeedSettings
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = horizontalPadding, vertical = if (isMaterial3) 4.dp else 3.dp)
+    ) {
+        val stackSponsorLabel = sponsorLabel.isNotBlank() && shouldStackSponsorLabelAboveTitle(sponsorLabel)
+        if (stackSponsorLabel) {
+            // 长徽标独立成行，背景随内容收缩；窄窗口仍受父级宽度约束并允许换行。
+            VideoDetailSponsorLabelChip(
+                label = sponsorLabel,
+                maxLines = 2,
+            )
+        }
+        // Tap the full title row, including its spacing; long-press selection stays available.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    onClickLabel = if (expanded) "收起简介" else "展开简介",
+                    onClick = toggleExpanded,
+                )
+                .padding(bottom = if (isMaterial3) 4.dp else 3.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            //  共享元素过渡 - 标题
+            var titleModifier = if (animateLayout) Modifier.animateContentSize() else Modifier
+
+            //  注意：使用 ExperimentalSharedTransitionApi 注解需要上下文
+            if (metadataSharedEnabled) {
+                with(requireNotNull(sharedTransitionScope)) {
+                     titleModifier = titleModifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(
+                            key = app.bilipai.core.ui.transition.videoTitleSharedElementKey(
+                                info.bvid,
+                                sourceRoute = sourceRouteForSharedElement
+                            )
+                        ),
+                        animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                        boundsTransform = { initialBounds, targetBounds ->
+                            videoMetadataSharedElementBoundsTransformSpec(
+                                motion = metadataSharedTransitionMotionSpec,
+                                initialBounds = initialBounds,
+                                targetBounds = targetBounds
+                            )
+                        }
+                    )
+                }
+            }
+
+            if (sponsorLabel.isNotBlank() && !stackSponsorLabel) {
+                VideoDetailSponsorLabelChip(
+                    label = sponsorLabel,
+                    modifier = Modifier.padding(end = 6.dp, top = 2.dp)
+                )
+            }
+            SelectionContainer(modifier = Modifier.weight(1f)) {
+                AppText(
+                    text = info.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    // PiliPlus 同款：收起时 2 行省略，展开后全文。
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = AppContentColors.primaryText(),
+                    modifier = titleModifier,
+                    tapToCopyEnabled = false,
+                )
+            }
+        }
+
+        val argueMsg = info.argueInfo?.argueMsg.orEmpty()
+        val noReprint = info.rights.noReprint == 1
+        val inlineDeclarations = argueMsgShown && (argueMsg.isNotBlank() || noReprint) &&
+            !expanded && videoBadges.isEmpty() && info.honorReply?.honor.isNullOrEmpty()
+
+        // Stats row：PiliPlus 同款单行统计，AI/笔记入口浮于行尾，不占统计宽度。
+        Box(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    onClickLabel = if (expanded) "收起简介" else "展开简介",
+                    onClick = toggleExpanded,
+                ),
+        ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Stats Row split for shared element transitions
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Views
+                var viewsModifier = Modifier.wrapContentSize()
+                if (metadataSharedEnabled) {
+                    with(requireNotNull(sharedTransitionScope)) {
+                        viewsModifier = viewsModifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = app.bilipai.core.ui.transition.videoViewsSharedElementKey(
+                                    info.bvid,
+                                    sourceRoute = sourceRouteForSharedElement
+                                )
+                            ),
+                            animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                            boundsTransform = { initialBounds, targetBounds ->
+                                videoMetadataSharedElementBoundsTransformSpec(
+                                    motion = metadataSharedTransitionMotionSpec,
+                                    initialBounds = initialBounds,
+                                    targetBounds = targetBounds
+                                )
+                            }
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = viewsModifier) {
+                    AppIcon(
+                        imageVector = Icons.Outlined.PlayCircleOutline,
+                        contentDescription = null,
+                        tint = AppContentColors.secondaryText(),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    AppText(
+                        text = FormatUtils.formatStat(info.stat.view.toLong()),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppContentColors.secondaryText()
+                    )
+                }
+
+                Spacer(Modifier.width(10.dp))
+
+                // Danmaku
+                var danmakuModifier = Modifier.wrapContentSize()
+                if (metadataSharedEnabled) {
+                    with(requireNotNull(sharedTransitionScope)) {
+                        danmakuModifier = danmakuModifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = app.bilipai.core.ui.transition.videoDanmakuSharedElementKey(
+                                    info.bvid,
+                                    sourceRoute = sourceRouteForSharedElement
+                                )
+                            ),
+                            animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                            boundsTransform = { initialBounds, targetBounds ->
+                                videoMetadataSharedElementBoundsTransformSpec(
+                                    motion = metadataSharedTransitionMotionSpec,
+                                    initialBounds = initialBounds,
+                                    targetBounds = targetBounds
+                                )
+                            }
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = danmakuModifier) {
+                    AppIcon(
+                        imageVector = Icons.Outlined.Subtitles,
+                        contentDescription = null,
+                        tint = AppContentColors.secondaryText(),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    AppText(
+                        text = FormatUtils.formatStat(info.stat.danmaku.toLong()),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppContentColors.secondaryText()
+                    )
+                }
+
+            }
+            if (publishTimeRowText.isNotBlank()) {
+                if (emphasizePublishTime) {
+                    AppSurface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.78f),
+                        shape = app.bilipai.core.ui.AppShapes.container(
+                            app.bilipai.core.ui.ContainerLevel.Field
+                        )
+                    ) {
+                        AppText(
+                            text = publishTimeRowText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = AppContentColors.secondaryText(),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    AppText(
+                        text = fullPublishTimeText.ifBlank { publishTimeRowText },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 1
+                    )
+                }
+            }
+            if (onlineCountText.isNotBlank()) {
+                AppText(
+                    text = onlineCountText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AppContentColors.accent().copy(alpha = 0.82f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (inlineDeclarations) {
+            Spacer(Modifier.height(4.dp))
+            if (argueMsg.isNotBlank()) VideoArgueMsgRow(argueMsg = argueMsg)
+            if (argueMsg.isNotBlank() && noReprint) Spacer(Modifier.height(2.dp))
+            if (noReprint) VideoArgueMsgRow(argueMsg = "未经作者授权，请勿转载")
+        }
+        }
+        // PiliPlus 同款：AI/笔记入口浮于统计行右上，不参与统计区高度测量，避免撑出空白。
+        Box(
+            modifier = Modifier.matchParentSize(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            trailingStatsContent?.invoke()
+        }
+        }
+
+        // 视频荣誉徽标(全站排行榜/每周必看/入站必刷/热门):可点击跳转对应榜单页
+        val honorChips = info.honorReply?.honor.orEmpty().mapNotNull { honor ->
+            resolveVideoHonorChipText(
+                type = honor.type,
+                honorName = honor.honorName,
+                descContent = honor.desc?.content,
+                weeklyRecommendNum = honor.weeklyRecommendNum
+            )?.let { text ->
+                val jumpUrl = resolveVideoHonorJumpUrl(
+                    type = honor.type,
+                    honorUrl = honor.honorUrl,
+                    weeklyRecommendNum = honor.weeklyRecommendNum,
+                    honorText = "${honor.honorName} ${honor.desc?.content.orEmpty()}"
+                ) ?: return@mapNotNull null
+                Triple(honor, text, jumpUrl)
+            }
+        }
+        // 内容属性与榜单荣誉共用流式标签区，空间不足时自动换行。
+        // UP 主声明与禁止转载以非交互项并入同一流式行，避免各自独占整行。
+        val showDeclarationRows = !inlineDeclarations && argueMsgShown && (argueMsg.isNotBlank() || noReprint)
+        if (videoBadges.isNotEmpty() || honorChips.isNotEmpty() || showDeclarationRows) {
+            Spacer(Modifier.height(if (videoBadges.isNotEmpty() || honorChips.isNotEmpty()) 6.dp else 3.dp))
+            androidx.compose.foundation.layout.FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                videoBadges.forEach { badge ->
+                    VideoDetailBadgeChip(
+                        text = badge,
+                    )
+                }
+                honorChips.forEach { (_, text, jumpUrl) ->
+                    VideoHonorChip(
+                        text = text,
+                        onClick = { onDescriptionUrlClick?.invoke(jumpUrl) },
+                    )
+                }
+                if (showDeclarationRows) {
+                    if (argueMsg.isNotBlank()) {
+                        VideoArgueMsgRow(argueMsg = argueMsg, modifier = Modifier.align(Alignment.CenterVertically))
+                    }
+                    if (noReprint) {
+                        VideoArgueMsgRow(
+                            argueMsg = "未经作者授权，请勿转载",
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                }
+            }
+        }
+
+        // BGM 不再单独成卡：与 PiliPlus 一致，通过标签流中的 BGM 标签进入音乐详情。
+
+        if (showDescriptionAndTags) {
+            VideoDescriptionAndTags(
+                info = info,
+                videoTags = videoTags,
+                expanded = expanded,
+                animateLayout = animateLayout,
+                onDescriptionUrlClick = onDescriptionUrlClick,
+                onBgmClick = onBgmClick,
+                onTagClick = onTagClick,
+            )
+        }
+    }
+}
+
+/** Shared rich description and tags; large-screen info panes also show a compact preview. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun VideoDescriptionAndTags(
+    info: ViewInfo,
+    videoTags: List<VideoTag>,
+    expanded: Boolean,
+    modifier: Modifier = Modifier,
+    showCollapsedPreview: Boolean = false,
+    animateLayout: Boolean = true,
+    onDescriptionUrlClick: ((String) -> Unit)? = null,
+    onBgmClick: (BgmInfo) -> Unit = {},
+    onTagClick: (String) -> Unit = {},
+) {
+    val context = LocalContext.current
+    Column(modifier = modifier) {
+        //  BV 号 - PiliPlus 同款：展开后独占一行，位于简介之前，点击复制
+        androidx.compose.animation.AnimatedVisibility(
+            visible = expanded && info.bvid.isNotBlank(),
+            enter = if (animateLayout) {
+                folmeExpandEnterTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.EnterTransition.None
+            },
+            exit = if (animateLayout) {
+                folmeExpandExitTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.ExitTransition.None
+            }
+        ) {
+            AppText(
+                text = info.bvid,
+                style = MaterialTheme.typography.bodySmall,
+                color = AppContentColors.secondaryText(),
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .copyOnClick(info.bvid, "BV号")
+            )
+        }
+
+        //  Description - 默认隐藏，展开后显示
+        androidx.compose.animation.AnimatedVisibility(
+            visible = (expanded || showCollapsedPreview) && info.desc.isNotBlank(),
+            enter = if (animateLayout) {
+                folmeExpandEnterTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.EnterTransition.None
+            },
+            exit = if (animateLayout) {
+                folmeExpandExitTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.ExitTransition.None
+            }
+        ) {
+            Column {
+                Spacer(Modifier.height(4.dp))
+                val descriptionUrlColor = AppContentColors.accent()
+                val descriptionLinkListener = remember(onDescriptionUrlClick) {
+                    onDescriptionUrlClick?.let { handler ->
+                        androidx.compose.ui.text.LinkInteractionListener { link ->
+                            handler((link as androidx.compose.ui.text.LinkAnnotation.Clickable).tag)
+                        }
+                    }
+                }
+                val descriptionText = remember(
+                    info.desc,
+                    info.descV2,
+                    descriptionUrlColor,
+                    descriptionLinkListener
+                ) {
+                    buildVideoDescriptionAnnotatedString(
+                        desc = info.desc,
+                        descV2 = info.descV2,
+                        urlColor = descriptionUrlColor,
+                        linkListener = descriptionLinkListener
+                    )
+                }
+                val descriptionModifier = if (animateLayout) {
+                    Modifier.animateContentSize()
+                } else {
+                    Modifier
+                }
+                // 原生链接分发：链接点击在 Text 内部处理，与划选（SelectionContainer）
+                // 和外层手势不再竞争，恢复无条件划选容器。
+                SelectionContainer {
+                    AppText(
+                        text = descriptionText,
+                        maxLines = if (expanded || !showCollapsedPreview) Int.MAX_VALUE else 3,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppContentColors.secondaryText(),
+                        modifier = descriptionModifier
+                    )
+                }
+            }
+        }
+
+        //  Tags - 默认隐藏，展开后显示
+        androidx.compose.animation.AnimatedVisibility(
+            visible = (expanded || showCollapsedPreview) && videoTags.isNotEmpty(),
+            enter = if (animateLayout) {
+                folmeExpandEnterTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.EnterTransition.None
+            },
+            exit = if (animateLayout) {
+                folmeExpandExitTransition(useMiuixSpring)
+            } else {
+                androidx.compose.animation.ExitTransition.None
+            }
+        ) {
+            val videoTagSize by app.bilipai.core.store.SettingsManager
+                .getVideoTagSizePreset(context)
+                .collectAsStateWithLifecycle(
+                    initialValue = app.bilipai.core.ui.components.AppTagChipSize.STANDARD
+                )
+            val tagMetrics = app.bilipai.core.ui.components
+                .resolveAppTagChipMetrics(videoTagSize)
+            Column {
+                Spacer(Modifier.height(4.dp))
+                // Keep native touch expansion without reserving a 48dp layout box per tag.
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                    androidx.compose.foundation.layout.FlowRow(
+                        maxLines = if (expanded || !showCollapsedPreview) Int.MAX_VALUE else 2,
+                        horizontalArrangement = Arrangement.spacedBy(tagMetrics.itemSpacingHorizontal),
+                        verticalArrangement = Arrangement.spacedBy(tagMetrics.itemSpacingVertical)
+                    ) {
+                        videoTags.forEach { tag ->
+                            app.bilipai.core.ui.components.AppTagChip(
+                                label = if (tag.tag_type == "bgm") tag.tag_name.replaceFirst("发现", "♫ BGM：") else tag.tag_name,
+                                onClick = {
+                                    val bgm = resolveBgmTagInfo(tag)
+                                    if (bgm != null) onBgmClick(bgm) else onTagClick(tag.tag_name)
+                                },
+                                modifier = Modifier.copyOnLongPress(tag.tag_name, "标签"),
+                                size = videoTagSize,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoDetailBadgeChip(
+    text: String,
+) {
+    VideoInfoChip(
+        text = text,
+        containerColor = AppSurfaceTokens.primaryContainer(),
+        contentColor = AppSurfaceTokens.onPrimaryContainer(),
+    )
+}
+
+/**
+ * UP 主视频声明行：
+ * error_outline 小图标 + 12sp 次要色文本,如"虚构演绎,请勿过度解读"。
+ */
+@Composable
+private fun VideoArgueMsgRow(argueMsg: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+    ) {
+        androidx.compose.material3.Icon(
+            imageVector = Icons.Outlined.ErrorOutline,
+            contentDescription = null,
+            tint = AppContentColors.secondaryText(),
+            modifier = Modifier.size(13.dp)
+        )
+        AppText(
+            text = argueMsg,
+            style = MaterialTheme.typography.labelSmall,
+            color = AppContentColors.secondaryText()
+        )
+    }
+}
+
+/**
+ * 视频荣誉徽标(全站排行榜最高第N名/每周必看等):
+ * 着色小胶囊,有跳转链接时可点击,走通用的 B 站链接路由进入对应原生榜单页面。
+ */
+@Composable
+private fun VideoHonorChip(
+    text: String,
+    onClick: (() -> Unit)? = null
+) {
+    VideoInfoChip(
+        text = text,
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        onClick = onClick,
+    )
+}
+
+/** 标签共享字形、内边距与圆角；PiliPlus 同款紧凑尺寸，不做额外触控槽位，避免信息区出现大片空白。 */
+@Composable
+private fun VideoInfoChip(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    val shape = when (LocalAppUiStyle.current) {
+        AppUiStyle.MATERIAL3 -> MaterialTheme.shapes.small
+        AppUiStyle.MIUIX -> AppShapes.container(ContainerLevel.Tag)
+    }
+    Box(
+        modifier = modifier
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center,
+    ) {
+        AppSurface(shape = shape, color = containerColor, contentColor = contentColor) {
+            AppText(
+                text = text,
+                color = contentColor,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            )
+        }
+    }
+}
+
+/**
+ * UP Owner Info Section (Bilibili official style: blue UP tag)
+ */
+@OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
+@Composable
+fun UpInfoSection(
+    info: ViewInfo,
+    isFollowing: Boolean = false,
+    followStatusKnown: Boolean = false,
+    onFollowClick: () -> Unit = {},
+    onUpClick: (Long) -> Unit = {},
+    showOwnerAvatar: Boolean = true,
+    followerCount: Int? = null,
+    videoCount: Int? = null,
+    transitionEnabled: Boolean = false,  // 🔗 共享元素过渡开关
+    isQuickReturnLimitedForSharedElements: Boolean = false,
+    sourceRouteForSharedElement: String? = null,
+    horizontalPadding: androidx.compose.ui.unit.Dp = 12.dp,
+    modifier: Modifier = Modifier,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    onOpenLiveRoom: ((String) -> Unit)? = null,
+) {
+    val playerControlVisibility by app.bilipai.core.store.SettingsManager
+        .getPlayerControlVisibilitySettings(LocalContext.current)
+        .collectAsStateWithLifecycle(
+            initialValue = app.bilipai.core.store.PlayerControlVisibilitySettings()
+        )
+    //  尝试获取共享元素作用域
+    val sharedTransitionScope = app.bilipai.core.ui.LocalSharedTransitionScope.current
+    val animatedVisibilityScope = app.bilipai.core.ui.LocalAnimatedVisibilityScope.current
+    val coverSharedEnabled = shouldEnableVideoCoverSharedTransition(
+        transitionEnabled = transitionEnabled,
+        hasSharedTransitionScope = sharedTransitionScope != null,
+        hasAnimatedVisibilityScope = animatedVisibilityScope != null
+    )
+    val useCardContainerSharedBounds = shouldUseVideoCardShellSharedBounds(
+        sourceRoute = sourceRouteForSharedElement,
+        transitionEnabled = coverSharedEnabled
+    )
+    val metadataSharedEnabled = shouldEnableVideoMetadataSharedTransition(
+        coverSharedEnabled = coverSharedEnabled,
+        isQuickReturnLimited = isQuickReturnLimitedForSharedElements,
+        useCardContainerSharedBounds = useCardContainerSharedBounds
+    )
+    val sharedTransitionSpeedSettings = LocalVideoSharedTransitionSpeedSettings.current
+    val metadataSharedTransitionMotionSpec = remember(
+        metadataSharedEnabled,
+        sharedTransitionSpeedSettings
+    ) {
+        resolveVideoMetadataSharedTransitionMotionSpec(
+            transitionEnabled = metadataSharedEnabled,
+            speedSettings = sharedTransitionSpeedSettings
+        )
+    }
+    // 统计是所有材质共有的详情信息，不调整 MD3、Miuix 或玻璃的原生控件参数。
+    val cachedOwner = VideoRepository.getCachedCreatorCardStats(info.owner.mid)
+    val upStatsLabels = listOf(
+        resolveVideoDetailOwnerStatsLabels(followerCount ?: cachedOwner?.followerCount, null).firstOrNull() ?: "—粉丝",
+        resolveVideoDetailOwnerStatsLabels(null, videoCount ?: cachedOwner?.videoCount).firstOrNull() ?: "—视频",
+    )
+    val showInlineOwnerIdentity = shouldShowInlineOwnerIdentity(showOwnerAvatar = showOwnerAvatar)
+
+    BoxWithConstraints(modifier = modifier) {
+        val isCompact = maxWidth.isSpecified && shouldUseCompactUpInfoLayout(maxWidth.value.toInt())
+
+        val avatarContent: @Composable () -> Unit = {
+            if (showOwnerAvatar) {
+                val avatarSize = if (isCompact) 32.dp else 35.dp
+                var sharedFaceModifier: Modifier = Modifier
+                if (metadataSharedEnabled) {
+                    with(requireNotNull(sharedTransitionScope)) {
+                        sharedFaceModifier = Modifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = app.bilipai.core.ui.transition.videoAvatarSharedElementKey(
+                                    info.bvid,
+                                    sourceRoute = sourceRouteForSharedElement
+                                )
+                            ),
+                            animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                            boundsTransform = { initialBounds, targetBounds ->
+                                videoMetadataSharedElementBoundsTransformSpec(
+                                    motion = metadataSharedTransitionMotionSpec,
+                                    initialBounds = initialBounds,
+                                    targetBounds = targetBounds
+                                )
+                            },
+                            clipInOverlayDuringTransition = OverlayClip(CircleShape)
+                        )
+                    }
+                }
+                val ownerStaff = info.staff.firstOrNull { it.mid == info.owner.mid }
+
+                if (info.owner.face.isNotBlank()) {
+                    OwnerDecoratedAvatar(
+                        faceUrl = info.owner.face,
+                        ownerMid = info.owner.mid,
+                        modifier = Modifier.size(avatarSize),
+                        badgeSize = if (isCompact) 11.dp else 12.dp,
+                        fallbackOfficialType = ownerStaff?.official?.type,
+                        fallbackVipStatus = ownerStaff?.vip?.status,
+                        faceModifier = sharedFaceModifier,
+                        contentDescription = "UP主头像",
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(avatarSize)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .then(sharedFaceModifier),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AppIcon(
+                            imageVector = Icons.Outlined.AccountCircle,
+                            contentDescription = "UP主标识",
+                            tint = AppContentColors.accent(),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            } else {
+                UserUpBadge()
+            }
+        }
+
+        val upNameContent: @Composable (Modifier) -> Unit = { rowModifier ->
+            Row(
+                modifier = rowModifier,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                var upNameModifier: Modifier = Modifier
+
+                if (metadataSharedEnabled) {
+                    with(requireNotNull(sharedTransitionScope)) {
+                        upNameModifier = upNameModifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(
+                                key = app.bilipai.core.ui.transition.videoUpNameSharedElementKey(
+                                    info.bvid,
+                                    sourceRoute = sourceRouteForSharedElement
+                                )
+                            ),
+                            animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                            boundsTransform = { initialBounds, targetBounds ->
+                                videoMetadataSharedElementBoundsTransformSpec(
+                                    motion = metadataSharedTransitionMotionSpec,
+                                    initialBounds = initialBounds,
+                                    targetBounds = targetBounds
+                                )
+                            }
+                        )
+                    }
+                }
+
+                upNameModifier = upNameModifier.copyOnLongPress(info.owner.name, "UP主名称")
+
+                if (showInlineOwnerIdentity) {
+                    if (info.owner.face.isNotBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(FormatUtils.fixImageUrl(
+                                    info.owner.face
+                                ))
+                                .crossfade(false)
+                                .build(),
+                            contentDescription = "UP主头像",
+                            modifier = Modifier
+                                .padding(horizontal = 2.dp)
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        UserUpBadge(modifier = Modifier.padding(horizontal = 2.dp))
+                    }
+                    Spacer(Modifier.width(4.dp))
+                }
+                val ownerStaff = info.staff.firstOrNull { it.mid == info.owner.mid }
+                val fallbackVipStatus = ownerStaff?.vip?.status ?: 0
+                val fallbackVipType = ownerStaff?.vip?.type ?: 0
+                val onSurfaceColor = AppContentColors.primaryText()
+                val secondaryColor = app.bilipai.core.ui.components.userVipPink()
+                val ownerNameColor by produceState<Color>(
+                    initialValue = resolveUpNameColor(
+                        vipStatus = cachedOwner?.vipStatus ?: fallbackVipStatus,
+                        vipType = cachedOwner?.vipType ?: fallbackVipType,
+                        onSurface = onSurfaceColor,
+                        secondary = secondaryColor,
+                    ),
+                    key1 = info.owner.mid,
+                    key2 = onSurfaceColor,
+                    key3 = secondaryColor,
+                ) {
+                    val card = if (info.owner.mid > 0L) {
+                        VideoRepository.getCreatorCardStats(info.owner.mid).getOrNull()
+                    } else {
+                        null
+                    }
+                    value = resolveUpNameColor(
+                        vipStatus = card?.vipStatus ?: fallbackVipStatus,
+                        vipType = card?.vipType ?: fallbackVipType,
+                        onSurface = onSurfaceColor,
+                        secondary = secondaryColor,
+                    )
+                }
+                SelectionContainer(modifier = Modifier.weight(1f, fill = false)) {
+                    AppText(
+                        text = info.owner.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = ownerNameColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = upNameModifier
+                    )
+                }
+                VideoOwnerLiveBadge(
+                    ownerMid = info.owner.mid,
+                    modifier = Modifier.padding(start = 6.dp),
+                    onOpenLiveRoom = onOpenLiveRoom,
+                )
+            }
+        }
+
+        val followButtonContent: @Composable () -> Unit = {
+            var followActionModifier = Modifier
+                .heightIn(min = if (isCompact) 26.dp else 28.dp)
+                .widthIn(min = if (isCompact) 56.dp else 68.dp)
+            if (metadataSharedEnabled) {
+                with(requireNotNull(sharedTransitionScope)) {
+                    followActionModifier = followActionModifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(
+                            key = app.bilipai.core.ui.transition.videoUpActionSharedElementKey(
+                                info.bvid,
+                                sourceRoute = sourceRouteForSharedElement
+                            )
+                        ),
+                        animatedVisibilityScope = requireNotNull(animatedVisibilityScope),
+                        boundsTransform = { initialBounds, targetBounds ->
+                            videoMetadataSharedElementBoundsTransformSpec(
+                                motion = metadataSharedTransitionMotionSpec,
+                                initialBounds = initialBounds,
+                                targetBounds = targetBounds
+                            )
+                        },
+                        clipInOverlayDuringTransition = OverlayClip(VideoDetailShapes.action())
+                    )
+                }
+            }
+
+            val nativeFollowColors = app.bilipai.core.ui.AppInteractionColors.nativeFollow(
+                isFollowing = isFollowing,
+                enabled = followStatusKnown,
+            )
+            val followAccent = AppContentColors.selectionAccent(
+                app.bilipai.core.ui.LocalAppThemeConfig.current.liquidGlassEnabled
+            )
+            val followDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+            val followVisualPolicy = remember(isFollowing, followDarkTheme) {
+                resolveVideoFollowVisualPolicy(
+                    isFollowing = isFollowing,
+                    darkTheme = followDarkTheme,
+                )
+            }
+            // 状态未确认仍显示完整文案；非玻璃 Miuix 使用原生禁用配色，其余材质保留既有占位策略。
+            // 关系状态回填继续沿用原有文案过渡。
+            AppSurface(
+                onClick = rememberFollowActionWithConfirmation(
+                    targetKey = info.owner.mid,
+                    userName = info.owner.name,
+                    isFollowing = isFollowing,
+                    onFollowClick = onFollowClick,
+                ),
+                enabled = followStatusKnown,
+                color = nativeFollowColors?.container ?: if (isFollowing) followAccent.copy(alpha = 0.14f) else when (followVisualPolicy.detailButtonTone) {
+                    FollowButtonTone.PRIMARY -> AppContentColors.accent()
+                    FollowButtonTone.PRIMARY_CONTAINER -> MaterialTheme.colorScheme.primaryContainer
+                },
+                shape = VideoDetailShapes.action(),
+                modifier = followActionModifier.followActionAnchor()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(horizontal = if (isCompact) 8.dp else 12.dp),
+                ) {
+                    Crossfade(
+                        targetState = if (isFollowing) "\u5df2\u5173\u6ce8" else "\u5173\u6ce8",
+                        animationSpec = tween(durationMillis = 180),
+                        label = "videoDetailFollowLabel"
+                    ) { followLabel ->
+                        AppText(
+                            text = followLabel,
+                            maxLines = 1,
+                            softWrap = false,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = nativeFollowColors?.content ?: if (isFollowing) followAccent else when (followVisualPolicy.detailTextTone) {
+                                FollowTextTone.ON_PRIMARY -> AppContentColors.onAccent()
+                                FollowTextTone.ON_PRIMARY_CONTAINER -> MaterialTheme.colorScheme.onPrimaryContainer
+                            },
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (isCompact) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onUpClick(info.owner.mid) }
+                        .padding(horizontal = horizontalPadding, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    avatarContent()
+
+                    Spacer(Modifier.width(10.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        upNameContent(Modifier.fillMaxWidth())
+
+                        if (upStatsLabels.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            OwnerStatsRow(labels = upStatsLabels)
+                        }
+
+                        if (playerControlVisibility.showFollowButton || trailingContent != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (playerControlVisibility.showFollowButton) {
+                                    followButtonContent()
+                                }
+                                if (trailingContent != null) {
+                                    trailingContent()
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onUpClick(info.owner.mid) }
+                        .padding(horizontal = horizontalPadding, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    avatarContent()
+
+                    Spacer(Modifier.width(10.dp))
+
+                    // UP owner name row
+                    Column(modifier = Modifier.weight(1f)) {
+                        upNameContent(Modifier)
+                        if (upStatsLabels.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            OwnerStatsRow(labels = upStatsLabels)
+                        }
+                    }
+
+                    if (playerControlVisibility.showFollowButton) {
+                        followButtonContent()
+                    }
+                    if (trailingContent != null) {
+                        if (playerControlVisibility.showFollowButton) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        trailingContent()
+                    }
+                }
+            }
+            if (shouldShowCreatorTeamSection(info)) {
+                CreatorTeamSection(
+                    staff = info.staff,
+                    ownerMid = info.owner.mid,
+                    onMemberClick = onUpClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CreatorTeamSection(
+    staff: List<VideoStaff>,
+    ownerMid: Long,
+    onMemberClick: (Long) -> Unit
+) {
+    if (staff.isEmpty()) return
+    // 每个成员的关注状态:null=查询中;经 followStateChanges 与全局动作同步。
+    val followStates = remember(staff) { mutableStateMapOf<Long, Boolean>() }
+    LaunchedEffect(staff) {
+        staff.filter { it.mid > 0L && it.mid != ownerMid }.forEach { member ->
+            followStates[member.mid] =
+                app.bilipai.data.repository.ActionRepository
+                    .checkFollowStatus(member.mid)
+        }
+    }
+    LaunchedEffect(Unit) {
+        app.bilipai.data.repository.ActionRepository.followStateChanges.collect { change ->
+            if (followStates.containsKey(change.mid)) {
+                followStates[change.mid] = change.isFollowing
+            }
+        }
+    }
+    val scope = rememberCoroutineScope()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, bottom = 10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AppText(
+                text = "创作团队",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = AppContentColors.primaryText()
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            AppText(
+                text = "共 ${staff.size} 位",
+                style = MaterialTheme.typography.labelSmall,
+                color = AppContentColors.secondaryText()
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            staff.forEach { member ->
+                CreatorTeamMemberChip(
+                    member = member,
+                    showFollow = member.mid > 0L && member.mid != ownerMid,
+                    isFollowing = followStates[member.mid] ?: false,
+                    onFollowToggle = {
+                        scope.launch {
+                            val target = !(followStates[member.mid] ?: false)
+                            val ok = app.bilipai.data.repository.ActionRepository
+                                .followUser(member.mid, target)
+                                .getOrDefault(false)
+                            if (ok) followStates[member.mid] = target
+                        }
+                    },
+                    onClick = { onMemberClick(member.mid) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CreatorTeamMemberChip(
+    member: VideoStaff,
+    showFollow: Boolean,
+    isFollowing: Boolean,
+    onFollowToggle: () -> Unit,
+    onClick: () -> Unit
+) {
+    val nativeFollowColors = app.bilipai.core.ui.AppInteractionColors.nativeFollow(isFollowing)
+    val followAccent = AppContentColors.selectionAccent(
+        app.bilipai.core.ui.LocalAppThemeConfig.current.liquidGlassEnabled
+    )
+    val followDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val followVisualPolicy = remember(isFollowing, followDarkTheme) {
+        resolveVideoFollowVisualPolicy(
+            isFollowing = isFollowing,
+            darkTheme = followDarkTheme,
+        )
+    }
+    Row(
+        modifier = Modifier
+            .clip(AppShapes.container(ContainerLevel.Chip))
+            .clickable(enabled = member.mid > 0L, onClick = onClick)
+            .padding(end = 4.dp)
+            .heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.size(36.dp)) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(FormatUtils.fixImageUrl(
+                        member.face
+                    ))
+                    .crossfade(false)
+                    .build(),
+                contentDescription = "${member.name} 头像",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+            UserAvatarCornerMarkBadge(
+                mark = resolveUserAvatarCornerMark(
+                    officialType = member.official.type,
+                    vipStatus = member.vip.status,
+                ),
+                modifier = Modifier.align(Alignment.BottomEnd),
+                badgeSize = 14.dp,
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier = Modifier.widthIn(min = 64.dp, max = 112.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                AppText(
+                    text = member.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+            }
+            if (member.title.isNotBlank()) {
+                AppText(
+                    text = member.title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (showFollow) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .clickable(
+                        role = Role.Button,
+                        onClick = rememberFollowActionWithConfirmation(
+                            targetKey = member.mid,
+                            userName = member.name,
+                            isFollowing = isFollowing,
+                            onFollowClick = onFollowToggle,
+                        ),
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                AppSurface(
+                    color = nativeFollowColors?.container ?: if (isFollowing) followAccent.copy(alpha = 0.14f) else when (followVisualPolicy.detailButtonTone) {
+                        FollowButtonTone.PRIMARY -> AppContentColors.accent()
+                        FollowButtonTone.PRIMARY_CONTAINER -> MaterialTheme.colorScheme.primaryContainer
+                    },
+                    shape = VideoDetailShapes.action(),
+                    modifier = Modifier.heightIn(min = 28.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    ) {
+                        AppText(
+                            text = if (isFollowing) "已关注" else "关注",
+                            maxLines = 1,
+                            softWrap = false,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = nativeFollowColors?.content ?: if (isFollowing) followAccent else when (followVisualPolicy.detailTextTone) {
+                                FollowTextTone.ON_PRIMARY -> AppContentColors.onAccent()
+                                FollowTextTone.ON_PRIMARY_CONTAINER -> MaterialTheme.colorScheme.onPrimaryContainer
+                            },
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Description Section (optimized style)
+ */
+@Composable
+fun DescriptionSection(desc: String) {
+    var expanded by remember { mutableStateOf(false) }
+
+    if (desc.isBlank()) return
+
+    AppSurface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .animateContentSize()
+        ) {
+            SelectionContainer {
+                AppText(
+                    text = desc,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = if (expanded) Int.MAX_VALUE else 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            if (desc.length > 100 || desc.lines().size > 3) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expanded = !expanded }
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AppText(
+                        text = if (expanded) "\u6536\u8d77" else "\u5c55\u5f00\u66f4\u591a",
+                        color = AppContentColors.accent(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    AppIcon(
+                        imageVector = if (expanded) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = AppContentColors.accent(),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+internal fun resolveBgmTagInfo(tag: app.bilipai.data.model.response.VideoTag): BgmInfo? =
+    if (tag.tag_type == "bgm" && (tag.music_id.isNotBlank() || tag.jump_url.isNotBlank())) {
+        BgmInfo(musicId = tag.music_id, musicTitle = tag.tag_name, jumpUrl = tag.jump_url, coverUrl = tag.cover)
+    } else null
+
+/** 数量与标签跟随主题字体，项间距使用布局单位，不依赖空格宽度。 */
+@Composable
+private fun OwnerStatsRow(labels: List<String>, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        labels.forEach { label ->
+            AppText(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = AppContentColors.secondaryText(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}

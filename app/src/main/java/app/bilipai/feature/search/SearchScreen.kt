@@ -1,0 +1,3813 @@
+// 文件路径: feature/search/SearchScreen.kt
+package app.bilipai.feature.search
+
+import app.bilipai.navigation.tabSelectedPage
+import app.bilipai.navigation.tabIndicatorPosition
+import app.bilipai.feature.home.effectiveGridColumnCount
+import app.bilipai.feature.home.effectiveGridColumnCountCompact
+import app.bilipai.core.ui.components.resolveAppCountedTabLabel
+import app.bilipai.core.ui.components.appCountedTabOption
+import app.bilipai.core.ui.AppContentColors
+
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
+import app.bilipai.core.util.HtmlEntityUtils
+import app.bilipai.core.ui.LocalAppThemeConfig
+import app.bilipai.core.ui.components.rememberVideoListLayoutControl
+import coil3.request.crossfade
+import app.bilipai.core.ui.components.AppAssistChip
+import app.bilipai.core.ui.components.AppLiquidGlassBackToTopButton
+import app.bilipai.core.ui.components.AppCheckbox
+import app.bilipai.core.ui.components.AppDropdownMenu
+import app.bilipai.core.ui.components.AppDropdownMenuItem
+import app.bilipai.core.ui.components.AppFilterChip
+import app.bilipai.core.ui.components.AppIcon
+import app.bilipai.core.ui.components.AppIconButton
+import app.bilipai.core.ui.components.AppInputChip
+import app.bilipai.core.ui.components.AppSurface
+import app.bilipai.core.ui.components.AppText
+import app.bilipai.core.ui.components.AppTextButton
+import app.bilipai.core.ui.components.KeepScrollableTabSelectionVisible
+import app.bilipai.core.ui.components.liquidDockViewport
+import app.bilipai.navigation.animatePagerSelection
+import app.bilipai.core.util.BilibiliNavigationTarget
+import app.bilipai.data.model.response.MatchContestInfo
+import app.bilipai.data.model.response.MatchContestTeam
+import app.bilipai.data.model.response.resolveMatchContestLogoUrl
+import app.bilipai.navigation.SearchSubmitAction
+import app.bilipai.navigation.resolveSearchSubmitAction
+import app.bilipai.core.store.CommonListHeaderCollapseMode
+import app.bilipai.feature.list.resolveCommonListHeaderOffsetAfterContentScroll
+import app.bilipai.feature.list.resolveCommonListHeaderOffsetForSettledContent
+
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import app.bilipai.core.ui.components.appActionClickable
+import app.bilipai.core.ui.components.AppHorizontalPager as HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+//  Material Icons
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.animation.core.animate
+import androidx.compose.ui.geometry.Offset
+import kotlinx.coroutines.Job
+import app.bilipai.core.ui.motion.AppMotionTokens
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.BackHandler
+import app.bilipai.R
+import app.bilipai.core.ui.AppScaffold
+import app.bilipai.core.ui.AppShapes
+import app.bilipai.core.ui.ContainerLevel
+import app.bilipai.core.ui.AppSurfaceTokens
+import app.bilipai.core.theme.LocalAppUiStyle
+import app.bilipai.core.theme.AppUiStyle
+import app.bilipai.core.ui.components.AppTabRowIndicatorPresentation
+import app.bilipai.core.theme.resolveAccessibleContainerColors
+import app.bilipai.core.ui.AppChromeSizeTokens
+import app.bilipai.core.ui.AppSpacingTokens
+import app.bilipai.core.ui.rememberContentCardSurfaceSpec
+import app.bilipai.feature.home.components.BottomBarLiquidSegmentedControl
+import app.bilipai.feature.home.components.resolveHomeTopSearchContainerShape
+import app.bilipai.feature.home.components.BiliPaiImmersiveTopBar
+import app.bilipai.feature.home.components.shouldUseBiliPaiProgressiveTopBlur
+import app.bilipai.core.ui.performance.isLowBlurBudgetForced
+import top.yukonga.miuix.kmp.blur.Backdrop as MiuixBackdrop
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.roundToInt
+import app.bilipai.core.ui.LocalGlobalWallpaperBackdropVisible
+import app.bilipai.core.ui.videoCardTitleMaxLines
+import app.bilipai.feature.home.components.cards.HorizontalVideoCardFrame
+import app.bilipai.core.ui.videoCardTitleOverflow
+import app.bilipai.core.ui.OfficialVerifyAvatarBadge
+import app.bilipai.core.ui.UserAvatarCornerMarkBadge
+import app.bilipai.core.ui.resolveUserAvatarCornerMark
+import app.bilipai.core.ui.globalWallpaperAwareBackground
+import app.bilipai.core.ui.resolveGlobalWallpaperProtectiveColor
+import app.bilipai.core.ui.resolveBottomSafeAreaPadding
+import app.bilipai.core.ui.AppTopChromePolicy
+import app.bilipai.core.ui.AppTopTabPresentation
+import app.bilipai.core.ui.rememberAppTopChromePolicy
+import app.bilipai.core.ui.rememberAppChromeLiquidGlassEnabled
+import app.bilipai.core.ui.rememberAppSemanticVisualPolicy
+import app.bilipai.core.ui.rememberBackToTopButtonEnabled
+import app.bilipai.core.ui.rememberAppChevronDownIcon
+import app.bilipai.core.ui.rememberAppClearIcon
+import app.bilipai.core.ui.resolveOfficialVerifyBadge
+import app.bilipai.core.ui.components.UserLevelBadge
+import app.bilipai.core.ui.components.UpBadgeName
+import app.bilipai.feature.home.components.cards.VideoCardCoverDurationText
+import app.bilipai.feature.home.components.cards.HorizontalVideoStatRow
+import app.bilipai.feature.home.resolveHomeFeedCardLayout
+import app.bilipai.feature.home.resolveReturnAnimationSuppressionDurationMs
+import app.bilipai.core.store.HomeDurationStyle
+import app.bilipai.core.store.HomeFeedCardStyle
+import app.bilipai.core.store.HomeSettings
+import app.bilipai.core.store.SettingsManager  //  读取动画设置
+import app.bilipai.data.repository.SearchOrder
+import app.bilipai.data.repository.SearchDuration
+import app.bilipai.data.repository.SearchLiveOrder
+import app.bilipai.data.repository.SearchOrderSort
+import app.bilipai.data.repository.SearchArticleCategory
+import app.bilipai.data.repository.SearchPhotoCategory
+import app.bilipai.data.repository.SearchUpOrder
+import app.bilipai.data.repository.SearchUserType
+import app.bilipai.data.repository.resolveSearchDurationFilterLabel
+import app.bilipai.data.model.response.VideoItem
+import app.bilipai.core.util.FormatUtils
+import app.bilipai.core.util.animateScrollToTop
+import app.bilipai.core.util.shouldShowScrollToTop
+import app.bilipai.core.ui.adaptive.resolveDeviceUiProfile
+import app.bilipai.core.ui.adaptive.resolveEffectiveMotionTier
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import app.bilipai.core.util.responsiveContentWidth
+import app.bilipai.core.ui.blur.rememberRecoverableHazeState
+import app.bilipai.core.ui.blur.recoverableBlurEnabled
+import app.bilipai.core.ui.blur.shouldAllowRenderEffectBackedHazeEffect
+import app.bilipai.core.ui.blur.hazeSourceCompat
+import app.bilipai.core.ui.blur.unifiedBlur
+import app.bilipai.core.ui.motion.continuityTween
+import app.bilipai.core.util.LocalWindowSizeClass
+import app.bilipai.data.model.response.HotItem
+import app.bilipai.data.model.response.SearchArticleItem
+import app.bilipai.data.model.response.SearchLiveUserItem
+import app.bilipai.data.model.response.SearchPhotoItem
+import app.bilipai.data.model.response.SearchType
+import app.bilipai.data.model.response.SearchTopicItem
+import kotlinx.coroutines.launch
+
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.bilipai.core.ui.AdaptiveLoadingIndicator
+
+
+internal fun shouldShowSearchHotSection(
+    hotItemCount: Int,
+    hotSearchEnabled: Boolean
+): Boolean = hotSearchEnabled && hotItemCount > 0
+
+internal fun shouldShowSearchHotHeader(
+    hotItemCount: Int,
+    hotSearchEnabled: Boolean
+): Boolean = hotItemCount > 0
+
+internal data class SearchTopBarLayoutSpec(
+    val showInlineHotToggle: Boolean,
+    val placeholderMaxLines: Int
+)
+
+internal fun resolveSearchTopBarLayoutSpec(): SearchTopBarLayoutSpec {
+    return SearchTopBarLayoutSpec(
+        showInlineHotToggle = false,
+        placeholderMaxLines = 1
+    )
+}
+
+internal const val SEARCH_INPUT_LINE_HEIGHT_SP = 20
+
+/** Total vertical padding around the search controls. */
+internal const val SEARCH_TOP_BAR_VERTICAL_PADDING_DP = 4
+
+internal fun resolveSearchTopBarRowMinHeightDp(
+    inputHeightDp: Int,
+    verticalPaddingDp: Int = SEARCH_TOP_BAR_VERTICAL_PADDING_DP
+): Int = maxOf(48, inputHeightDp) + verticalPaddingDp
+
+internal fun resolveSearchInputHeightDp(
+    minHeightDp: Int,
+    lineHeightDp: Float,
+    fontSizeDp: Float,
+): Int = maxOf(minHeightDp, ceil(maxOf(lineHeightDp, fontSizeDp) + 8f).toInt())
+
+@Composable
+internal fun rememberSearchInputHeightDp(minHeightDp: Int): Int {
+    val density = LocalDensity.current
+    val fontSize = MaterialTheme.typography.bodyLarge.fontSize
+    return remember(minHeightDp, density, fontSize) {
+        with(density) {
+            resolveSearchInputHeightDp(
+                minHeightDp = minHeightDp,
+                lineHeightDp = SEARCH_INPUT_LINE_HEIGHT_SP.sp.toDp().value,
+                fontSizeDp = fontSize.toDp().value,
+            )
+        }
+    }
+}
+
+internal fun shouldOmitSearchInputLeadingIcon(
+    tabPresentation: AppTopTabPresentation,
+): Boolean = tabPresentation == AppTopTabPresentation.MATERIAL_UNDERLINE
+
+internal fun resolveSearchTopBarHeaderColor(
+    surfaceColor: Color,
+    backgroundAlpha: Float,
+    globalWallpaperVisible: Boolean,
+    useHeaderBlur: Boolean
+): Color {
+    return if (globalWallpaperVisible) {
+        val protectiveColor = resolveGlobalWallpaperProtectiveColor(surfaceColor)
+        protectiveColor.copy(alpha = maxOf(protectiveColor.alpha, backgroundAlpha))
+    } else if (useHeaderBlur) {
+        Color.Transparent
+    } else {
+        surfaceColor.copy(alpha = backgroundAlpha)
+    }
+}
+
+internal fun shouldUseSearchTopBarHeaderBlur(
+    headerBlurRequested: Boolean,
+    hazeSourceEnabled: Boolean,
+    globalWallpaperVisible: Boolean
+): Boolean = headerBlurRequested && hazeSourceEnabled && !globalWallpaperVisible
+
+internal fun shouldUseSearchSolidTopChrome(
+    headerBlurRequested: Boolean,
+    progressiveBlurRequested: Boolean,
+): Boolean = !headerBlurRequested && !progressiveBlurRequested
+
+/** Search chrome sizes and semantic shape levels for actions and content surfaces. */
+/** Shared alignment and spacing for the search field, type tabs and order rail. */
+internal data class SearchComponentSpacingSpec(
+    val horizontalPaddingDp: Int,
+    val resultRailHorizontalPaddingDp: Int,
+    val rowVerticalPaddingDp: Int,
+    val actionGapDp: Int,
+)
+
+internal fun resolveSearchComponentSpacingSpec(uiStyle: AppUiStyle): SearchComponentSpacingSpec =
+    when (uiStyle) {
+        AppUiStyle.MATERIAL3 -> SearchComponentSpacingSpec(16, 8, 0, 12)
+        AppUiStyle.MIUIX -> SearchComponentSpacingSpec(12, 8, 0, 8)
+    }
+
+internal data class SearchChromeVisualSpec(
+    val inputHeightDp: Int,
+    /** Search-action hit target beside the field, using the same capsule curvature. */
+    val actionShapeLevel: ContainerLevel,
+    val useFilledSearchAction: Boolean,
+    /** Suggestion / history / discover surface cards. */
+    val suggestionShapeLevel: ContainerLevel,
+    val clearActionSizeDp: Int,
+    val submitActionSizeDp: Int,
+    val actionIconSizeDp: Int,
+    val horizontalGapDp: Int,
+    val inputHorizontalPaddingDp: Int,
+    val chipHeightDp: Int,
+    val compactChipHeightDp: Int,
+    val chipShapeLevel: ContainerLevel,
+    val chipHorizontalPaddingDp: Int
+)
+
+internal fun resolveSearchInputShape(
+    chromePolicy: AppTopChromePolicy,
+): androidx.compose.ui.graphics.Shape = resolveHomeTopSearchContainerShape(chromePolicy)
+
+internal fun resolveSearchChromeVisualSpec(
+    chromePolicy: AppTopChromePolicy,
+): SearchChromeVisualSpec {
+    val compactChrome = chromePolicy.compactChromeSpec
+    return SearchChromeVisualSpec(
+        inputHeightDp = minOf(compactChrome.primaryHeightDp, 40),
+        actionShapeLevel = ContainerLevel.Pill,
+        useFilledSearchAction = chromePolicy.tabPresentation != AppTopTabPresentation.MOVING_CAPSULE,
+        suggestionShapeLevel = ContainerLevel.Card,
+        clearActionSizeDp = minOf(compactChrome.secondaryButtonSizeDp, 40),
+        submitActionSizeDp = minOf(compactChrome.secondaryButtonSizeDp, 40),
+        actionIconSizeDp = minOf(compactChrome.iconSizeDp, 20),
+        horizontalGapDp = compactChrome.standardGapDp,
+        inputHorizontalPaddingDp = compactChrome.inputHorizontalPaddingDp,
+        chipHeightDp = compactChrome.chipHeightDp,
+        compactChipHeightDp = compactChrome.compactChipHeightDp,
+        chipShapeLevel = ContainerLevel.Pill,
+        chipHorizontalPaddingDp = compactChrome.chipHorizontalPaddingDp,
+    )
+}
+
+internal data class SearchHomeContentMotionSpec(
+    val fadeInDurationMillis: Int,
+    val fadeOutDurationMillis: Int,
+    val sizeTransformDurationMillis: Int,
+    val enterFromTop: Boolean,
+    val exitTowardTop: Boolean,
+    val enterOffsetDp: Int,
+    val exitOffsetDp: Int
+)
+
+internal fun resolveSearchHomeContentMotionSpec(
+    reducedMotion: Boolean
+): SearchHomeContentMotionSpec {
+    return if (reducedMotion) {
+        SearchHomeContentMotionSpec(
+            fadeInDurationMillis = 90,
+            fadeOutDurationMillis = 80,
+            sizeTransformDurationMillis = 120,
+            enterFromTop = true,
+            exitTowardTop = true,
+            enterOffsetDp = 0,
+            exitOffsetDp = 0
+        )
+    } else {
+        SearchHomeContentMotionSpec(
+            fadeInDurationMillis = 320,
+            fadeOutDurationMillis = 220,
+            sizeTransformDurationMillis = 380,
+            enterFromTop = true,
+            exitTowardTop = true,
+            enterOffsetDp = 18,
+            exitOffsetDp = 14
+        )
+    }
+}
+
+internal fun shouldApplyInitialSearchKeyword(
+    initialKeyword: String,
+    currentQuery: String,
+    showResults: Boolean
+): Boolean {
+    val normalizedKeyword = initialKeyword.trim()
+    if (normalizedKeyword.isBlank()) return false
+    return normalizedKeyword != currentQuery || !showResults
+}
+
+internal fun shouldResetSearchResultScroll(
+    searchSessionId: Long,
+    showResults: Boolean,
+    lastResetSessionId: Long,
+    isReturningFromVideoDetail: Boolean = false,
+): Boolean {
+    return !isReturningFromVideoDetail &&
+        showResults &&
+        searchSessionId > 0L &&
+        searchSessionId != lastResetSessionId
+}
+
+internal fun shouldShowSearchBackToTop(
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+    offsetThresholdPx: Int = 280
+): Boolean {
+    return shouldShowScrollToTop(
+        firstVisibleItemIndex = firstVisibleItemIndex,
+        firstVisibleItemScrollOffset = firstVisibleItemScrollOffset,
+        offsetThresholdPx = offsetThresholdPx,
+    )
+}
+
+internal fun resolveSearchSubmitKeyword(
+    query: String,
+    suggestedKeyword: String
+): String {
+    val normalizedQuery = query.trim()
+    if (normalizedQuery.isNotBlank()) return normalizedQuery
+    return suggestedKeyword.trim()
+}
+
+internal enum class SearchFilterControl {
+    VIDEO_ORDER,
+    VIDEO_DURATION,
+    VIDEO_TID,
+    UP_ORDER,
+    UP_ORDER_SORT,
+    UP_USER_TYPE,
+    LIVE_ORDER,
+    ARTICLE_ORDER,
+    ARTICLE_CATEGORY,
+    PHOTO_ORDER,
+    PHOTO_CATEGORY
+}
+
+internal val defaultSearchFilterTabOrder: List<SearchType> = listOf(
+    SearchType.ALL,
+    SearchType.BANGUMI,
+    SearchType.MEDIA_FT,
+    SearchType.LIVE,
+    SearchType.UP,
+    SearchType.ARTICLE
+)
+
+internal fun resolveSearchFilterTabs(
+    savedOrder: List<String> = emptyList()
+): List<SearchType> {
+    // Match PiliPlus' active search tabs. Video results are integrated into 综合.
+    val activeTypes = defaultSearchFilterTabOrder.toSet()
+    val knownByValue = SearchType.entries
+        .filter { it in activeTypes }
+        .associateBy(SearchType::value)
+    val saved = savedOrder.mapNotNull(knownByValue::get).distinct()
+    // Older saved layouts may omit 综合; preserve the user's remaining active order.
+    val ordered = if (SearchType.ALL in saved) saved else listOf(SearchType.ALL) + saved
+    val remaining = defaultSearchFilterTabOrder.filterNot(ordered::contains)
+    return ordered + remaining
+}
+
+internal fun resolveSearchDefaultPlaceholder(): String {
+    return "搜索视频、番剧、影视、直播、UP主、专栏等..."
+}
+
+internal fun resolveSearchUpUserTypeFilterLabel(userType: SearchUserType): String {
+    return when (userType) {
+        SearchUserType.ALL -> "用户类型"
+        else -> userType.displayName
+    }
+}
+
+internal fun resolveSearchTypeForPagerPage(
+    page: Int,
+    tabs: List<SearchType> = resolveSearchFilterTabs()
+): SearchType {
+    return tabs.getOrNull(page) ?: SearchType.ALL
+}
+
+internal fun resolveSearchPagerPageForType(
+    currentType: SearchType,
+    tabs: List<SearchType> = resolveSearchFilterTabs()
+): Int {
+    return tabs.indexOf(currentType).takeIf { it >= 0 } ?: 0
+}
+
+internal fun resolveSearchResultPageState(
+    state: SearchUiState,
+    searchType: SearchType
+): SearchResultPageUiState {
+    return if (state.searchType == searchType) {
+        state.toCurrentSearchResultPage()
+    } else {
+        state.resultPages[searchType] ?: SearchResultPageUiState(query = state.submittedQuery)
+    }
+}
+
+internal fun resolveSearchFilterControls(
+    currentType: SearchType,
+    currentUpOrder: SearchUpOrder
+): List<SearchFilterControl> {
+    return when (currentType) {
+        // PiliPlus 综合页在筛选视频时切换到 video/type API。
+        SearchType.ALL,
+        SearchType.VIDEO -> listOf(
+            SearchFilterControl.VIDEO_ORDER,
+            SearchFilterControl.VIDEO_DURATION,
+            SearchFilterControl.VIDEO_TID
+        )
+        SearchType.UP -> buildList {
+            add(SearchFilterControl.UP_ORDER)
+            if (currentUpOrder != SearchUpOrder.DEFAULT) {
+                add(SearchFilterControl.UP_ORDER_SORT)
+            }
+            add(SearchFilterControl.UP_USER_TYPE)
+        }
+        SearchType.LIVE -> listOf(SearchFilterControl.LIVE_ORDER)
+        SearchType.BANGUMI,
+        SearchType.MEDIA_FT,
+        SearchType.LIVE_USER -> emptyList()
+        SearchType.ARTICLE -> listOf(
+            SearchFilterControl.ARTICLE_ORDER,
+            SearchFilterControl.ARTICLE_CATEGORY
+        )
+        SearchType.PHOTO -> listOf(
+            SearchFilterControl.PHOTO_ORDER,
+            SearchFilterControl.PHOTO_CATEGORY
+        )
+        SearchType.TOPIC -> emptyList()
+    }
+}
+
+internal fun resolveSearchResultLazyItemKey(
+    searchType: SearchType,
+    index: Int,
+    textKey: String = "",
+    numericKey: Long = 0L,
+    secondaryNumericKey: Long = 0L
+): String {
+    val normalizedTextKey = textKey.trim()
+    return when {
+        normalizedTextKey.isNotEmpty() -> "${searchType.value}:$index:text:$normalizedTextKey"
+        numericKey > 0L -> "${searchType.value}:$index:id:$numericKey"
+        secondaryNumericKey > 0L -> "${searchType.value}:$index:secondary:$secondaryNumericKey"
+        else -> "${searchType.value}:local:$index"
+    }
+}
+
+internal data class SearchHighlightedTextSegment(
+    val text: String,
+    val highlighted: Boolean
+)
+
+internal fun resolveSearchHighlightedTextSegments(rawTitle: String): List<SearchHighlightedTextSegment> {
+    if (rawTitle.isBlank()) return emptyList()
+    val segments = mutableListOf<SearchHighlightedTextSegment>()
+    val regex = Regex("<em[^>]*>(.*?)</em>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+    var cursor = 0
+    regex.findAll(rawTitle).forEach { match ->
+        if (match.range.first > cursor) {
+            val plain = decodeSearchHighlightedText(rawTitle.substring(cursor, match.range.first))
+            if (plain.isNotEmpty()) {
+                segments += SearchHighlightedTextSegment(plain, highlighted = false)
+            }
+        }
+        val highlighted = decodeSearchHighlightedText(match.groupValues.getOrElse(1) { "" })
+        if (highlighted.isNotEmpty()) {
+            segments += SearchHighlightedTextSegment(highlighted, highlighted = true)
+        }
+        cursor = match.range.last + 1
+    }
+    if (cursor < rawTitle.length) {
+        val plain = decodeSearchHighlightedText(rawTitle.substring(cursor))
+        if (plain.isNotEmpty()) {
+            segments += SearchHighlightedTextSegment(plain, highlighted = false)
+        }
+    }
+    return segments
+}
+
+private fun decodeSearchHighlightedText(raw: String): String {
+    return HtmlEntityUtils.unescape(raw.replace(Regex("<.*?>"), ""))
+}
+
+internal data class SearchTypeTabLayoutSpec(
+    val horizontalSpacingDp: Int,
+    val verticalSpacingDp: Int,
+    val horizontalPaddingDp: Int,
+    val minHeightDp: Int,
+    val fontSizeSp: Int
+)
+
+internal fun resolveSearchTypeTabLayoutSpec(widthDp: Int): SearchTypeTabLayoutSpec {
+    return if (widthDp < 400) {
+        SearchTypeTabLayoutSpec(
+            horizontalSpacingDp = 6,
+            verticalSpacingDp = 6,
+            horizontalPaddingDp = 10,
+            minHeightDp = 36,
+            fontSizeSp = 13
+        )
+    } else {
+        SearchTypeTabLayoutSpec(
+            horizontalSpacingDp = 8,
+            verticalSpacingDp = 8,
+            horizontalPaddingDp = 16,
+            minHeightDp = 40,
+            fontSizeSp = 14
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
+@Composable
+fun SearchScreen(
+    viewModel: SearchViewModel = viewModel(),
+    userFace: String = "",
+    initialKeyword: String = "",
+    onInitialKeywordConsumed: (String) -> Unit = {},
+    onBack: () -> Unit,
+    onOpenTrending: () -> Unit,
+    onNavigateSearchTarget: (BilibiliNavigationTarget) -> Boolean,
+    onOpenSearchLink: (String) -> Unit,
+    onVideoClick: (String, Long, String, Boolean) -> Unit,
+    onWebClick: (String, String) -> Unit,
+    onUpClick: (Long) -> Unit,  //  点击UP主跳转到空间
+    onBangumiClick: (Long) -> Unit, //  点击番剧/影视跳转详情
+    onCheeseClick: ((Long, Long) -> Unit)? = null, // 点击课堂跳转
+    onLiveClick: (Long, String, String) -> Unit, // [新增] 直播点击
+    onTopicClick: (Long) -> Unit,
+    onArticleClick: (Long, String) -> Unit,
+    onAvatarClick: () -> Unit,
+    entryMotionSource: SearchEntryMotionSource = SearchEntryMotionSource.NONE,
+    entryMotionKey: Int = 0,
+    onEntryMotionConsumed: (Int) -> Unit = {},
+    isReturningFromVideoDetail: Boolean = false,
+    isQuickReturningFromVideoDetail: Boolean = false,
+    onVideoDetailReturnAnimationConsumed: () -> Unit = {},
+    onUpResultClick: ((Long, String) -> Unit)? = null,
+    onBangumiResultClick: ((Long, String) -> Unit)? = null,
+    backEnabled: Boolean = true,
+) {
+    val topChromePolicy = rememberAppTopChromePolicy()
+    val semanticVisualPolicy = rememberAppSemanticVisualPolicy()
+    val contentCardSurfaceSpec = rememberContentCardSurfaceSpec()
+    val backToTopButtonEnabled = rememberBackToTopButtonEnabled()
+    val searchChromeSpec = remember(topChromePolicy) { resolveSearchChromeVisualSpec(topChromePolicy) }
+    val searchState = viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery = remember(searchState) { derivedStateOf { searchState.value.query } }
+    val state by rememberSearchScreenState(searchState)
+    // The editable draft is authoritative. VM query is only its search/suggestion projection,
+    // never a value to replay into an active IME session.
+    val searchInputState = androidx.compose.foundation.text.input.rememberTextFieldState(
+        initialText = viewModel.uiState.value.query
+    )
+    val listLayout = rememberVideoListLayoutControl()
+    // Entry-scoped: consuming the initial keyword or returning from a detail must not add a landing.
+    val openedWithKeyword = rememberSaveable { initialKeyword.isNotBlank() }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val configuration = LocalConfiguration.current
+    val windowSizeClass = LocalWindowSizeClass.current
+    var startupSettled by remember { mutableStateOf(false) }
+    var searchFieldFocused by remember { mutableStateOf(false) }
+    var retainSearchImeAfterClear by remember { mutableStateOf(false) }
+    var searchQueryClearedAtElapsedMs by remember { mutableLongStateOf(-1L) }
+    // Startup autofocus is one-shot; returning from results owns its explicit edit-context restore.
+    var autoFocusConsumed by rememberSaveable { mutableStateOf(false) }
+    var previousShowResults by rememberSaveable { mutableStateOf(false) }
+    var restoreLandingFocusOnBack by rememberSaveable { mutableStateOf(false) }
+    var pendingLandingFocusRestore by remember { mutableStateOf(false) }
+    val searchLayoutPolicy = remember(configuration.screenWidthDp) {
+        resolveSearchLayoutPolicy(
+            widthDp = configuration.screenWidthDp
+        )
+    }
+
+    //  自动聚焦搜索框
+    val searchFocusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+
+    // 1. 滚动状态监听 (用于列表)
+    val historyListState = rememberLazyListState()
+    val resultStateKey = remember(state.searchSessionId, state.searchType) {
+        state.searchSessionId to state.searchType
+    }
+    val resultGridState = rememberSaveable(resultStateKey, saver = app.bilipai.core.ui.CompatibleStaggeredGridStateSaver) {
+        app.bilipai.core.ui.createCompatibleStaggeredGridState()
+    }
+    val resultListState = rememberSaveable(resultStateKey, saver = LazyListState.Saver) {
+        LazyListState()
+    }
+    // A fresh SearchScreen entry starts at the top. Keep this non-saveable so leaving
+    // search and opening it again does not inherit the previous result position.
+    var lastResetSearchSessionId by remember { mutableLongStateOf(0L) }
+    val shouldShowBackToTop by remember(
+        state.showResults,
+        state.isSearching,
+        state.searchType,
+        resultGridState,
+        resultListState
+    ) {
+        derivedStateOf {
+            state.showResults &&
+                !state.isSearching &&
+                if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                    shouldShowSearchBackToTop(
+                        firstVisibleItemIndex = resultGridState.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = resultGridState.firstVisibleItemScrollOffset
+                    )
+                } else {
+                    shouldShowSearchBackToTop(
+                        firstVisibleItemIndex = resultListState.firstVisibleItemIndex,
+                        firstVisibleItemScrollOffset = resultListState.firstVisibleItemScrollOffset
+                    )
+                }
+        }
+    }
+
+    LaunchedEffect(resultStateKey, state.showResults) {
+        if (!shouldResetSearchResultScroll(
+                searchSessionId = state.searchSessionId,
+                showResults = state.showResults,
+                lastResetSessionId = lastResetSearchSessionId,
+                isReturningFromVideoDetail = isReturningFromVideoDetail,
+            )
+        ) {
+            if (isReturningFromVideoDetail && state.showResults && state.searchSessionId > 0L) {
+                lastResetSearchSessionId = state.searchSessionId
+            }
+            return@LaunchedEffect
+        }
+        resultListState.scrollToItem(0)
+        resultGridState.scrollToItem(0)
+        lastResetSearchSessionId = state.searchSessionId
+    }
+
+    // ✨ Haze State
+    val hazeState = rememberRecoverableHazeState()
+
+    // 2. 顶部避让高度计算
+    val density = LocalDensity.current
+    val statusBarHeight = WindowInsets.statusBars.getTop(density).let { with(density) { it.toDp() } }
+    val inputHeightDp = rememberSearchInputHeightDp(searchChromeSpec.inputHeightDp)
+    val topBarHeight = resolveSearchTopBarRowMinHeightDp(inputHeightDp).dp
+    val contentTopPadding = statusBarHeight + topBarHeight
+
+    //  读取动画设置开关
+    val context = LocalContext.current
+    val searchHintEnabled by remember(context) {
+        app.bilipai.core.store.SearchHintSettingsStore.isEnabled(context)
+    }.collectAsStateWithLifecycle(initialValue = true)
+    val displayedSearchHint = state.defaultSearchHint.takeIf { searchHintEnabled }.orEmpty()
+    val suggestedSearchKeyword = state.defaultSearchKeyword.takeIf { searchHintEnabled }.orEmpty()
+    val scope = rememberCoroutineScope()
+    val savedSearchFilterTabOrder by SettingsManager
+        .getSearchFilterTabOrder(context)
+        .collectAsStateWithLifecycle(
+            initialValue = defaultSearchFilterTabOrder.map { it.value }
+        )
+    val searchTabs = remember(savedSearchFilterTabOrder) {
+        resolveSearchFilterTabs(savedSearchFilterTabOrder)
+    }
+    val searchPagerState = rememberPagerState(
+        initialPage = resolveSearchPagerPageForType(state.searchType, searchTabs),
+        pageCount = { searchTabs.size }
+    )
+    var scrollToTopSearchType by remember { mutableStateOf<SearchType?>(null) }
+    var scrollToTopRequestId by remember { mutableIntStateOf(0) }
+    val deviceUiProfile = remember(windowSizeClass.widthSizeClass) {
+        resolveDeviceUiProfile(
+            widthSizeClass = windowSizeClass.widthSizeClass
+        )
+    }
+    val cardAnimationEnabled by SettingsManager.getCardAnimationEnabled(context).collectAsStateWithLifecycle(initialValue = true)
+    val homeDurationStyle by SettingsManager
+        .getHomeDurationStyle(context)
+        .collectAsStateWithLifecycle(initialValue = HomeDurationStyle.OUTSIDE_COVER)
+    val compactVideoStatsOnCover by SettingsManager
+        .getCompactVideoStatsOnCover(context)
+        .collectAsStateWithLifecycle(initialValue = false)
+    val showHotSection by SettingsManager.getSearchLandingSectionVisible(context, 0).collectAsStateWithLifecycle(initialValue = true)
+    val showHistorySection by SettingsManager.getSearchLandingSectionVisible(context, 1).collectAsStateWithLifecycle(initialValue = true)
+    val showDiscoverSection by SettingsManager.getSearchLandingSectionVisible(context, 2).collectAsStateWithLifecycle(initialValue = true)
+    val hotSearchEnabled by SettingsManager.getSearchHotSectionEnabled(context).collectAsStateWithLifecycle(initialValue = true)
+    val discoverSectionEnabled by SettingsManager.getSearchDiscoverSectionEnabled(context).collectAsStateWithLifecycle(initialValue = true)
+    val appThemeConfig = app.bilipai.core.ui.LocalAppThemeConfig.current
+    val androidNativeLiquidGlassEnabled = appThemeConfig.liquidGlassEnabled
+    val effectiveLiquidGlassEnabled = rememberAppChromeLiquidGlassEnabled(
+        androidNativeEnabled = androidNativeLiquidGlassEnabled,
+    )
+    val headerBlurEnabled = appThemeConfig.headerBlurEnabled
+    val progressiveTopBlurEnabled = appThemeConfig.progressiveTopBlurEnabled
+    val bottomBarBlurEnabled = appThemeConfig.bottomBarBlurEnabled
+    val cardMotionTier = resolveEffectiveMotionTier(
+        baseTier = deviceUiProfile.motionTier,
+        animationEnabled = cardAnimationEnabled
+    )
+    val searchCardBlurEnabled = remember(headerBlurEnabled, bottomBarBlurEnabled) {
+        resolveSearchCardBlurEnabled(
+            headerBlurEnabled = headerBlurEnabled,
+            bottomBarBlurEnabled = bottomBarBlurEnabled
+        )
+    }
+    val videoCardAppearance = remember(
+        effectiveLiquidGlassEnabled,
+        searchCardBlurEnabled,
+    ) {
+        resolveSearchVideoCardAppearance(
+            effectiveLiquidGlassEnabled = effectiveLiquidGlassEnabled,
+            blurEnabled = searchCardBlurEnabled,
+            showHomeCoverGlassBadges = false,
+            showHomeInfoGlassBadges = false,
+        )
+    }
+    val genericResultCardAppearance = remember(
+        effectiveLiquidGlassEnabled,
+        semanticVisualPolicy.supportsIndependentLiquidGlass,
+        contentCardSurfaceSpec.tonalElevationDp,
+    ) {
+        resolveSearchResultCardAppearance(
+            effectiveLiquidGlassEnabled = effectiveLiquidGlassEnabled,
+            supportsIndependentLiquidGlass = semanticVisualPolicy.supportsIndependentLiquidGlass,
+            tonalElevationDp = contentCardSurfaceSpec.tonalElevationDp.toInt(),
+        )
+    }
+    val cardTransitionEnabled by SettingsManager.getCardTransitionEnabled(context).collectAsStateWithLifecycle(initialValue = false)
+    val showOnlineCount by SettingsManager.getShowCardOnlineCount(context).collectAsStateWithLifecycle(initialValue = false)
+    val homeFeedCardStyle by SettingsManager
+        .getHomeFeedCardStyle(context)
+        .collectAsStateWithLifecycle(initialValue = HomeFeedCardStyle.BILIPAI)
+    val homeSettings by SettingsManager
+        .getHomeSettings(context)
+        .collectAsStateWithLifecycle(initialValue = HomeSettings())
+    val searchContentWidth = resolveSearchContentWidth(
+        isExpandedScreen = windowSizeClass.isExpandedScreen,
+        widthDp = windowSizeClass.widthDp
+    )
+    val videoGridColumns = remember(
+        searchContentWidth,
+        listLayout.singleColumn,
+        homeSettings.effectiveGridColumnCount,
+        homeSettings.effectiveGridColumnCountCompact,
+        homeSettings.homeFeedCardWidthPreset,
+        windowSizeClass.widthSizeClass
+    ) {
+        resolveSearchVideoGridColumns(
+            singleColumn = listLayout.singleColumn,
+            contentWidthDp = searchContentWidth.value.toInt(),
+            fixedColumnCount = app.bilipai.feature.home.resolveHomeFeedStoredColumnCount(
+                widthSizeClass = windowSizeClass.widthSizeClass,
+                compactColumnCount = homeSettings.effectiveGridColumnCountCompact,
+                defaultColumnCount = homeSettings.effectiveGridColumnCount,
+            ),
+            cardWidthPreset = homeSettings.homeFeedCardWidthPreset,
+            widthSizeClass = windowSizeClass.widthSizeClass
+        )
+    }
+    val cardLayout = remember(
+        homeFeedCardStyle,
+        videoGridColumns,
+        windowSizeClass.widthSizeClass,
+    ) {
+        resolveHomeFeedCardLayout(
+            style = homeFeedCardStyle,
+            gridColumns = videoGridColumns,
+            widthSizeClass = windowSizeClass.widthSizeClass,
+        )
+    }
+    val isSearchResultsScrolling by remember(historyListState, resultGridState, resultListState, searchPagerState) {
+        derivedStateOf {
+            historyListState.isScrollInProgress ||
+                resultGridState.isScrollInProgress ||
+                resultListState.isScrollInProgress ||
+                searchPagerState.isScrollInProgress
+        }
+    }
+    val searchHeaderCollapseMode = homeSettings.commonListHeaderCollapseMode
+    val isSearchCollapseEnabled = searchHeaderCollapseMode != CommonListHeaderCollapseMode.ALWAYS_VISIBLE
+    var searchTopBarHeightPx by remember { mutableIntStateOf(0) }
+    var searchHeaderOffsetPx by remember { mutableFloatStateOf(0f) }
+    var searchHeaderSettleJob by remember { mutableStateOf<Job?>(null) }
+    var searchHeaderSettleTargetPx by remember { mutableFloatStateOf(0f) }
+    val searchStatusBarHeightPx = with(density) {
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding().toPx()
+    }
+    val searchCollapseDistancePx = searchTopBarHeightPx.toFloat().coerceAtLeast(0f)
+    val searchHeaderSettleMotionSpec = AppMotionTokens.emphasizedSpec<Float>()
+
+    val isSearchResultsAtTop by remember(
+        state.showResults,
+        state.searchType,
+        resultGridState,
+        resultListState
+    ) {
+        derivedStateOf {
+            if (!state.showResults) {
+                true
+            } else if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                resultGridState.firstVisibleItemIndex == 0 && resultGridState.firstVisibleItemScrollOffset == 0
+            } else {
+                resultListState.firstVisibleItemIndex == 0 && resultListState.firstVisibleItemScrollOffset == 0
+            }
+        }
+    }
+
+    fun animateSearchHeaderOffsetTo(targetOffsetPx: Float) {
+        // 相同目标继续当前动画，避免回顶滚动和位置校正反复重启缓动。
+        if (searchHeaderSettleJob?.isActive == true && searchHeaderSettleTargetPx == targetOffsetPx) return
+        searchHeaderSettleJob?.cancel()
+        searchHeaderSettleJob = null
+        searchHeaderSettleTargetPx = targetOffsetPx
+        if (kotlin.math.abs(searchHeaderOffsetPx - targetOffsetPx) <= 0.5f) {
+            searchHeaderOffsetPx = targetOffsetPx
+            return
+        }
+        searchHeaderSettleJob = scope.launch {
+            animate(
+                initialValue = searchHeaderOffsetPx,
+                targetValue = targetOffsetPx,
+                animationSpec = searchHeaderSettleMotionSpec
+            ) { value, _ ->
+                searchHeaderOffsetPx = value
+            }
+        }.also { job ->
+            job.invokeOnCompletion {
+                if (searchHeaderSettleJob === job) {
+                    searchHeaderSettleJob = null
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(isSearchCollapseEnabled, isSearchResultsAtTop) {
+        if (!isSearchCollapseEnabled || isSearchResultsAtTop) {
+            animateSearchHeaderOffsetTo(0f)
+        }
+    }
+
+    LaunchedEffect(
+        searchHeaderCollapseMode, searchCollapseDistancePx, state.showResults, state.searchType,
+        resultGridState, resultListState,
+    ) {
+        snapshotFlow {
+            val index = if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                resultGridState.firstVisibleItemIndex
+            } else {
+                resultListState.firstVisibleItemIndex
+            }
+            val offset = if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                resultGridState.firstVisibleItemScrollOffset
+            } else {
+                resultListState.firstVisibleItemScrollOffset
+            }
+            Triple(index, offset, isSearchResultsScrolling)
+        }.collect { (index, offset, scrolling) ->
+            if (!scrolling) {
+                animateSearchHeaderOffsetTo(resolveCommonListHeaderOffsetForSettledContent(
+                    firstVisibleItemIndex = if (state.showResults) index else 0,
+                    firstVisibleItemScrollOffset = if (state.showResults) offset else 0,
+                    maxCollapsePx = searchCollapseDistancePx,
+                    mode = searchHeaderCollapseMode,
+                ))
+            }
+        }
+    }
+    val searchHeaderScrollConnection = remember(searchHeaderCollapseMode, searchCollapseDistancePx, isSearchResultsAtTop) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (!isSearchCollapseEnabled || searchCollapseDistancePx <= 0f) return Offset.Zero
+                if (kotlin.math.abs(available.y) < 0.5f) return Offset.Zero
+                if (kotlin.math.abs(available.y) < kotlin.math.abs(available.x)) return Offset.Zero
+                // 到顶后的剩余滚动交给展开动画，避免直接归零或被连续回调打断。
+                if (isSearchResultsAtTop && available.y > 0f) {
+                    animateSearchHeaderOffsetTo(0f)
+                    return Offset.Zero
+                }
+                searchHeaderSettleJob?.cancel()
+                searchHeaderSettleJob = null
+                searchHeaderOffsetPx = resolveCommonListHeaderOffsetAfterContentScroll(
+                    currentOffsetPx = searchHeaderOffsetPx,
+                    contentConsumedDeltaYPx = available.y,
+                    maxCollapsePx = searchCollapseDistancePx,
+                    isAtTop = isSearchResultsAtTop,
+                    mode = searchHeaderCollapseMode,
+                )
+                return Offset.Zero
+            }
+        }
+    }
+    val searchMotionBudget by remember(state.hasQuery, state.isSearching, isSearchResultsScrolling) {
+        derivedStateOf {
+            resolveSearchMotionBudget(
+                hasQuery = state.hasQuery,
+                isSearching = state.isSearching,
+                isScrolling = isSearchResultsScrolling
+            )
+        }
+    }
+    val effectiveSearchMotionBudget = remember(startupSettled, searchMotionBudget) {
+        resolveEffectiveSearchMotionBudget(
+            startupSettled = startupSettled,
+            baseBudget = searchMotionBudget
+        )
+    }
+    val entryMotionSpec = resolveSearchEntryMotionSpec(
+        source = entryMotionSource,
+        reducedMotionBudget = searchMotionBudget == SearchMotionBudget.REDUCED
+    )
+    val exitMotionSpec = remember(entryMotionKey, configuration.screenHeightDp) {
+        resolveSearchExitMotionSpec(
+            entrySpec = entryMotionSpec,
+            screenHeightDp = configuration.screenHeightDp,
+        )
+    }
+    var exitMotionKey by remember { mutableIntStateOf(0) }
+    var exitMotionInProgress by remember { mutableStateOf(false) }
+    val exitContentAlpha by animateFloatAsState(
+        // Keep the destination visibly populated until navigation hands off to Home. Fading to
+        // zero here leaves only Search's opaque scaffold background for the remainder of the
+        // search-field morph, which reads as a white flash.
+        targetValue = if (exitMotionInProgress) 0.72f else 1f,
+        animationSpec = continuityTween(220),
+        label = "searchExitContentAlpha",
+    )
+    val searchHazeAvailable = shouldAllowRenderEffectBackedHazeEffect(android.os.Build.VERSION.SDK_INT) &&
+        recoverableBlurEnabled(hazeState) &&
+        !app.bilipai.core.ui.performance.isLowBlurBudgetForced()
+    val searchHazeEnabled = searchHazeAvailable && shouldEnableSearchHazeSource(
+        isSearching = state.isSearching,
+        startupSettled = startupSettled
+    )
+    val effectiveCardTransitionEnabled = resolveEffectiveSearchCardTransitionEnabled(
+        cardTransitionEnabled = cardTransitionEnabled,
+        motionBudget = effectiveSearchMotionBudget,
+        isReturningFromVideoDetail = isReturningFromVideoDetail
+    )
+    val returnAnimationSuppressionDurationMs = resolveReturnAnimationSuppressionDurationMs(
+        isTabletLayout = windowSizeClass.isTablet,
+        cardAnimationEnabled = cardAnimationEnabled,
+        cardTransitionEnabled = cardTransitionEnabled,
+    )
+    LaunchedEffect(returnAnimationSuppressionDurationMs, isReturningFromVideoDetail) {
+        if (!isReturningFromVideoDetail) return@LaunchedEffect
+        kotlinx.coroutines.delay(returnAnimationSuppressionDurationMs)
+        onVideoDetailReturnAnimationConsumed()
+    }
+    val forceLowBudgetSearchHeaderBlur = remember(state.isSearching, isSearchResultsScrolling) {
+        shouldForceLowBudgetSearchHeaderBlur(
+            isSearching = state.isSearching,
+            isScrollingResults = isSearchResultsScrolling
+        )
+    }
+    val globalWallpaperVisible = LocalGlobalWallpaperBackdropVisible.current
+    val shouldUseSearchTopBarBlur = shouldUseSearchTopBarHeaderBlur(
+        headerBlurRequested = headerBlurEnabled,
+        hazeSourceEnabled = searchHazeEnabled,
+        globalWallpaperVisible = globalWallpaperVisible
+    )
+    val searchUsesSolidChrome = shouldUseSearchSolidTopChrome(
+        headerBlurRequested = headerBlurEnabled,
+        progressiveBlurRequested = progressiveTopBlurEnabled,
+    )
+    val searchTopBarHeaderColor = resolveSearchTopBarHeaderColor(
+        // Keep the top chrome on the same semantic plane as the Miuix list scaffold.
+        // Using Material surface here made the header black while the list stayed gray.
+        surfaceColor = AppSurfaceTokens.groupedListContainer(),
+        backgroundAlpha = if (searchUsesSolidChrome) 1f else 0.96f,
+        globalWallpaperVisible = globalWallpaperVisible,
+        useHeaderBlur = shouldUseSearchTopBarBlur
+    )
+    val dismissSearchKeyboardAndFocus = {
+        keyboardController?.hide()
+        focusManager.clearFocus(force = true)
+        searchFieldFocused = false
+        autoFocusConsumed = true
+    }
+    val updateSearchQuery: (String) -> Unit = { query ->
+        if (
+            shouldRetainSearchImeWhenQueryCleared(
+                fieldFocused = searchFieldFocused,
+                previousQuery = searchState.value.query,
+                newQuery = query,
+            )
+        ) {
+            retainSearchImeAfterClear = true
+            searchQueryClearedAtElapsedMs = android.os.SystemClock.elapsedRealtime()
+        }
+        viewModel.onQueryChange(query)
+    }
+    val latestUpdateSearchQuery by rememberUpdatedState(updateSearchQuery)
+    LaunchedEffect(searchInputState) {
+        snapshotFlow { searchInputState.text.toString() }.collect { query ->
+            if (query != viewModel.uiState.value.query) latestUpdateSearchQuery(query)
+        }
+    }
+    // Clear is an edit action, including when invoked from an unfocused result field.
+    val clearSearchQuery = {
+        pendingLandingFocusRestore = true
+        searchQueryClearedAtElapsedMs = android.os.SystemClock.elapsedRealtime()
+        if (state.showResults) viewModel.exitResultsToLanding()
+        searchInputState.setTextAndPlaceCursorAtEnd("")
+        updateSearchQuery("")
+    }
+    LaunchedEffect(retainSearchImeAfterClear) {
+        if (!retainSearchImeAfterClear) return@LaunchedEffect
+        androidx.compose.runtime.withFrameNanos { }
+        runCatching { searchFocusRequester.requestFocus() }
+        keyboardController?.show()
+        retainSearchImeAfterClear = false
+    }
+    val submitSearch: (String) -> Unit = submitSearch@{ keyword ->
+        when (val action = resolveSearchSubmitAction(keyword)) {
+            SearchSubmitAction.Ignore -> return@submitSearch
+            is SearchSubmitAction.OpenLink -> {
+                viewModel.dismissSuggestions()
+                onOpenSearchLink(action.url)
+            }
+            is SearchSubmitAction.OpenSearch -> {
+                if (!state.showResults) restoreLandingFocusOnBack = searchFieldFocused
+                if (searchInputState.text.toString() != action.keyword) {
+                    searchInputState.setTextAndPlaceCursorAtEnd(action.keyword)
+                }
+                viewModel.search(action.keyword)
+            }
+            is SearchSubmitAction.OpenNativeTarget -> {
+                viewModel.dismissSuggestions()
+                if (!onNavigateSearchTarget(action.target)) {
+                    if (!state.showResults) restoreLandingFocusOnBack = searchFieldFocused
+                    val normalizedKeyword = keyword.trim()
+                    if (searchInputState.text.toString() != normalizedKeyword) {
+                        searchInputState.setTextAndPlaceCursorAtEnd(normalizedKeyword)
+                    }
+                    viewModel.search(keyword)
+                }
+            }
+        }
+        dismissSearchKeyboardAndFocus()
+    }
+
+    val handleSearchBack = {
+        when (
+            resolveSearchBackAction(
+                showResults = state.showResults,
+                suggestionsVisible = searchState.value.suggestions.isNotEmpty(),
+                searchFieldFocused = searchFieldFocused,
+                openedWithKeyword = openedWithKeyword,
+            )
+        ) {
+            SearchBackAction.RETURN_TO_LANDING -> {
+                pendingLandingFocusRestore = restoreLandingFocusOnBack || searchFieldFocused
+                viewModel.exitResultsToLanding()
+                if (pendingLandingFocusRestore) viewModel.onQueryChange(searchInputState.text.toString())
+                else dismissSearchKeyboardAndFocus()
+            }
+            SearchBackAction.LEAVE_SEARCH -> {
+                dismissSearchKeyboardAndFocus()
+                if (exitMotionSpec != null && !exitMotionInProgress) {
+                    exitMotionInProgress = true
+                    exitMotionKey += 1
+                } else if (!exitMotionInProgress) {
+                    onBack()
+                }
+            }
+        }
+    }
+
+    BackHandler(enabled = backEnabled, onBack = handleSearchBack)
+
+    // Entering results must drop focus so the keyboard cannot reappear.
+    LaunchedEffect(state.showResults) {
+        if (shouldClearSearchFocusWhenShowingResults(
+                showResults = state.showResults,
+                previousShowResults = previousShowResults
+            )
+        ) {
+            dismissSearchKeyboardAndFocus()
+        }
+        previousShowResults = state.showResults
+    }
+
+    LaunchedEffect(state.showResults, pendingLandingFocusRestore) {
+        if (state.showResults || !pendingLandingFocusRestore) return@LaunchedEffect
+        // The same movable input keeps selection; wait until it is placed on the landing surface.
+        androidx.compose.runtime.withFrameNanos { }
+        if (runCatching { searchFocusRequester.requestFocus() }.isSuccess) {
+            keyboardController?.show()
+        }
+        pendingLandingFocusRestore = false
+    }
+
+    //  [埋点] 页面浏览追踪
+    LaunchedEffect(Unit) {
+        app.bilipai.core.util.AnalyticsHelper.logScreenView("SearchScreen")
+    }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(140)
+        startupSettled = true
+    }
+
+    LaunchedEffect(state.searchType, searchTabs) {
+        val targetPage = resolveSearchPagerPageForType(state.searchType, searchTabs)
+        // Hard-settle only when the pager is fully idle. Mid-flight corrections would snap the
+        // tab indicator while animatePagerSelection is still gliding.
+        if (
+            !searchPagerState.isScrollInProgress &&
+            kotlin.math.abs(searchPagerState.currentPageOffsetFraction) <= 0.001f &&
+            searchPagerState.currentPage != targetPage
+        ) {
+            searchPagerState.scrollToPage(targetPage)
+        }
+    }
+
+    LaunchedEffect(searchPagerState, searchTabs, state.showResults) {
+        snapshotFlow { searchPagerState.settledPage }
+            .collect { page ->
+                if (state.showResults) {
+                    viewModel.setSearchType(resolveSearchTypeForPagerPage(page, searchTabs))
+                }
+            }
+    }
+
+    LaunchedEffect(startupSettled, state.showResults, state.hasQuery) {
+        if (shouldBootstrapSearchLandingData(
+                startupSettled = startupSettled,
+                showResults = state.showResults,
+                query = searchState.value.query
+            )
+        ) {
+            viewModel.ensureLandingBootstrap()
+        }
+    }
+
+    LaunchedEffect(initialKeyword) {
+        val normalizedKeyword = initialKeyword.trim()
+        if (normalizedKeyword.isNotBlank()) {
+            if (shouldApplyInitialSearchKeyword(normalizedKeyword, searchState.value.query, state.showResults)) {
+                searchInputState.setTextAndPlaceCursorAtEnd(normalizedKeyword)
+                viewModel.onQueryChange(normalizedKeyword)
+                submitSearch(normalizedKeyword)
+            }
+            onInitialKeywordConsumed(normalizedKeyword)
+        }
+    }
+
+    val searchTopBarCallbacks = SearchTopBarCallbacks(
+        onBack = handleSearchBack,
+        onSearch = submitSearch,
+        onClearQuery = clearSearchQuery,
+        onFocusChanged = { focused ->
+            searchFieldFocused = focused
+            if (focused) {
+                autoFocusConsumed = true
+                if (state.showResults) {
+                    pendingLandingFocusRestore = true
+                    viewModel.exitResultsToLanding()
+                    viewModel.onQueryChange(searchInputState.text.toString())
+                }
+            }
+        },
+        onEntryMotionFinished = onEntryMotionConsumed,
+        onExitMotionFinished = { completedKey ->
+            if (exitMotionInProgress && completedKey == exitMotionKey) {
+                onBack()
+            }
+        },
+        isScrollInProgressProvider = { isSearchResultsScrolling },
+    )
+    // One BasicTextField moves between the results scaffold and the landing overlay.
+    // Call sites pass the same edit state, placement, trailing actions, and callbacks so
+    // this remembered content does not close over the first composition's state.
+    val searchTopBarContent = remember {
+        movableContentOf<
+            androidx.compose.foundation.text.input.TextFieldState,
+            SearchTopBarPlacement,
+            (@Composable RowScope.() -> Unit)?,
+            SearchTopBarCallbacks,
+        > { inputState, placement, trailingActions, callbacks ->
+            SearchTopBar(
+                textFieldState = inputState,
+                onBack = callbacks.onBack,
+                onSearch = callbacks.onSearch,
+                onClearQuery = callbacks.onClearQuery,
+                onFocusChanged = callbacks.onFocusChanged,
+                focusRequester = placement.focusRequester,
+                placeholder = placement.placeholder,
+                suggestedKeyword = placement.suggestedKeyword,
+                autoFocusEnabled = placement.autoFocusEnabled,
+                reducedMotionBudget = placement.reducedMotionBudget,
+                entryMotionSpec = placement.entryMotionSpec,
+                entryMotionKey = placement.entryMotionKey,
+                onEntryMotionFinished = callbacks.onEntryMotionFinished,
+                exitMotionSpec = placement.exitMotionSpec,
+                exitMotionKey = placement.exitMotionKey,
+                onExitMotionFinished = callbacks.onExitMotionFinished,
+                isScrollInProgressProvider = callbacks.isScrollInProgressProvider,
+                liquidGlassEnabled = placement.liquidGlassEnabled,
+                miuixBackdrop = placement.miuixBackdrop,
+                includeStatusBarPadding = placement.includeStatusBarPadding,
+                trailingActions = trailingActions,
+                modifier = placement.modifier,
+            )
+        }
+    }
+
+    val resultBottomPadding = resolveBottomSafeAreaPadding(
+        navigationBarsBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+        extraBottomPadding = 16.dp
+    ) + if (app.bilipai.core.ui.rememberNowPlayingBarOverlayVisible()) {
+        // 听视频小横条悬浮时统一上浮避让（与首页/稍后再看一致）
+        app.bilipai.core.ui.NowPlayingBarOverlayAvoidancePadding
+    } else {
+        0.dp
+    }
+
+    AppScaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
+        //  移除 bottomBar，搜索栏现在位于顶部 Box 中
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .globalWallpaperAwareBackground()
+                .then(
+                    if (searchUsesSolidChrome) {
+                        Modifier.background(AppSurfaceTokens.groupedListContainer())
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(padding)
+        ) {
+            val searchChromeSource = if (
+                shouldKeepSearchChromeBackdropSource(
+                    progressiveTopBlurEnabled = progressiveTopBlurEnabled,
+                    liquidGlassEnabled = effectiveLiquidGlassEnabled,
+                )
+            ) {
+                app.bilipai.core.ui.blur.rememberChromeBackdropSource()
+            } else {
+                null
+            }
+            val searchChromeBackdrop = searchChromeSource?.takeIf { it.isReady }?.backdrop
+            val immersiveSearchChrome = shouldUseBiliPaiProgressiveTopBlur(
+                enabled = progressiveTopBlurEnabled && !headerBlurEnabled,
+                hasBackdrop = searchChromeBackdrop != null,
+            ) && !app.bilipai.core.ui.performance.isLowBlurBudgetForced()
+            val searchFadeActive = appThemeConfig.progressiveTopFadeEnabled && !headerBlurEnabled
+            // --- 列表内容层 ---
+            if (state.showResults) {
+                AppScaffold(
+                    modifier = Modifier
+                        .responsiveContentWidth(maxWidth = searchContentWidth)
+                        .fillMaxSize()
+                        .nestedScroll(searchHeaderScrollConnection)
+                        .graphicsLayer { alpha = exitContentAlpha },
+                    containerColor = Color.Transparent,
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                    topBar = {
+                        val searchChromeSurface = app.bilipai.core.ui.globalWallpaperAwareChromeColor(
+                            AppSurfaceTokens.groupedListContainer()
+                        )
+                        // 分类与排序只采样列表；顶部控件额外采样它们的已渲染像素，避免自采样。
+                        val lowerChromeSource = if (effectiveLiquidGlassEnabled) {
+                            app.bilipai.core.ui.blur.rememberChromeBackdropSource()
+                        } else null
+                        val topControlContentBackdrop = if (searchChromeBackdrop != null && lowerChromeSource?.isReady == true) {
+                            app.bilipai.feature.home.components.liquid.rememberCombinedBackdrop(
+                                searchChromeBackdrop, lowerChromeSource.backdrop,
+                            )
+                        } else searchChromeBackdrop
+                        BiliPaiImmersiveTopBar(
+                            backdrop = searchChromeBackdrop,
+                            enabled = immersiveSearchChrome,
+                            headerBlurActive = shouldUseSearchTopBarBlur && !immersiveSearchChrome,
+                            surfaceColor = searchChromeSurface,
+                            iconSurfaceColor = if (immersiveSearchChrome || searchFadeActive) Color.Transparent
+                            else searchChromeSurface.copy(alpha = if (shouldUseSearchTopBarBlur) AppSurfaceTokens.FrostedScrimAlpha else searchChromeSurface.alpha),
+                            fadeEnabled = searchFadeActive,
+                            extendBelowBounds = false,
+                            modifier = Modifier.then(
+                                if (immersiveSearchChrome || searchFadeActive) {
+                                    Modifier.background(Color.Transparent)
+                                } else if (shouldUseSearchTopBarBlur) {
+                                    Modifier
+                                        .unifiedBlur(
+                                            hazeState = hazeState,
+                                            surfaceType = app.bilipai.core.ui.blur.BlurSurfaceType.HEADER,
+                                        )
+                                        .background(
+                                            searchChromeSurface
+                                                .copy(alpha = AppSurfaceTokens.FrostedScrimAlpha)
+                                        )
+                                } else {
+                                    Modifier.background(searchChromeSurface)
+                                }
+                            ),
+                        ) {
+                            val topControlBackdrop = app.bilipai.core.ui.blur.rememberSurfaceOverlayBackdrop(
+                                topControlContentBackdrop,
+                                app.bilipai.core.ui.components.LocalAppTopBarSurfaceColor.current,
+                            )
+                            val searchCollapseFraction = if (isSearchCollapseEnabled && searchCollapseDistancePx > 0f) {
+                                (-searchHeaderOffsetPx / searchCollapseDistancePx).coerceIn(0f, 1f)
+                            } else {
+                                0f
+                            }
+                            Layout(
+                                modifier = if (searchCollapseFraction > 0f) {
+                                    // Hide chrome above the status-bar boundary, but retain
+                                    // a halo below/alongside the header for elastic controls.
+                                    Modifier.drawWithContent {
+                                        val top = searchStatusBarHeightPx.coerceIn(0f, size.height)
+                                        if (size.height > top) {
+                                            val overflow = AppChromeSizeTokens.MinimumTouchTarget.toPx()
+                                            clipRect(
+                                                left = -overflow,
+                                                top = top,
+                                                right = size.width + overflow,
+                                                bottom = size.height + overflow,
+                                            ) { this@drawWithContent.drawContent() }
+                                        }
+                                    }
+                                } else Modifier,
+                                content = {
+                                    Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .onGloballyPositioned { coordinates ->
+                                                    if (coordinates.size.height > 0 && searchCollapseFraction <= 0.05f) {
+                                                        searchTopBarHeightPx = coordinates.size.height
+                                                    }
+                                                }
+                                        ) {
+                                            searchTopBarContent(
+                                                searchInputState,
+                                                SearchTopBarPlacement(
+                                                    focusRequester = searchFocusRequester,
+                                                    placeholder = displayedSearchHint.ifBlank { resolveSearchDefaultPlaceholder() },
+                                                    suggestedKeyword = suggestedSearchKeyword,
+                                                    autoFocusEnabled = false,
+                                                    reducedMotionBudget = effectiveSearchMotionBudget == SearchMotionBudget.REDUCED,
+                                                    entryMotionSpec = entryMotionSpec,
+                                                    entryMotionKey = entryMotionKey,
+                                                    exitMotionSpec = exitMotionSpec,
+                                                    exitMotionKey = exitMotionKey,
+                                                    liquidGlassEnabled = effectiveLiquidGlassEnabled,
+                                                    miuixBackdrop = topControlBackdrop,
+                                                    includeStatusBarPadding = false,
+                                                    // 返回、输入框和筛选共用前景层，拖拽越过行高时绘制在分类 dock 上方。
+                                                    // 只调整兄弟节点绘制顺序，玻璃、MD3 与 Miuix 均保留原有布局和触摸区域。
+                                                    modifier = Modifier.zIndex(1f),
+                                                ),
+                                                if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                                                    val videoFilters: @Composable RowScope.() -> Unit = {
+                                                        SearchVideoFilterActions(
+                                                            currentDurations = state.searchDurations,
+                                                            currentVideoTid = state.videoTid,
+                                                            currentPubTimeType = state.pubTimeType,
+                                                            currentPubBegin = state.pubBegin,
+                                                            currentPubEnd = state.pubEnd,
+                                                            miuixBackdrop = topControlBackdrop,
+                                                            onDurationSelect = { viewModel.setSearchDuration(it) },
+                                                            onVideoTidChange = { viewModel.setVideoTid(it) },
+                                                            onPubTimeTypeChange = { viewModel.setPubTimeType(it) },
+                                                            onCustomPubTimeRange = { begin, end ->
+                                                                viewModel.setCustomPubTimeRange(begin, end)
+                                                            }
+                                                        )
+                                                    }
+                                                    videoFilters
+                                                } else {
+                                                    null
+                                                },
+                                                searchTopBarCallbacks,
+                                            )
+                                            val lowerChromeContent: @Composable () -> Unit = {
+                                                //  搜索彩蛋消息横幅
+                                                val easterEggMsg = state.easterEggMessage
+                                                if (easterEggMsg != null) {
+                                                    val easterEggColors = resolveAccessibleContainerColors(
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        backgroundColor = MaterialTheme.colorScheme.surface,
+                                                        fallbackContentColors = listOf(
+                                                            AppContentColors.primaryText(),
+                                                            MaterialTheme.colorScheme.onBackground,
+                                                        ),
+                                                    )
+                                                    AppSurface(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                                                        color = easterEggColors.containerColor,
+                                                        shape = AppShapes.container(ContainerLevel.Card)
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                                            horizontalArrangement = Arrangement.Center,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            AppText(
+                                                                text = easterEggMsg,
+                                                                color = easterEggColors.contentColor,
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                fontWeight = FontWeight.Medium,
+                                                                maxLines = 2,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                SearchResultTypeTabRow(
+                                                    tabs = searchTabs,
+                                                    pagerState = searchPagerState,
+                                                    counts = state.searchTypeCounts,
+                                                    miuixBackdrop = searchChromeBackdrop,
+                                                    onTabClick = { page, type ->
+                                                        if (searchPagerState.currentPage == page && state.searchType == type) {
+                                                            scrollToTopSearchType = type
+                                                            scrollToTopRequestId += 1
+                                                            animateSearchHeaderOffsetTo(0f)
+                                                        } else {
+                                                            scope.launch { animatePagerSelection(searchPagerState, page) }
+                                                        }
+                                                    }
+                                                )
+                                                val showStableFilterBar = resolveSearchFilterControls(
+                                                    currentType = state.searchType,
+                                                    currentUpOrder = state.upOrder
+                                                ).isNotEmpty()
+                                                AnimatedVisibility(
+                                                    visible = showStableFilterBar,
+                                                    enter = fadeIn(animationSpec = tween(90)),
+                                                    exit = fadeOut(animationSpec = tween(70))
+                                                ) {
+                                                    if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                                                        SearchVideoFilterBar(
+                                                            currentOrder = state.searchOrder,
+                                                            miuixBackdrop = searchChromeBackdrop,
+                                                            onOrderChange = { viewModel.setSearchOrder(it) },
+                                                        )
+                                                    } else {
+                                                        SearchFilterBar(
+                                                            currentType = state.searchType,
+                                                            currentOrder = state.searchOrder,
+                                                            currentDurations = state.searchDurations,
+                                                            currentVideoTid = state.videoTid,
+                                                            currentUpOrder = state.upOrder,
+                                                            currentUpOrderSort = state.upOrderSort,
+                                                            currentUpUserType = state.upUserType,
+                                                            currentLiveOrder = state.liveOrder,
+                                                            currentArticleOrder = state.articleOrder,
+                                                            currentArticleCategory = state.articleCategory,
+                                                            currentPhotoOrder = state.photoOrder,
+                                                            currentPhotoCategory = state.photoCategory,
+                                                            onOrderChange = { viewModel.setSearchOrder(it) },
+                                                            onDurationToggle = { viewModel.toggleSearchDuration(it) },
+                                                            onVideoTidChange = { viewModel.setVideoTid(it) },
+                                                            onUpOrderChange = { viewModel.setUpOrder(it) },
+                                                            onUpOrderSortChange = { viewModel.setUpOrderSort(it) },
+                                                            onUpUserTypeChange = { viewModel.setUpUserType(it) },
+                                                            onLiveOrderChange = { viewModel.setLiveOrder(it) },
+                                                            onArticleOrderChange = viewModel::setArticleOrder,
+                                                            onArticleCategoryChange = viewModel::setArticleCategory,
+                                                            onPhotoOrderChange = viewModel::setPhotoOrder,
+                                                            onPhotoCategoryChange = viewModel::setPhotoCategory
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            if (lowerChromeSource != null) {
+                                                Column(modifier = lowerChromeSource.modifier) { lowerChromeContent() }
+                                            } else {
+                                                lowerChromeContent()
+                                            }
+                                        }
+                                }
+                            ) { measurables, constraints ->
+                                val placeables = measurables.map { it.measure(constraints) }
+                                val width = placeables.maxOfOrNull { it.width }?.coerceIn(constraints.minWidth, constraints.maxWidth)
+                                    ?: constraints.minWidth
+                                val topInset = placeables.firstOrNull()?.height ?: 0
+                                val offset = if (isSearchCollapseEnabled) searchHeaderOffsetPx.toInt() else 0
+                                val height = (placeables.sumOf { it.height } + offset)
+                                    .coerceIn(topInset.coerceAtLeast(constraints.minHeight), constraints.maxHeight)
+                                layout(width, height) {
+                                    placeables.firstOrNull()?.placeRelative(0, 0)
+                                    var y = topInset + offset
+                                    placeables.drop(1).forEach { placeable ->
+                                        placeable.placeRelative(0, y)
+                                        y += placeable.height
+                                    }
+                                }
+                            }
+                        }
+                    },
+                ) { resultChromePadding ->
+                    val resultTopPadding = resultChromePadding.calculateTopPadding()
+                    app.bilipai.core.ui.adaptive.AppHingeSafeContent(
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        val requestedSkeletonColumns = videoGridColumns
+                        val videoGridColumns = if (
+                            app.bilipai.core.util.LocalAppWindowAdaptiveInfo.current.shouldAvoidHinge
+                        ) {
+                            app.bilipai.core.ui.adaptive.resolveHingeSafeFeedColumns(
+                                requestedSkeletonColumns, maxWidth.value,
+                                homeSettings.homeFeedCardWidthPreset.minCardWidthDp ?: 180,
+                            )
+                        } else requestedSkeletonColumns
+                        HorizontalPager(
+                            state = searchPagerState,
+                            userScrollEnabled = true,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(searchChromeSource?.modifier ?: Modifier)
+                                .globalWallpaperAwareBackground(),
+                            beyondViewportPageCount = 1,
+                            key = { page -> resolveSearchTypeForPagerPage(page, searchTabs) },
+                        ) { page ->
+                            val targetSearchType = resolveSearchTypeForPagerPage(page, searchTabs)
+                            SearchResultStateHost(
+                                source = searchState,
+                                searchType = targetSearchType,
+                                modifier = Modifier.fillMaxSize(),
+                            ) { pageResultState ->
+                                SearchResultPageContent(
+                                    pageResultState = pageResultState,
+                                    targetSearchType = targetSearchType,
+                                    activeSearchType = state.searchType,
+                                    searchSessionId = state.searchSessionId,
+                                    isPageVisible = { searchPagerState.currentPage == page },
+                                    resultGridState = resultGridState,
+                                    resultListState = resultListState,
+                                    scrollToTopSearchType = scrollToTopSearchType,
+                                    scrollToTopRequestId = scrollToTopRequestId,
+                                    appearance = SearchResultPageAppearance(
+                                        singleColumn = listLayout.singleColumn,
+                                        searchLayoutPolicy = searchLayoutPolicy,
+                                        cardAnimationEnabled = cardAnimationEnabled,
+                                        homeDurationStyle = homeDurationStyle,
+                                        compactVideoStatsOnCover = compactVideoStatsOnCover,
+                                        cardMotionTier = cardMotionTier,
+                                        videoCardAppearance = videoCardAppearance,
+                                        genericResultCardAppearance = genericResultCardAppearance,
+                                        showOnlineCount = showOnlineCount,
+                                        homeFeedCardStyle = homeFeedCardStyle,
+                                        homeSettings = homeSettings,
+                                        videoGridColumns = videoGridColumns,
+                                        cardLayout = cardLayout,
+                                        searchHazeEnabled = searchHazeEnabled,
+                                        effectiveCardTransitionEnabled = effectiveCardTransitionEnabled,
+                                        isReturningFromVideoDetail = isReturningFromVideoDetail,
+                                        isQuickReturningFromVideoDetail = isQuickReturningFromVideoDetail,
+                                    ),
+                                    hazeState = hazeState,
+                                    resultTopPadding = resultTopPadding,
+                                    resultBottomPadding = resultBottomPadding,
+                                    onLoadMore = viewModel::loadMoreResults,
+                                    onRetrySearch = { viewModel.search(it, updateDraft = false) },
+                                    onWatchLater = viewModel::addToWatchLater,
+                                    onNavigateSearchTarget = onNavigateSearchTarget,
+                                    onVideoClick = onVideoClick,
+                                    onWebClick = onWebClick,
+                                    onUpClick = onUpClick,
+                                    onBangumiClick = onBangumiClick,
+                                    onCheeseClick = onCheeseClick,
+                                    onLiveClick = onLiveClick,
+                                    onTopicClick = onTopicClick,
+                                    onArticleClick = onArticleClick,
+                                    onUpResultClick = onUpResultClick,
+                                    onBangumiResultClick = onBangumiResultClick,
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                val useSplitLayout = shouldUseSearchSplitLayout(
+                    widthDp = configuration.screenWidthDp
+                )
+                SearchLandingStateHost(
+                    source = searchState,
+                    historyListState = historyListState,
+                    useSplitLayout = useSplitLayout,
+                    layoutPolicy = searchLayoutPolicy,
+                    contentTopPadding = contentTopPadding,
+                    bottomPadding = resultBottomPadding,
+                    onToggleHistoryRecording = viewModel::toggleSearchHistoryRecording,
+                    showHotSection = showHotSection,
+                    showHistorySection = showHistorySection,
+                    showDiscoverSection = showDiscoverSection,
+                    hotSearchEnabled = hotSearchEnabled,
+                    discoverSectionEnabled = discoverSectionEnabled,
+                    onToggleHotSearch = {
+                        scope.launch {
+                            SettingsManager.setSearchHotSectionEnabled(context, !hotSearchEnabled)
+                        }
+                    },
+                    onToggleDiscoverSection = {
+                        scope.launch {
+                            SettingsManager.setSearchDiscoverSectionEnabled(
+                                context,
+                                !discoverSectionEnabled
+                            )
+                        }
+                    },
+                    onRefreshHot = viewModel::refreshHotSearch,
+                    onOpenTrending = onOpenTrending,
+                    onRefreshDiscover = viewModel::refreshDiscover,
+                    onKeywordClick = { keyword ->
+                        if (
+                            shouldAcceptSearchLandingKeywordClick(
+                                clearedAtElapsedMs = searchQueryClearedAtElapsedMs,
+                                nowElapsedMs = android.os.SystemClock.elapsedRealtime(),
+                            )
+                        ) {
+                            submitSearch(keyword)
+                        }
+                    },
+                    onClearHistory = viewModel::clearHistory,
+                    onDeleteHistory = viewModel::deleteHistory,
+                    modifier = Modifier
+                        .then(searchChromeSource?.modifier ?: Modifier)
+                        .globalWallpaperAwareBackground()
+                        .graphicsLayer { alpha = exitContentAlpha }
+                        .then(
+                            if (searchHazeEnabled) Modifier.hazeSourceCompat(state = hazeState) else Modifier
+                        )
+                )
+            }
+
+            // Landing keeps an overlay search bar; results pin it in the scaffold chrome
+            // so the type dock stays below it instead of sliding underneath.
+            if (!state.showResults) {
+            BiliPaiImmersiveTopBar(
+                backdrop = searchChromeBackdrop,
+                enabled = immersiveSearchChrome,
+                headerBlurActive = shouldUseSearchTopBarBlur && !immersiveSearchChrome,
+                extendBelowBounds = false,
+                modifier = Modifier.align(Alignment.TopCenter),
+            ) {
+            searchTopBarContent(
+                searchInputState,
+                SearchTopBarPlacement(
+                    focusRequester = searchFocusRequester,
+                    placeholder = displayedSearchHint.ifBlank { resolveSearchDefaultPlaceholder() },
+                    suggestedKeyword = suggestedSearchKeyword,
+                    autoFocusEnabled = shouldAutoFocusSearchField(
+                        startupSettled = startupSettled,
+                        query = searchQuery.value,
+                        showResults = state.showResults,
+                        autoFocusConsumed = autoFocusConsumed
+                    ),
+                    reducedMotionBudget = effectiveSearchMotionBudget == SearchMotionBudget.REDUCED,
+                    entryMotionSpec = entryMotionSpec,
+                    entryMotionKey = entryMotionKey,
+                    exitMotionSpec = exitMotionSpec,
+                    exitMotionKey = exitMotionKey,
+                    liquidGlassEnabled = effectiveLiquidGlassEnabled,
+                    miuixBackdrop = searchChromeBackdrop,
+                    includeStatusBarPadding = true,
+                    modifier = Modifier
+                        .then(
+                            if (!immersiveSearchChrome && shouldUseSearchTopBarBlur) {
+                                Modifier.unifiedBlur(
+                                    hazeState = hazeState,
+                                    surfaceType = app.bilipai.core.ui.blur.BlurSurfaceType.HEADER,
+                                    isScrolling = isSearchResultsScrolling,
+                                    forceLowBudget = forceLowBudgetSearchHeaderBlur
+                                )
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .background(
+                            if (immersiveSearchChrome || shouldUseSearchTopBarBlur) {
+                                Color.Transparent
+                            } else {
+                                searchTopBarHeaderColor
+                            }
+                        ),
+                ),
+                null,
+                searchTopBarCallbacks,
+            )
+
+            }
+            }
+
+            AppLiquidGlassBackToTopButton(
+                visible = backToTopButtonEnabled && shouldShowBackToTop,
+                onClick = {
+                    scope.launch {
+                        animateSearchHeaderOffsetTo(0f)
+                        if (state.searchType == SearchType.VIDEO || state.searchType == SearchType.ALL) {
+                            resultGridState.animateScrollToTop(fast = true)
+                        } else {
+                            resultListState.animateScrollToTop(fast = true)
+                        }
+                    }
+                },
+                backdrop = searchChromeBackdrop,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        end = 20.dp,
+                        bottom = resultBottomPadding + 12.dp
+                    ),
+            )
+
+            SearchSuggestionsHost(
+                source = searchState,
+                onSuggestionClick = submitSearch,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = contentTopPadding + 6.dp)
+                    .padding(horizontal = searchLayoutPolicy.resultHorizontalPaddingDp.dp)
+                    .align(Alignment.TopCenter)
+                    .responsiveContentWidth(),
+            )
+        }
+    }
+}
+
+private class SearchTopBarPlacement(
+    val focusRequester: androidx.compose.ui.focus.FocusRequester,
+    val placeholder: String,
+    val suggestedKeyword: String,
+    val autoFocusEnabled: Boolean,
+    val reducedMotionBudget: Boolean,
+    val entryMotionSpec: SearchEntryMotionSpec?,
+    val entryMotionKey: Int,
+    val exitMotionSpec: SearchEntryMotionSpec?,
+    val exitMotionKey: Int,
+    val liquidGlassEnabled: Boolean,
+    val miuixBackdrop: MiuixBackdrop?,
+    val includeStatusBarPadding: Boolean,
+    val modifier: Modifier,
+)
+
+private class SearchTopBarCallbacks(
+    val onBack: () -> Unit,
+    val onSearch: (String) -> Unit,
+    val onClearQuery: () -> Unit,
+    val onFocusChanged: (Boolean) -> Unit,
+    val onEntryMotionFinished: (Int) -> Unit,
+    val onExitMotionFinished: (Int) -> Unit,
+    val isScrollInProgressProvider: () -> Boolean,
+)
+
+// 气泡化历史记录：中性 InputChip（AppInputChip），视觉跟随主题层。
+@Composable
+fun HistoryChip(
+    keyword: String,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val clearIcon = rememberAppClearIcon()
+    val deleteLabel = stringResource(R.string.common_delete)
+    AppInputChip(
+        selected = false,
+        onClick = onClick,
+        label = {
+            AppText(
+                text = keyword,
+                color = AppContentColors.primaryText(),
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        trailingIcon = {
+            AppIconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(24.dp)
+            ) {
+                AppIcon(
+                    clearIcon,
+                    contentDescription = deleteLabel,
+                    tint = AppContentColors.secondaryText().copy(0.5f),
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+    )
+}
+
+/**
+ *  快捷分类入口
+ */
+@Composable
+fun QuickCategory(
+    emoji: String,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .appActionClickable { onClick() }
+            .heightIn(min = 48.dp)
+            .padding(8.dp)
+    ) {
+        AppText(text = emoji, style = MaterialTheme.typography.headlineSmall)
+        AppText(text = label, style = MaterialTheme.typography.bodySmall, color = AppContentColors.primaryText())
+    }
+}
+
+// ============================================================================================
+// 📱 搜索模块组件提取 (用于平板适配)
+// ============================================================================================
+
+/**
+ * 💎 搜索发现 / 推荐板块
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SearchDiscoverySection(
+    title: String,
+    list: List<String>,
+    onItemClick: (String) -> Unit,
+    onRefresh: () -> Unit
+) {
+    Column {
+        //  搜索发现 / 个性化推荐
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppText(
+                    "💎",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                AppText(
+                    title, //  使用动态标题
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppContentColors.primaryText()
+                )
+            }
+
+            // 刷新按钮
+            AppTextButton(onClick = onRefresh) {
+                AppText(
+                    stringResource(R.string.search_shuffle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppContentColors.secondaryText()
+                )
+            }
+        }
+
+        // 动态发现内容
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            list.forEach { keyword -> //  使用动态列表
+                AppSurface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    shape = AppShapes.container(ContainerLevel.Chip),
+                    modifier = Modifier.appActionClickable { onItemClick(keyword) }
+                ) {
+                    AppText(
+                        keyword,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AppContentColors.primaryText(),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+/**
+ * 🔥 热门搜索板块
+ */
+@Composable
+fun SearchHotSection(
+    hotList: List<HotItem>,
+    hotSearchEnabled: Boolean,
+    hotColumns: Int = 2,
+    onToggleHotSearch: () -> Unit,
+    onItemClick: (String) -> Unit
+) {
+    val showHotBody = shouldShowSearchHotSection(
+        hotItemCount = hotList.size,
+        hotSearchEnabled = hotSearchEnabled
+    )
+    if (shouldShowSearchHotHeader(hotList.size, hotSearchEnabled)) {
+        Column {
+            //  热搜标题
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AppText(
+                        "", // 🔥
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    AppText(
+                        stringResource(R.string.search_hot_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = AppContentColors.primaryText()
+                    )
+                }
+                AppSurface(
+                    onClick = onToggleHotSearch,
+                    shape = AppShapes.container(ContainerLevel.Card),
+                    color = if (hotSearchEnabled) {
+                        AppContentColors.accent().copy(alpha = 0.14f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f)
+                    }
+                ) {
+                    AppText(
+                        text = stringResource(if (hotSearchEnabled) R.string.search_hot_on else R.string.search_hot_off),
+                        color = if (hotSearchEnabled) {
+                            AppContentColors.accent()
+                        } else {
+                            AppContentColors.secondaryText()
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (showHotBody) {
+                //  热搜列表 (动态布局)
+                val safeColumns = hotColumns.coerceAtLeast(1)
+                val displayList = hotList.take(20)
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    displayList.chunked(safeColumns).forEachIndexed { rowIndex, rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            rowItems.forEachIndexed { indexInRow, hotItem ->
+                                val globalIndex = rowIndex * safeColumns + indexInRow
+                                val isTop3 = globalIndex < 3
+
+                                Row(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .appActionClickable { onItemClick(hotItem.keyword) },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // 排名序号
+                                    AppText(
+                                        text = "${globalIndex + 1}",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                        color = if (isTop3) AppContentColors.accent() else AppContentColors.secondaryText().copy(alpha = 0.5f),
+                                        modifier = Modifier.width(24.dp)
+                                    )
+
+                                    // 标题
+                                    AppText(
+                                        text = hotItem.show_name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = AppContentColors.primaryText(),
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            // 如果不足一行，补空位占位
+                            if (rowItems.size < safeColumns) {
+                                Spacer(modifier = Modifier.weight((safeColumns - rowItems.size).toFloat()))
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+/**
+ * Search type tabs — same interaction model as home top tabs:
+ * floating capsule follows [PagerState.currentPage] + [PagerState.currentPageOffsetFraction]
+ * and can be interrupted mid-swipe / mid-animate.
+ */
+/** PiliPlus 同款分类计数标签:未加载(-1/null)只显示名称,超过 99 显示 99+。 */
+internal fun resolveSearchTypeTabLabel(displayName: String, count: Int?): String =
+    resolveAppCountedTabLabel(displayName, count)
+
+internal fun resolveSearchTypeTabMeasurementLabel(type: SearchType, count: Int?): String =
+    requireNotNull(appCountedTabOption(type, type.displayName, count).measurementLabel)
+
+@Composable
+private fun SearchResultTypeTabRow(
+    tabs: List<SearchType>,
+    pagerState: PagerState,
+    counts: Map<SearchType, Int>,
+    onTabClick: (Int, SearchType) -> Unit,
+    miuixBackdrop: MiuixBackdrop? = null,
+) {
+    val componentSpacing = resolveSearchComponentSpacingSpec(LocalAppUiStyle.current)
+    if (tabs.isEmpty()) return
+    val scrollState = rememberScrollState()
+    val density = LocalDensity.current
+    val selectedIndex = pagerState.tabSelectedPage.coerceIn(0, tabs.lastIndex)
+    val tabLabels = tabs.map { type ->
+        resolveSearchTypeTabLabel(type.displayName, counts[type])
+    }
+    val glassMeasurementLabels = tabs.map { type ->
+        resolveSearchTypeTabMeasurementLabel(type, counts[type])
+    }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = componentSpacing.resultRailHorizontalPaddingDp.dp,
+                vertical = componentSpacing.rowVerticalPaddingDp.dp,
+            ),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        val viewportWidthDp = maxWidth.value.roundToInt()
+        val useScrollableRail = shouldScrollSearchTypeTabs(
+            itemCount = tabs.size,
+            viewportWidthDp = viewportWidthDp
+        )
+        val itemWidthDp = resolveSearchTypeTabAdaptiveItemWidthDp(
+            itemCount = tabs.size,
+            viewportWidthDp = viewportWidthDp
+        )
+        val itemWidth = itemWidthDp.dp
+        val viewportWidthPx = with(density) { maxWidth.toPx() }
+        val itemWidthPx = with(density) { itemWidth.toPx() }
+        val containerHorizontalPaddingPx = with(density) { AppSpacingTokens.ExtraSmall.toPx() }
+        val dragFollowEdgePaddingPx = with(density) { 12.dp.toPx() }
+
+
+        KeepScrollableTabSelectionVisible(
+            scrollState = scrollState,
+            selectedIndex = if (useScrollableRail) selectedIndex else 0,
+            itemWidthPx = itemWidthPx,
+            contentPaddingPx = containerHorizontalPaddingPx,
+            // Glide with the indicator (page + fraction) while the pager is moving; settle when idle.
+            focusPosition = {
+                if (useScrollableRail) {
+                    pagerState.tabIndicatorPosition
+                } else {
+                    0f
+                }
+            },
+            continuousFollow = { useScrollableRail && pagerState.isScrollInProgress },
+        )
+
+        BottomBarLiquidSegmentedControl(
+            items = tabLabels,
+            // 玻璃槽位按计数上限预留，指示器按当前文字适配；原生路径不使用这些测量参数。
+            liquidGlassMeasurementLabels = glassMeasurementLabels,
+            liquidGlassIndicatorMeasurementLabels = tabLabels,
+            liquidGlassAdaptIndicatorToLabel = true,
+            liquidGlassAnimateLabelWidthChanges = false,
+            // Both renderers center on wide devices; each keeps its own sizing and indicator style.
+            centerGlassContent = LocalWindowSizeClass.current.let { it.isTabletDevice && it.isTablet },
+            centerNativeContent = LocalWindowSizeClass.current.let { it.isTabletDevice && it.isTablet },
+            selectedIndex = selectedIndex,
+            onSelected = { index ->
+                tabs.getOrNull(index)?.let { onTabClick(index, it) }
+            },
+            itemWidth = itemWidth.takeIf { useScrollableRail },
+            height = AppChromeSizeTokens.BottomBarMatchedSegmentedControlHeightDp.dp,
+            indicatorHeight = AppChromeSizeTokens.BottomBarMatchedSegmentedIndicatorHeightDp.dp,
+            labelFontSize = MaterialTheme.typography.labelMedium.fontSize,
+            allowNativeLabelOverflow = true,
+            nativeIndicatorPresentation = AppTabRowIndicatorPresentation.TONAL_PILL,
+            miuixBackdrop = miuixBackdrop,
+            liquidGlassEffectsEnabled = true,
+            tapPressRefractionEnabled = !useScrollableRail,
+            dragSelectionEnabled = tabs.size > 1,
+            indicatorPositionProvider = {
+                pagerState.tabIndicatorPosition
+            },
+            isScrollInProgressProvider = { pagerState.isScrollInProgress },
+            externalPagerMotionEffectsEnabled = true,
+            onIndicatorPositionChanged = { position ->
+                // Continuous pager motion is owned by KeepScrollableTabSelectionVisible lock-step.
+                // Edge-follow remains only for idle indicator nudges so the two never fight.
+                if (useScrollableRail && !pagerState.isScrollInProgress) {
+                    scrollState.dispatchRawDelta(
+                        resolveSearchTypeTabDragScrollDeltaPx(
+                            indicatorPosition = position,
+                            itemWidthPx = itemWidthPx,
+                            viewportWidthPx = viewportWidthPx,
+                            currentScrollPx = scrollState.value.toFloat(),
+                            containerHorizontalPaddingPx = containerHorizontalPaddingPx,
+                            edgePaddingPx = dragFollowEdgePaddingPx
+                        )
+                    )
+                }
+            },
+            modifier = if (useScrollableRail) {
+                Modifier.liquidDockViewport(
+                    verticalOverflow = AppChromeSizeTokens.MinimumTouchTarget,
+                    allowNativeOverflow = true,
+                )
+            } else {
+                Modifier.fillMaxWidth()
+            },
+            scrollState = scrollState.takeIf { useScrollableRail },
+        )
+    }
+}
+
+@Composable
+internal fun rememberSearchHighlightedTitle(video: VideoItem): androidx.compose.ui.text.AnnotatedString? {
+    val highlightColor = AppContentColors.accent()
+    return remember(video.searchHighlightedTitle, highlightColor) {
+        val segments = resolveSearchHighlightedTextSegments(video.searchHighlightedTitle)
+        if (segments.none { it.highlighted }) {
+            null
+        } else {
+            buildAnnotatedString {
+                segments.forEach { segment ->
+                    if (segment.highlighted) {
+                        pushStyle(
+                            SpanStyle(
+                                color = highlightColor,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                        append(segment.text)
+                        pop()
+                    } else {
+                        append(segment.text)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ *  搜索筛选条件栏
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SearchFilterBar(
+    currentType: SearchType,
+    currentOrder: SearchOrder,
+    currentDurations: Set<SearchDuration>,
+    currentVideoTid: Int,
+    currentUpOrder: SearchUpOrder,
+    currentUpOrderSort: SearchOrderSort,
+    currentUpUserType: SearchUserType,
+    currentLiveOrder: SearchLiveOrder,
+    currentArticleOrder: SearchOrder,
+    currentArticleCategory: SearchArticleCategory,
+    currentPhotoOrder: SearchOrder,
+    currentPhotoCategory: SearchPhotoCategory,
+    onOrderChange: (SearchOrder) -> Unit,
+    onDurationToggle: (SearchDuration) -> Unit,
+    onVideoTidChange: (Int) -> Unit,
+    onUpOrderChange: (SearchUpOrder) -> Unit,
+    onUpOrderSortChange: (SearchOrderSort) -> Unit,
+    onUpUserTypeChange: (SearchUserType) -> Unit,
+    onLiveOrderChange: (SearchLiveOrder) -> Unit,
+    onArticleOrderChange: (SearchOrder) -> Unit,
+    onArticleCategoryChange: (SearchArticleCategory) -> Unit,
+    onPhotoOrderChange: (SearchOrder) -> Unit,
+    onPhotoCategoryChange: (SearchPhotoCategory) -> Unit
+) {
+    var showOrderMenu by remember { mutableStateOf(false) }
+    var showDurationMenu by remember { mutableStateOf(false) }
+    var showVideoTidMenu by remember { mutableStateOf(false) }
+    var showUpOrderMenu by remember { mutableStateOf(false) }
+    var showUpOrderSortMenu by remember { mutableStateOf(false) }
+    var showUpUserTypeMenu by remember { mutableStateOf(false) }
+    var showLiveOrderMenu by remember { mutableStateOf(false) }
+    var showArticleOrderMenu by remember { mutableStateOf(false) }
+    var showArticleCategoryMenu by remember { mutableStateOf(false) }
+    var showPhotoOrderMenu by remember { mutableStateOf(false) }
+    var showPhotoCategoryMenu by remember { mutableStateOf(false) }
+
+    val videoTidOptions = listOf(
+            0 to stringResource(R.string.search_zone_all_sections),
+            1 to stringResource(R.string.search_zone_animation),
+            3 to stringResource(R.string.search_zone_music),
+            4 to stringResource(R.string.search_zone_games),
+            5 to stringResource(R.string.search_zone_entertainment),
+            36 to stringResource(R.string.search_zone_technology),
+            119 to stringResource(R.string.search_zone_kichiku),
+            160 to stringResource(R.string.search_zone_life),
+            181 to stringResource(R.string.search_zone_film_tv)
+    )
+    val selectedVideoTidName = videoTidOptions.find { it.first == currentVideoTid }?.second
+        ?: stringResource(R.string.search_zone_unavailable, currentVideoTid)
+    val filterControls = remember(currentType, currentUpOrder) {
+        resolveSearchFilterControls(
+            currentType = currentType,
+            currentUpOrder = currentUpOrder
+        )
+    }
+    if (filterControls.isEmpty()) return
+
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val filterRowPadding = if (useMiuixPresentation) {
+        Modifier.padding(horizontal = AppSpacingTokens.Large, vertical = AppSpacingTokens.Small)
+    } else {
+        Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+    }
+    val chipSpacing = if (useMiuixPresentation) 9.dp else 10.dp
+    val centerWideFilters = LocalWindowSizeClass.current.let { it.isTabletDevice && it.isTablet }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(filterRowPadding)
+    ) {
+            FlowRow(
+                modifier = if (centerWideFilters) Modifier.fillMaxWidth() else Modifier,
+                horizontalArrangement = Arrangement.spacedBy(
+                    chipSpacing,
+                    if (centerWideFilters) Alignment.CenterHorizontally else Alignment.Start,
+                ),
+                verticalArrangement = Arrangement.spacedBy(if (useMiuixPresentation) AppSpacingTokens.Small else 8.dp)
+            ) {
+                if (SearchFilterControl.VIDEO_ORDER in filterControls) {
+                app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showOrderMenu = true }) {
+                    FilterMenuChip(
+                        text = localizedSearchOrderLabel(currentOrder),
+                        highlighted = currentOrder != SearchOrder.TOTALRANK,
+                        onClick = { showOrderMenu = true }
+                    )
+                    AppDropdownMenu(
+                        expanded = showOrderMenu,
+                        onDismissRequest = { showOrderMenu = false }
+                    ) {
+                        resolveSearchVideoOrderOptions().forEach { order ->
+                            AppDropdownMenuItem(
+                                text = { AppText(localizedSearchOrderLabel(order)) },
+                                onClick = {
+                                    onOrderChange(order)
+                                    showOrderMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+                }
+
+                if (SearchFilterControl.VIDEO_DURATION in filterControls) {
+                app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showDurationMenu = true }) {
+                    FilterMenuChip(
+                        text = resolveSearchDurationFilterLabel(currentDurations),
+                        highlighted = currentDurations.isNotEmpty(),
+                        onClick = { showDurationMenu = true }
+                    )
+                    AppDropdownMenu(
+                        expanded = showDurationMenu,
+                        onDismissRequest = { showDurationMenu = false }
+                    ) {
+                        SearchDuration.entries.forEach { duration ->
+                            val selected = if (duration == SearchDuration.ALL) {
+                                currentDurations.isEmpty()
+                            } else {
+                                duration in currentDurations
+                            }
+                            AppDropdownMenuItem(
+                                text = { AppText(duration.displayName) },
+                                dismissOnClick = false,
+                                leadingIcon = {
+                                    AppCheckbox(
+                                        checked = selected,
+                                        onCheckedChange = null
+                                    )
+                                },
+                                onClick = {
+                                    onDurationToggle(duration)
+                                }
+                            )
+                        }
+                    }
+                }
+                }
+
+                if (SearchFilterControl.VIDEO_TID in filterControls) {
+                app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showVideoTidMenu = true }) {
+                    FilterMenuChip(
+                        text = selectedVideoTidName,
+                        highlighted = currentVideoTid != 0,
+                        onClick = { showVideoTidMenu = true }
+                    )
+                    AppDropdownMenu(
+                        expanded = showVideoTidMenu,
+                        onDismissRequest = { showVideoTidMenu = false }
+                    ) {
+                        videoTidOptions.forEach { (tid, name) ->
+                            AppDropdownMenuItem(
+                                text = { AppText(name) },
+                                onClick = {
+                                    onVideoTidChange(tid)
+                                    showVideoTidMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+                }
+
+                if (SearchFilterControl.UP_ORDER in filterControls) {
+                app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showUpOrderMenu = true }) {
+                    FilterMenuChip(
+                        text = currentUpOrder.displayName,
+                        highlighted = currentUpOrder != SearchUpOrder.DEFAULT,
+                        onClick = { showUpOrderMenu = true }
+                    )
+                    AppDropdownMenu(
+                        expanded = showUpOrderMenu,
+                        onDismissRequest = { showUpOrderMenu = false }
+                    ) {
+                        SearchUpOrder.entries.forEach { order ->
+                            AppDropdownMenuItem(
+                                text = { AppText(order.displayName) },
+                                selected = order == currentUpOrder,
+                                onClick = {
+                                    onUpOrderChange(order)
+                                    showUpOrderMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+                }
+
+                if (SearchFilterControl.UP_ORDER_SORT in filterControls) {
+                    app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showUpOrderSortMenu = true }) {
+                        FilterMenuChip(
+                            text = currentUpOrderSort.displayName,
+                            highlighted = true,
+                            onClick = { showUpOrderSortMenu = true }
+                        )
+                        AppDropdownMenu(
+                            expanded = showUpOrderSortMenu,
+                            onDismissRequest = { showUpOrderSortMenu = false }
+                        ) {
+                            SearchOrderSort.entries.forEach { sort ->
+                                AppDropdownMenuItem(
+                                    text = { AppText(sort.displayName) },
+                                    onClick = {
+                                        onUpOrderSortChange(sort)
+                                        showUpOrderSortMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (SearchFilterControl.UP_USER_TYPE in filterControls) {
+                app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showUpUserTypeMenu = true }) {
+                    FilterMenuChip(
+                        text = resolveSearchUpUserTypeFilterLabel(currentUpUserType),
+                        highlighted = currentUpUserType != SearchUserType.ALL,
+                        onClick = { showUpUserTypeMenu = true }
+                    )
+                    AppDropdownMenu(
+                        expanded = showUpUserTypeMenu,
+                        onDismissRequest = { showUpUserTypeMenu = false }
+                    ) {
+                        SearchUserType.entries.forEach { userType ->
+                            AppDropdownMenuItem(
+                                text = { AppText(userType.displayName) },
+                                onClick = {
+                                    onUpUserTypeChange(userType)
+                                    showUpUserTypeMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+                }
+
+                if (SearchFilterControl.LIVE_ORDER in filterControls) {
+                    app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { showLiveOrderMenu = true }) {
+                        FilterMenuChip(
+                            text = currentLiveOrder.displayName,
+                            highlighted = currentLiveOrder != SearchLiveOrder.ONLINE,
+                            onClick = { showLiveOrderMenu = true }
+                        )
+                        AppDropdownMenu(
+                            expanded = showLiveOrderMenu,
+                            onDismissRequest = { showLiveOrderMenu = false }
+                        ) {
+                            SearchLiveOrder.entries.forEach { order ->
+                                AppDropdownMenuItem(
+                                    text = { AppText(order.displayName) },
+                                    selected = order == currentLiveOrder,
+                                    onClick = {
+                                        onLiveOrderChange(order)
+                                        showLiveOrderMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (SearchFilterControl.ARTICLE_ORDER in filterControls) {
+                    SearchOrderMenu(
+                        current = currentArticleOrder,
+                        expanded = showArticleOrderMenu,
+                        options = SearchOrder.entries,
+                        onExpandedChange = { showArticleOrderMenu = it },
+                        onSelected = onArticleOrderChange
+                    )
+                }
+
+                if (SearchFilterControl.ARTICLE_CATEGORY in filterControls) {
+                    SearchCategoryMenu(
+                        label = currentArticleCategory.displayName,
+                        highlighted = currentArticleCategory != SearchArticleCategory.ALL,
+                        expanded = showArticleCategoryMenu,
+                        options = SearchArticleCategory.entries.map { it.displayName },
+                        onExpandedChange = { showArticleCategoryMenu = it },
+                        onSelected = { index ->
+                            SearchArticleCategory.entries.getOrNull(index)?.let(onArticleCategoryChange)
+                        }
+                    )
+                }
+
+                if (SearchFilterControl.PHOTO_ORDER in filterControls) {
+                    SearchOrderMenu(
+                        current = currentPhotoOrder,
+                        expanded = showPhotoOrderMenu,
+                        options = SearchOrder.entries.filter { it != SearchOrder.ATTENTION },
+                        onExpandedChange = { showPhotoOrderMenu = it },
+                        onSelected = onPhotoOrderChange
+                    )
+                }
+
+                if (SearchFilterControl.PHOTO_CATEGORY in filterControls) {
+                    SearchCategoryMenu(
+                        label = currentPhotoCategory.displayName,
+                        highlighted = currentPhotoCategory != SearchPhotoCategory.ALL,
+                        expanded = showPhotoCategoryMenu,
+                        options = SearchPhotoCategory.entries.map { it.displayName },
+                        onExpandedChange = { showPhotoCategoryMenu = it },
+                        onSelected = { index ->
+                            SearchPhotoCategory.entries.getOrNull(index)?.let(onPhotoCategoryChange)
+                        }
+                    )
+                }
+        }
+    }
+}
+
+@Composable
+private fun SearchOrderMenu(
+    current: SearchOrder,
+    expanded: Boolean,
+    options: List<SearchOrder>,
+    onExpandedChange: (Boolean) -> Unit,
+    onSelected: (SearchOrder) -> Unit
+) {
+    app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { onExpandedChange(true) }) {
+        FilterMenuChip(
+            text = current.displayName,
+            highlighted = current != SearchOrder.TOTALRANK,
+            onClick = { onExpandedChange(true) }
+        )
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
+            options.forEach { order ->
+                AppDropdownMenuItem(
+                    text = { AppText(order.displayName) },
+                    selected = order == current,
+                    onClick = {
+                        onSelected(order)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchCategoryMenu(
+    label: String,
+    highlighted: Boolean,
+    expanded: Boolean,
+    options: List<String>,
+    onExpandedChange: (Boolean) -> Unit,
+    onSelected: (Int) -> Unit
+) {
+    app.bilipai.core.ui.components.AppGlassMenuAnchor(onOpen = { onExpandedChange(true) }) {
+        FilterMenuChip(label, highlighted) { onExpandedChange(true) }
+        AppDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
+            options.forEachIndexed { index, option ->
+                AppDropdownMenuItem(
+                    text = { AppText(option) },
+                    onClick = {
+                        onSelected(index)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterMenuChip(
+    text: String,
+    highlighted: Boolean,
+    onClick: () -> Unit
+) {
+    val chevronIcon = rememberAppChevronDownIcon()
+    AppFilterChip(
+        selected = highlighted,
+        onClick = onClick,
+        label = {
+            AppText(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        trailingIcon = {
+            AppIcon(
+                chevronIcon,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    )
+}
+
+@Composable
+private fun SearchResultCardSurface(
+    appearance: SearchResultCardAppearance,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val surfaceSpec = rememberContentCardSurfaceSpec()
+    val shape = AppShapes.borderedContainer(surfaceSpec.cornerLevel)
+    val color = if (surfaceSpec.usesTonalContainerTreatment) {
+        AppSurfaceTokens.surfaceContainer()
+    } else {
+        MaterialTheme.colorScheme.surface.copy(alpha = appearance.containerAlpha)
+    }
+    val border = when {
+        surfaceSpec.usesTonalContainerTreatment -> {
+            androidx.compose.foundation.BorderStroke(
+                surfaceSpec.borderWidthDp.dp,
+                AppSurfaceTokens.divider().copy(alpha = surfaceSpec.borderAlpha)
+            )
+        }
+        appearance.borderAlpha > 0f -> {
+            androidx.compose.foundation.BorderStroke(
+                0.8.dp,
+                Color.White.copy(alpha = appearance.borderAlpha)
+            )
+        }
+        else -> null
+    }
+    if (onClick != null) {
+        AppSurface(
+            modifier = modifier.fillMaxWidth(),
+            onClick = onClick,
+            color = color,
+            shape = shape,
+            tonalElevation = if (surfaceSpec.usesTonalContainerTreatment) {
+                surfaceSpec.tonalElevationDp.dp
+            } else {
+                appearance.tonalElevationDp.dp
+            },
+            shadowElevation = if (surfaceSpec.usesTonalContainerTreatment) {
+                surfaceSpec.shadowElevationDp.dp
+            } else {
+                appearance.shadowElevationDp.dp
+            },
+            border = border
+        ) {
+            content()
+        }
+    } else {
+        AppSurface(
+            modifier = modifier.fillMaxWidth(),
+            color = color,
+            shape = shape,
+            tonalElevation = if (surfaceSpec.usesTonalContainerTreatment) {
+                surfaceSpec.tonalElevationDp.dp
+            } else {
+                appearance.tonalElevationDp.dp
+            },
+            shadowElevation = if (surfaceSpec.usesTonalContainerTreatment) {
+                surfaceSpec.shadowElevationDp.dp
+            } else {
+                appearance.shadowElevationDp.dp
+            },
+            border = border
+        ) {
+            content()
+        }
+    }
+}
+
+private enum class SearchResultTextRole {
+    DENSE_TITLE,
+    TITLE,
+    BODY,
+    METADATA,
+    BADGE,
+}
+
+@Composable
+private fun SearchResultText(
+    text: String,
+    role: SearchResultTextRole,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    minLines: Int = 1,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+) {
+    val style = when (role) {
+        SearchResultTextRole.DENSE_TITLE -> MaterialTheme.typography.bodySmall
+        SearchResultTextRole.TITLE -> MaterialTheme.typography.titleSmall
+        SearchResultTextRole.BODY -> MaterialTheme.typography.bodySmall
+        SearchResultTextRole.METADATA -> MaterialTheme.typography.labelMedium
+        SearchResultTextRole.BADGE -> MaterialTheme.typography.labelSmall
+    }
+    AppText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = style,
+        fontWeight = fontWeight,
+        minLines = minLines,
+        maxLines = maxLines,
+        overflow = overflow,
+    )
+}
+
+/**
+ *  搜索结果卡片 (显示发布时间)
+ */
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+fun SearchResultCard(
+    video: VideoItem,
+    index: Int,
+    onClick: (String) -> Unit
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val coverUrl = remember(video.bvid) {
+        FormatUtils.fixImageUrl(if (video.pic.startsWith("//")) "https:${video.pic}" else video.pic)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(AppShapes.container(ContainerLevel.Card))
+            .appActionClickable { onClick(video.bvid) }
+            .padding(bottom = if (useMiuixPresentation) AppSpacingTokens.Small else 8.dp)
+    ) {
+        // 封面
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 10f)
+                .clip(AppShapes.mediaCover())
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverUrl)
+                    .crossfade(150)
+                    .size(480, 300)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // 底部渐变
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.6f)
+                            )
+                        )
+                    )
+            )
+
+            VideoCardCoverDurationText(
+                text = FormatUtils.formatDuration(video.duration),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp),
+            )
+
+        }
+
+        Spacer(
+            modifier = Modifier.height(
+                if (useMiuixPresentation) AppSpacingTokens.Small else 8.dp
+            )
+        )
+
+        // 标题
+        SearchResultText(
+            text = video.title,
+            role = SearchResultTextRole.DENSE_TITLE,
+            minLines = 1,
+            maxLines = videoCardTitleMaxLines(),
+            overflow = videoCardTitleOverflow(),
+            fontWeight = FontWeight.Medium,
+            color = AppContentColors.primaryText(),
+            modifier = Modifier.padding(horizontal = 2.dp)
+        )
+
+        Spacer(
+            modifier = Modifier.height(
+                if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 6.dp
+            )
+        )
+        HorizontalVideoStatRow(
+            playText = FormatUtils.formatStat(video.stat.view.toLong()),
+            danmakuText = if (video.stat.danmaku > 0) {
+                FormatUtils.formatStat(video.stat.danmaku.toLong())
+            } else {
+                ""
+            },
+            modifier = Modifier.padding(horizontal = 2.dp),
+        )
+
+        Spacer(
+            modifier = Modifier.height(
+                if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 6.dp
+            )
+        )
+
+        // UP主 + 发布时间
+        FlowRow(
+            modifier = Modifier.padding(horizontal = 2.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 2.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 2.dp
+            )
+        ) {
+            UpBadgeName(
+                name = video.owner.name,
+                leadingContent = if (
+                    app.bilipai.core.ui.LocalUpBadgeVisibility.current.showAvatars &&
+                    video.owner.face.isNotBlank()
+                ) {
+                    {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(FormatUtils.fixImageUrl(video.owner.face))
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                } else null,
+                nameStyle = MaterialTheme.typography.labelSmall,
+                nameColor = AppContentColors.secondaryText(),
+                badgeTextColor = AppContentColors.secondaryText().copy(alpha = 0.85f),
+                badgeBorderColor = AppContentColors.secondaryText().copy(alpha = 0.35f),
+                maxLines = Int.MAX_VALUE,
+                overflow = TextOverflow.Visible,
+                modifier = Modifier.wrapContentWidth()
+            )
+
+            //  显示发布时间
+            if (video.pubdate > 0) {
+                SearchResultText(
+                    text = "· ${FormatUtils.formatPublishTime(video.pubdate)}",
+                    role = SearchResultTextRole.BADGE,
+                    color = AppContentColors.secondaryText()
+                )
+            }
+        }
+    }
+}
+
+/**
+ *  UP主搜索结果卡片
+ */
+@Composable
+internal fun UpSearchResultCard(
+    upItem: app.bilipai.data.model.response.SearchUpItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit,
+    onTransitionClick: ((String) -> Unit)? = null,
+    onLiveClick: (() -> Unit)? = null,
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val cleanedItem = remember(upItem) { upItem.cleanupFields() }
+    val container = app.bilipai.core.ui.rememberNativeCardContainerTransition(
+        app.bilipai.navigation3.BiliPaiNavKey.Space(upItem.mid), onClick,
+    )
+
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = container.onClick,
+        modifier = Modifier.fillMaxWidth().then(container.modifier)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 头像
+            val avatarModifier = Modifier
+
+            val verifyBadge = cleanedItem.official_verify?.let { verify ->
+                resolveOfficialVerifyBadge(type = verify.type, desc = verify.desc)
+            }
+            Box(modifier = avatarModifier.size(42.dp)) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(cleanedItem.upic)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = cleanedItem.uname,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop
+                )
+                if (cleanedItem.is_live == 1) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(18.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        app.bilipai.core.ui.components.PlaybackBarsIndicator(
+                            isPlaying = true,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            contentDescription = "正在直播",
+                            modifier = Modifier.size(10.dp),
+                        )
+                    }
+                } else if (verifyBadge != null) {
+                    OfficialVerifyAvatarBadge(
+                        badge = verifyBadge,
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    )
+                } else {
+                    UserAvatarCornerMarkBadge(
+                        mark = resolveUserAvatarCornerMark(
+                            officialType = null,
+                            vipStatus = cleanedItem.vip?.status,
+                        ),
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        badgeSize = 14.dp,
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 10.dp
+                )
+            )
+
+            // UP主信息
+            Column(modifier = Modifier.weight(1f)) {
+                // 名称 + 官方等级标志
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 6.dp
+                    )
+                ) {
+                    SearchResultText(
+                        text = cleanedItem.uname,
+                        role = SearchResultTextRole.TITLE,
+                        modifier = Modifier.weight(1f, fill = false),
+                        fontWeight = FontWeight.Medium,
+                        color = AppContentColors.primaryText(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    UserLevelBadge(
+                        level = cleanedItem.level,
+                        isSeniorMember = cleanedItem.is_senior_member == 1
+                    )
+                    if (cleanedItem.is_live == 1) {
+                        AppSurface(
+                            modifier = Modifier.appActionClickable(
+                                enabled = (cleanedItem.room_id ?: 0L) > 0L && onLiveClick != null,
+                                onClickLabel = "进入直播间",
+                                onClick = { onLiveClick?.invoke() },
+                            ),
+                            shape = AppShapes.container(ContainerLevel.Tag),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ) {
+                            SearchResultText(
+                                text = "直播中",
+                                role = SearchResultTextRole.BADGE,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(
+                        if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 2.dp
+                    )
+                )
+                SearchResultText(
+                    text = "粉丝：${FormatUtils.formatStat(cleanedItem.fans.toLong())}  " +
+                        "视频：${cleanedItem.videos}",
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText(),
+                )
+
+                if (cleanedItem.usign.isNotBlank()) {
+                    SearchResultText(
+                        text = cleanedItem.usign,
+                        role = SearchResultTextRole.BODY,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+                if (verifyBadge != null && verifyBadge.text.isNotBlank()) {
+                    Spacer(
+                        modifier = Modifier.height(
+                            if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 2.dp
+                        )
+                    )
+                    SearchResultText(
+                        text = verifyBadge.text,
+                        role = SearchResultTextRole.METADATA,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+            }
+        }
+    }
+}
+
+/**
+ *  番剧搜索结果卡片
+ */
+@Composable
+internal fun BangumiSearchResultCard(
+    item: app.bilipai.data.model.response.BangumiSearchItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit,
+    categoryLabel: String? = null,
+    onTransitionClick: ((String) -> Unit)? = null,
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val container = app.bilipai.core.ui.rememberNativeCardContainerTransition(
+        app.bilipai.navigation3.BiliPaiNavKey.BangumiDetail(item.seasonId), onClick,
+    )
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = container.onClick,
+        modifier = container.modifier,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.Top
+        ) {
+            // 封面
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(item.cover)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = item.title,
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(110.dp)
+                    .clip(AppShapes.container(ContainerLevel.Chip))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+
+            // 番剧信息
+            Column(modifier = Modifier.weight(1f)) {
+                if (!categoryLabel.isNullOrBlank()) {
+                    AppAssistChip(
+                        onClick = {},
+                        enabled = false,
+                        label = {
+                            SearchResultText(
+                                text = categoryLabel,
+                                role = SearchResultTextRole.BADGE,
+                            )
+                        },
+                        modifier = Modifier.height(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                }
+                SearchResultText(
+                    text = item.title,
+                    role = SearchResultTextRole.TITLE,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                // 类型 + 集数
+                Row {
+                    if (item.seasonTypeName.isNotBlank()) {
+                        SearchResultText(
+                            text = item.seasonTypeName,
+                            role = SearchResultTextRole.METADATA,
+                            color = AppContentColors.accent(),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        Spacer(modifier = Modifier.width(AppSpacingTokens.Small))
+                    }
+                    if (item.indexShow.isNotBlank()) {
+                        SearchResultText(
+                            text = item.indexShow,
+                            role = SearchResultTextRole.METADATA,
+                            color = AppContentColors.secondaryText(),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                // 评分
+                item.mediaScore?.let { score ->
+                    if (score.score > 0) {
+                        Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SearchResultText(
+                                text = "⭐ ${score.score}",
+                                role = SearchResultTextRole.METADATA,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            Spacer(modifier = Modifier.width(AppSpacingTokens.ExtraSmall))
+                            SearchResultText(
+                                text = "${score.userCount}人评分",
+                                role = SearchResultTextRole.BADGE,
+                                color = AppContentColors.secondaryText()
+                            )
+                        }
+                    }
+                }
+                // 简介
+                if (item.desc.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                    SearchResultText(
+                        text = item.desc,
+                        role = SearchResultTextRole.BODY,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 综合搜索结果中的赛事卡片：对阵双方队标/队名与比分（或 VS），点击进入原生比赛详情页。
+ */
+@Composable
+internal fun MatchSearchResultCard(
+    item: app.bilipai.data.model.response.MatchContestInfo,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit
+) {
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                SearchResultText(
+                    text = listOfNotNull(
+                        item.season?.title?.takeIf { it.isNotBlank() },
+                        item.gameStage.takeIf { it.isNotBlank() }
+                    ).joinToString(" · ").ifBlank { "游戏赛事" },
+                    role = SearchResultTextRole.TITLE,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MatchSearchTeamContent(item.homeTeam, Modifier.weight(1f))
+                    SearchResultText(
+                        text = if (item.contestStatus in 2..3) {
+                            "${item.homeScore ?: 0} : ${item.awayScore ?: 0}"
+                        } else {
+                            "VS"
+                        },
+                        role = SearchResultTextRole.METADATA,
+                        fontWeight = FontWeight.Bold,
+                        color = AppContentColors.primaryText(),
+                        modifier = Modifier.padding(horizontal = AppSpacingTokens.Small)
+                    )
+                    MatchSearchTeamContent(item.awayTeam, Modifier.weight(1f))
+                }
+            }
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+            AppSurface(
+                color = if (item.contestStatus == 2) {
+                    AppContentColors.accent()
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                shape = AppShapes.container(ContainerLevel.Tag)
+            ) {
+                SearchResultText(
+                    text = when (item.contestStatus) {
+                        1 -> "未开始"
+                        2 -> "直播中"
+                        3 -> "已结束"
+                        else -> "待确认"
+                    },
+                    role = SearchResultTextRole.BADGE,
+                    color = if (item.contestStatus == 2) {
+                        MaterialTheme.colorScheme.onError
+                    } else {
+                        AppContentColors.secondaryText()
+                    },
+                    modifier = Modifier.padding(
+                        horizontal = AppSpacingTokens.ExtraSmall,
+                        vertical = AppSpacingTokens.Micro,
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MatchSearchTeamContent(
+    team: app.bilipai.data.model.response.MatchContestTeam?,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        val logo = team.resolveMatchContestLogoUrl()
+        AsyncImage(
+            model = logo.ifBlank { null },
+            contentDescription = null,
+            modifier = Modifier
+                .size(28.dp)
+                .clip(AppShapes.container(ContainerLevel.Chip)),
+            contentScale = ContentScale.Fit
+        )
+        Spacer(modifier = Modifier.width(AppSpacingTokens.ExtraSmall))
+        SearchResultText(
+            text = team?.title?.ifBlank { null } ?: "待定",
+            role = SearchResultTextRole.METADATA,
+            color = AppContentColors.secondaryText(),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/**
+ *  直播搜索结果卡片
+ */
+@Composable
+internal fun LiveSearchResultCard(
+    item: app.bilipai.data.model.response.LiveRoomSearchItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 封面
+            Box {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(item.cover.ifBlank { item.uface })
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = item.title,
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(68.dp)
+                        .clip(AppShapes.container(ContainerLevel.Chip))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop
+                )
+                // 直播状态标签
+                if (item.live_status == 1) {
+                    AppSurface(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(AppSpacingTokens.ExtraSmall),
+                        color = AppContentColors.error(),
+                        shape = AppShapes.container(ContainerLevel.Tag)
+                    ) {
+                        SearchResultText(
+                            text = stringResource(R.string.search_live_now),
+                            role = SearchResultTextRole.BADGE,
+                            color = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.padding(
+                                horizontal = AppSpacingTokens.ExtraSmall,
+                                vertical = AppSpacingTokens.Micro,
+                            )
+                        )
+                    }
+                }
+                // 在线人数
+                if (item.online > 0) {
+                    AppSurface(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(AppSpacingTokens.ExtraSmall),
+                        color = Color.Black.copy(alpha = 0.6f),
+                        shape = AppShapes.container(ContainerLevel.Tag)
+                    ) {
+                        SearchResultText(
+                            text = FormatUtils.formatStat(item.online.toLong()),
+                            role = SearchResultTextRole.BADGE,
+                            color = Color.White,
+                            modifier = Modifier.padding(
+                                horizontal = AppSpacingTokens.ExtraSmall,
+                                vertical = AppSpacingTokens.Micro,
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+
+            // 直播信息
+            Column(modifier = Modifier.weight(1f)) {
+                SearchResultText(
+                    text = item.title,
+                    role = SearchResultTextRole.TITLE,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                // 主播名
+                SearchResultText(
+                    text = item.uname,
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(
+                    modifier = Modifier.height(
+                        if (useMiuixPresentation) AppSpacingTokens.ExtraSmall else 2.dp
+                    )
+                )
+                // 分区
+                if (item.area_v2_name.isNotBlank()) {
+                    SearchResultText(
+                        text = "${item.area_v2_parent_name} · ${item.area_v2_name}",
+                        role = SearchResultTextRole.BADGE,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun SearchLoadMoreIndicator(
+    error: String? = null,
+    onRetry: (() -> Unit)? = null,
+) {
+    if (error != null) {
+        SearchNativeMessageState(
+            title = stringResource(R.string.search_more_failed),
+            message = error,
+            actionLabel = onRetry?.let { stringResource(R.string.search_retry) },
+            onAction = onRetry,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp)
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            AdaptiveLoadingIndicator(size = 24.dp, strokeWidth = 2.dp)
+        }
+    }
+}
+
+@Composable
+internal fun SearchNativeMessageState(
+    title: String,
+    message: String? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    animation: app.bilipai.core.ui.MaidAnimation? = null,
+    isVisible: Boolean = true
+) {
+    app.bilipai.core.ui.MaidStateViewport(
+        modifier = modifier.padding(24.dp)
+    ) {
+        if (animation != null) {
+            var replayKey by remember(animation, title, message) { mutableIntStateOf(0) }
+            app.bilipai.core.ui.BlueSnowMaidAnimation(
+                animation = animation,
+                isVisible = isVisible,
+                replayKey = replayKey,
+                modifier = Modifier
+                    .size(app.bilipai.core.ui.maidStateIllustrationSize())
+                    .appActionClickable(
+                        role = androidx.compose.ui.semantics.Role.Button,
+                        onClickLabel = "重播蓝雪女仆动画"
+                    ) { replayKey++ }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        AppText(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppContentColors.primaryText()
+        )
+        if (!message.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            AppText(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppContentColors.secondaryText()
+            )
+        }
+        if (actionLabel != null && onAction != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            if (animation == app.bilipai.core.ui.MaidAnimation.RETRY) {
+                app.bilipai.core.ui.components.AppButton(onClick = onAction) {
+                    AppText(actionLabel)
+                }
+            } else {
+                AppTextButton(onClick = onAction) {
+                    AppText(actionLabel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun LiveUserSearchResultCard(
+    item: SearchLiveUserItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val cleaned = remember(item.uid, item.uname, item.uface) { item.cleanupFields() }
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(cleaned.uface)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = cleaned.uname,
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SearchResultText(
+                        text = cleaned.uname,
+                        role = SearchResultTextRole.TITLE,
+                        fontWeight = FontWeight.Medium,
+                        color = AppContentColors.primaryText(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (cleaned.isLive || cleaned.liveStatus == 1) {
+                        Spacer(modifier = Modifier.width(AppSpacingTokens.Small))
+                        AppSurface(
+                            color = AppContentColors.error(),
+                            shape = AppShapes.container(ContainerLevel.Tag)
+                        ) {
+                            SearchResultText(
+                                text = stringResource(R.string.search_live_now),
+                                role = SearchResultTextRole.BADGE,
+                                color = Color.White,
+                                modifier = Modifier.padding(
+                                    horizontal = AppSpacingTokens.ExtraSmall,
+                                    vertical = AppSpacingTokens.Micro,
+                                )
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                SearchResultText(
+                    text = "粉丝 ${FormatUtils.formatStat(cleaned.attentions.toLong())}",
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun TopicSearchResultCard(
+    item: SearchTopicItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val cleaned = remember(item.topicId, item.title, item.cover) { item.cleanupFields() }
+    SearchResultCardSurface(
+        appearance = appearance,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(cleaned.cover)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = cleaned.title,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(AppShapes.container(ContainerLevel.Chip))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+            Column(modifier = Modifier.weight(1f)) {
+                SearchResultText(
+                    text = cleaned.title,
+                    role = SearchResultTextRole.TITLE,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (cleaned.description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                    SearchResultText(
+                        text = cleaned.description,
+                        role = SearchResultTextRole.BODY,
+                        color = AppContentColors.secondaryText(),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                SearchResultText(
+                    text = "浏览 ${FormatUtils.formatStat(cleaned.view.toLong())}",
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun PhotoSearchResultCard(
+    item: SearchPhotoItem,
+    appearance: SearchResultCardAppearance
+) {
+    val useMiuixPresentation = LocalAppUiStyle.current == AppUiStyle.MIUIX
+    val cleaned = remember(item.id, item.title, item.cover) { item.cleanupFields() }
+    SearchResultCardSurface(
+        appearance = appearance.copy(
+            containerAlpha = appearance.containerAlpha * 0.72f
+        ),
+        onClick = null
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    if (useMiuixPresentation) AppSpacingTokens.Medium else 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(cleaned.cover)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = cleaned.title,
+                modifier = Modifier
+                    .size(width = 104.dp, height = 72.dp)
+                    .clip(AppShapes.container(ContainerLevel.Chip))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(AppSpacingTokens.Medium))
+            Column(modifier = Modifier.weight(1f)) {
+                SearchResultText(
+                    text = cleaned.title,
+                    role = SearchResultTextRole.TITLE,
+                    fontWeight = FontWeight.Medium,
+                    color = AppContentColors.primaryText(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                SearchResultText(
+                    text = cleaned.uname,
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                SearchResultText(
+                    text = "图片 ${cleaned.count} · 浏览 ${FormatUtils.formatStat(cleaned.view.toLong())} · 喜欢 ${FormatUtils.formatStat(cleaned.like.toLong())}",
+                    role = SearchResultTextRole.BADGE,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacingTokens.ExtraSmall))
+                SearchResultText(
+                    text = stringResource(R.string.search_not_supported),
+                    role = SearchResultTextRole.BADGE,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ArticleSearchResultCard(
+    item: SearchArticleItem,
+    appearance: SearchResultCardAppearance,
+    onClick: () -> Unit,
+) {
+    val nativeTarget = when (val target = resolveArticleNavigationTarget(item.id)) {
+        is ArticleNavigationTarget.NativeArticle -> app.bilipai.navigation3.BiliPaiNavKey.ArticleDetail(target.articleId, item.title)
+        is ArticleNavigationTarget.NativeDynamic -> app.bilipai.navigation3.BiliPaiNavKey.DynamicDetail(target.dynamicId)
+        null -> null
+    }
+    val container = nativeTarget?.let {
+        app.bilipai.core.ui.rememberNativeCardContainerTransition(it, onClick)
+    }
+    SearchResultCardSurface(
+        appearance = appearance,
+        // 专栏与图文只走导航卡片容器；关闭动效时仍用同一目标正常跳转，
+        // 不回退搜索页内部的共享元素宿主，确保返回回收到这张结果卡片。
+        onClick = container?.onClick ?: onClick,
+        modifier = container?.modifier ?: Modifier,
+    ) {
+        val metaLine = buildString {
+            val publishTime = FormatUtils.formatPublishTime(item.pubTime)
+            if (publishTime.isNotBlank()) append(publishTime)
+            if (item.categoryName.isNotBlank()) {
+                if (isNotEmpty()) append(" · ")
+                append(item.categoryName)
+            }
+        }
+        val info: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
+            SearchResultText(
+                text = item.title,
+                role = SearchResultTextRole.TITLE,
+                fontWeight = FontWeight.SemiBold,
+                color = AppContentColors.primaryText(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (item.imageUrls.isEmpty() && item.description.isNotBlank()) {
+                SearchResultText(
+                    text = item.description,
+                    role = SearchResultTextRole.BODY,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (metaLine.isNotBlank()) {
+                SearchResultText(
+                    text = metaLine,
+                    role = SearchResultTextRole.METADATA,
+                    color = AppContentColors.secondaryText(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            SearchResultText(
+                text = "${FormatUtils.formatStat(item.view.toLong())}浏览 · ${FormatUtils.formatStat(item.reply.toLong())}评论 · ${FormatUtils.formatStat(item.like.toLong())}点赞",
+                role = SearchResultTextRole.METADATA,
+                color = AppContentColors.secondaryText(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (item.imageUrls.isNotEmpty()) {
+            HorizontalVideoCardFrame(
+                horizontalCoverMaxWidthDp = app.bilipai.feature.home.components.cards.WIDE_LIST_COVER_MAX_WIDTH_DP,
+                modifier = Modifier.fillMaxWidth(),
+                coverContent = {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(FormatUtils.buildSizedImageUrl(item.imageUrls.first(), width = 480, height = 320))
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                },
+                infoContent = info,
+            )
+        } else {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                content = info,
+            )
+        }
+    }
+}
