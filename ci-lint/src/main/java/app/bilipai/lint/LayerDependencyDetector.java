@@ -79,17 +79,27 @@ public final class LayerDependencyDetector extends Detector implements SourceCod
                         ? absolutePath.substring(srcIndex + 1)
                         : absolutePath;
 
-                if (isLowerLayerFile(filePath) && targetsAppLayer(imported)) {
-                    context.report(ISSUE, node, context.getLocation(node),
-                            "Lower layer file `" + filePath + "` imports application-layer `"
-                                    + imported + "`; see docs/wiki/LAYERS.md");
-                    return;
-                }
+                // navigation3 lives inside :app, so this rule must run before the
+                // application-module exclusion below, or it would never fire.
                 if (filePath.contains("/navigation3/") && imported.startsWith(APP_NAVIGATION)) {
                     context.report(ISSUE, node, context.getLocation(node),
                             "`navigation3` imports `navigation` (`" + imported + "`); break the "
                                     + "cycle by moving the shared key type to a lower layer "
                                     + "(docs/wiki/LAYERS.md)");
+                    return;
+                }
+
+                // :app and :app-tv host both core/ and feature/ packages. Judge that from the
+                // raw path: the portable path above is already cut at "/src/", which would hide
+                // the module directory from this check.
+                if (absolutePath.contains("/app/src/")
+                        || absolutePath.contains("/app-tv/src/")) {
+                    return;
+                }
+                if (isLowerLayerFile(filePath) && targetsAppLayer(imported)) {
+                    context.report(ISSUE, node, context.getLocation(node),
+                            "Lower layer file `" + filePath + "` imports application-layer `"
+                                    + imported + "`; see docs/wiki/LAYERS.md");
                 }
             }
         };
@@ -115,6 +125,11 @@ public final class LayerDependencyDetector extends Detector implements SourceCod
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    /**
+     * True when the file belongs to a lower-layer <em>module</em>. The {@code :app} and
+     * {@code :app-tv} exclusion runs on the raw path before this method is called (the portable
+     * path is already cut at {@code /src/} and can no longer show the module directory).
+     */
     private static boolean isLowerLayerFile(String filePath) {
         for (String segment : LOWER_LAYER_PATH_SEGMENTS) {
             if (filePath.contains(segment)) {
