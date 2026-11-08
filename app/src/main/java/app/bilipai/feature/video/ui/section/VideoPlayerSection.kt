@@ -233,6 +233,7 @@ import app.bilipai.feature.anime4k.resolveAnime4KOutputDecision
 import app.bilipai.feature.anime4k.shouldFallbackAnime4KBeforeFirstFrame
 import app.bilipai.feature.anime4k.gl.Anime4KGLSurfaceView
 import app.bilipai.plugin.sdk.VideoEnhancementPluginApi
+import app.bilipai.core.subtitle.SUBTITLE_GAP_HOLD_MS
 import app.bilipai.feature.video.subtitle.SubtitleDisplayMode
 import app.bilipai.feature.video.subtitle.SubtitleAutoPreference
 import app.bilipai.feature.video.subtitle.buildSubtitleTrackOptions
@@ -241,7 +242,7 @@ import app.bilipai.feature.video.subtitle.normalizeSubtitleDisplayMode
 import app.bilipai.feature.video.subtitle.normalizeSubtitleVerticalOffsetFraction
 import app.bilipai.feature.video.subtitle.resolveSubtitleControlAvailability
 import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayModeByAutoPreference
-import app.bilipai.feature.video.subtitle.resolveSubtitleTextAt
+import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayTextAt
 import app.bilipai.feature.video.subtitle.resolveSubtitleTrackDisplayLabel
 import app.bilipai.feature.video.subtitle.shouldRenderPrimarySubtitle
 import app.bilipai.feature.video.subtitle.shouldRenderSecondarySubtitle
@@ -488,6 +489,7 @@ private fun BoxScope.VideoSubtitleOverlayHost(
     ) {
         app.bilipai.feature.video.subtitle.subtitlePositionTimeline(
             subtitleOwner.subtitlePrimaryCues, subtitleOwner.subtitleSecondaryCues, timingOffsetMs,
+            endHoldMs = SUBTITLE_GAP_HOLD_MS,
         )
     }
     val subtitlePositionMs by app.bilipai.core.player.rememberPlaybackPosition(
@@ -497,7 +499,7 @@ private fun BoxScope.VideoSubtitleOverlayHost(
             (subtitleOwner.subtitlePrimaryCues.isNotEmpty() || subtitleOwner.subtitleSecondaryCues.isNotEmpty()),
         timeline = subtitleTimeline,
     )
-    val subtitlePrimaryRawText = remember(
+    val subtitlePrimaryText = remember(
         uiState,
         subtitleFeatureEnabled,
         subtitlePositionMs,
@@ -510,10 +512,10 @@ private fun BoxScope.VideoSubtitleOverlayHost(
             return@remember null
         }
         if (!shouldRenderPrimarySubtitle(subtitleDisplayMode)) return@remember null
-        resolveSubtitleTextAt(success.subtitlePrimaryCues,
+        resolveSubtitleDisplayTextAt(success.subtitlePrimaryCues,
             app.bilipai.feature.video.subtitle.subtitlePositionForOffset(subtitlePositionMs, timingOffsetMs))
     }
-    val subtitleSecondaryRawText = remember(
+    val subtitleSecondaryText = remember(
         uiState,
         subtitleFeatureEnabled,
         subtitlePositionMs,
@@ -526,62 +528,8 @@ private fun BoxScope.VideoSubtitleOverlayHost(
             return@remember null
         }
         if (!shouldRenderSecondarySubtitle(subtitleDisplayMode)) return@remember null
-        resolveSubtitleTextAt(success.subtitleSecondaryCues,
+        resolveSubtitleDisplayTextAt(success.subtitleSecondaryCues,
             app.bilipai.feature.video.subtitle.subtitlePositionForOffset(subtitlePositionMs, timingOffsetMs))
-    }
-
-    var stickyPrimaryText by remember(subtitlePollingIdentity, timingOffsetMs) { mutableStateOf<String?>(null) }
-    var stickySecondaryText by remember(subtitlePollingIdentity, timingOffsetMs) { mutableStateOf<String?>(null) }
-    var primaryBlankSinceMs by remember(subtitlePollingIdentity, timingOffsetMs) { mutableLongStateOf(-1L) }
-    var secondaryBlankSinceMs by remember(subtitlePollingIdentity, timingOffsetMs) { mutableLongStateOf(-1L) }
-    val nowForSticky = subtitlePositionMs
-    val subtitlePrimaryText = remember(
-        subtitlePrimaryRawText,
-        stickyPrimaryText,
-        primaryBlankSinceMs,
-        nowForSticky
-    ) {
-        val blankGap = if (subtitlePrimaryRawText.isNullOrBlank() && primaryBlankSinceMs >= 0L) {
-            (nowForSticky - primaryBlankSinceMs).coerceAtLeast(0L)
-        } else {
-            0L
-        }
-        app.bilipai.feature.video.subtitle.resolveStickySubtitleText(
-            currentText = subtitlePrimaryRawText,
-            previousText = stickyPrimaryText,
-            blankGapMs = blankGap,
-        )
-    }
-    val subtitleSecondaryText = remember(
-        subtitleSecondaryRawText,
-        stickySecondaryText,
-        secondaryBlankSinceMs,
-        nowForSticky
-    ) {
-        val blankGap = if (subtitleSecondaryRawText.isNullOrBlank() && secondaryBlankSinceMs >= 0L) {
-            (nowForSticky - secondaryBlankSinceMs).coerceAtLeast(0L)
-        } else {
-            0L
-        }
-        app.bilipai.feature.video.subtitle.resolveStickySubtitleText(
-            currentText = subtitleSecondaryRawText,
-            previousText = stickySecondaryText,
-            blankGapMs = blankGap,
-        )
-    }
-    SideEffect {
-        if (!subtitlePrimaryRawText.isNullOrBlank()) {
-            stickyPrimaryText = subtitlePrimaryRawText
-            primaryBlankSinceMs = -1L
-        } else if (primaryBlankSinceMs < 0L) {
-            primaryBlankSinceMs = nowForSticky
-        }
-        if (!subtitleSecondaryRawText.isNullOrBlank()) {
-            stickySecondaryText = subtitleSecondaryRawText
-            secondaryBlankSinceMs = -1L
-        } else if (secondaryBlankSinceMs < 0L) {
-            secondaryBlankSinceMs = nowForSticky
-        }
     }
 
     var subtitleVerticalOffsetFraction by rememberSaveable(bvid) {
@@ -2098,6 +2046,10 @@ private fun VideoPlayerSectionContent(
                         danmakuManager.isEnabled = newState
                         if (!newState) {
                             danmakuManager.clear()
+                        }
+                        // 弹幕开关由横竖屏共用；快捷键与按钮一样保存，换片后继续沿用。
+                        settingsScope.launch {
+                            SettingsManager.setDanmakuEnabled(context, newState)
                         }
                         Toast.makeText(context, if (newState) "弹幕已开启" else "弹幕已关闭", Toast.LENGTH_SHORT).show()
                         true

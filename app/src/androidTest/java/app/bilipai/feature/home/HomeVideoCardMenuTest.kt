@@ -9,10 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.width
 import app.bilipai.core.theme.AppUiStyle
 import app.bilipai.core.theme.LocalAppUiStyle
 import app.bilipai.core.ui.AppThemeConfig
@@ -26,6 +30,7 @@ import app.bilipai.data.model.response.VideoItem
 import app.bilipai.feature.home.components.cards.ElegantVideoCard
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -48,7 +53,7 @@ class HomeVideoCardMenuTest {
                 ProvideAppThemeConfig(AppThemeConfig(liquidGlassEnabled = false)) {
                     MiuixTheme {
                         MaterialTheme {
-                            Box(Modifier.width(240.dp)) {
+                            Box(Modifier.width(240.dp).testTag("menu_card")) {
                                 ElegantVideoCard(
                                     video = VideoItem(bvid = "BV_menu", title = "菜单测试", owner = Owner(name = "UP")),
                                     index = 0,
@@ -65,6 +70,9 @@ class HomeVideoCardMenuTest {
             }
         }
         rule.onNodeWithText("稍后再看").assertDoesNotExist()
+        val card = rule.onNodeWithTag("menu_card").getUnclippedBoundsInRoot()
+        val overflow = rule.onNodeWithContentDescription("更多操作").getUnclippedBoundsInRoot()
+        assertTrue(overflow.left.value > card.left.value + card.width.value / 2f)
         rule.onNodeWithContentDescription("更多操作").performClick()
         rule.onNodeWithText("稍后再看").performClick()
         rule.runOnIdle { assertEquals(1, watchLater) }

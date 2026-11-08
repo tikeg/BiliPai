@@ -65,7 +65,6 @@ import app.bilipai.feature.video.subtitle.buildSubtitleTrackOptions
 import app.bilipai.feature.video.subtitle.isSubtitleFeatureEnabledForUser
 import app.bilipai.feature.video.subtitle.normalizeSubtitleDisplayMode
 import app.bilipai.feature.video.subtitle.normalizeSubtitleVerticalOffsetFraction
-import app.bilipai.feature.video.subtitle.resolveStickySubtitleText
 import app.bilipai.feature.video.subtitle.resolveSubtitleControlAvailability
 import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayModeByAutoPreference
 import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayOptions

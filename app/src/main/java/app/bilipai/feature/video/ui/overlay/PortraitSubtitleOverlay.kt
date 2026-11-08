@@ -24,10 +24,8 @@ import app.bilipai.core.ui.components.AppSwitch
 import app.bilipai.core.ui.components.AppText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,18 +56,18 @@ import androidx.media3.exoplayer.ExoPlayer
 import app.bilipai.core.store.SettingsManager
 import app.bilipai.core.ui.AppShapes
 import app.bilipai.core.ui.ContainerLevel
+import app.bilipai.core.subtitle.SUBTITLE_GAP_HOLD_MS
 import app.bilipai.feature.video.subtitle.SubtitleDisplayMode
 import app.bilipai.feature.video.subtitle.SubtitleTrackOption
 import app.bilipai.feature.video.subtitle.buildSubtitleTrackOptions
 import app.bilipai.feature.video.subtitle.isSubtitleFeatureEnabledForUser
 import app.bilipai.feature.video.subtitle.normalizeSubtitleDisplayMode
 import app.bilipai.feature.video.subtitle.normalizeSubtitleVerticalOffsetFraction
-import app.bilipai.feature.video.subtitle.resolveStickySubtitleText
 import app.bilipai.feature.video.subtitle.resolveSubtitleControlAvailability
 import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayModeByAutoPreference
 import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayOptions
 import app.bilipai.feature.video.subtitle.resolveSubtitlePositionPollingIdentity
-import app.bilipai.feature.video.subtitle.resolveSubtitleTextAt
+import app.bilipai.feature.video.subtitle.resolveSubtitleDisplayTextAt
 import app.bilipai.feature.video.subtitle.resolveSubtitleTextSizeSpec
 import app.bilipai.feature.video.subtitle.resolveSubtitleTrackDisplayLabel
 import app.bilipai.feature.video.subtitle.shouldKeepSubtitleOverlayMounted
@@ -232,6 +230,7 @@ fun PortraitSubtitleHost(
     val subtitleTimeline = remember(success.subtitlePrimaryCues, success.subtitleSecondaryCues, subtitleSession.timeOffsetMs) {
         app.bilipai.feature.video.subtitle.subtitlePositionTimeline(
             success.subtitlePrimaryCues, success.subtitleSecondaryCues, subtitleSession.timeOffsetMs,
+            endHoldMs = SUBTITLE_GAP_HOLD_MS,
         )
     }
     val positionMs by app.bilipai.core.player.rememberPlaybackPosition(
@@ -242,51 +241,15 @@ fun PortraitSubtitleHost(
         timeline = subtitleTimeline,
     )
 
-    val primaryRaw = if (shouldRenderPrimarySubtitle(displayMode)) {
-        resolveSubtitleTextAt(success.subtitlePrimaryCues, subtitlePositionForOffset(positionMs, subtitleSession.timeOffsetMs))
+    val primaryText = if (shouldRenderPrimarySubtitle(displayMode)) {
+        resolveSubtitleDisplayTextAt(success.subtitlePrimaryCues, subtitlePositionForOffset(positionMs, subtitleSession.timeOffsetMs))
     } else {
         null
     }
-    val secondaryRaw = if (shouldRenderSecondarySubtitle(displayMode)) {
-        resolveSubtitleTextAt(success.subtitleSecondaryCues, subtitlePositionForOffset(positionMs, subtitleSession.timeOffsetMs))
+    val secondaryText = if (shouldRenderSecondarySubtitle(displayMode)) {
+        resolveSubtitleDisplayTextAt(success.subtitleSecondaryCues, subtitlePositionForOffset(positionMs, subtitleSession.timeOffsetMs))
     } else {
         null
-    }
-    var stickyPrimary by remember(pollingIdentity, subtitleSession.timeOffsetMs) { mutableStateOf<String?>(null) }
-    var stickySecondary by remember(pollingIdentity, subtitleSession.timeOffsetMs) { mutableStateOf<String?>(null) }
-    var primaryBlankSince by remember(pollingIdentity, subtitleSession.timeOffsetMs) { mutableLongStateOf(-1L) }
-    var secondaryBlankSince by remember(pollingIdentity, subtitleSession.timeOffsetMs) { mutableLongStateOf(-1L) }
-    val primaryText = resolveStickySubtitleText(
-        currentText = primaryRaw,
-        previousText = stickyPrimary,
-        blankGapMs = if (primaryRaw.isNullOrBlank() && primaryBlankSince >= 0L) {
-            (positionMs - primaryBlankSince).coerceAtLeast(0L)
-        } else {
-            0L
-        }
-    )
-    val secondaryText = resolveStickySubtitleText(
-        currentText = secondaryRaw,
-        previousText = stickySecondary,
-        blankGapMs = if (secondaryRaw.isNullOrBlank() && secondaryBlankSince >= 0L) {
-            (positionMs - secondaryBlankSince).coerceAtLeast(0L)
-        } else {
-            0L
-        }
-    )
-    SideEffect {
-        if (!primaryRaw.isNullOrBlank()) {
-            stickyPrimary = primaryRaw
-            primaryBlankSince = -1L
-        } else if (primaryBlankSince < 0L) {
-            primaryBlankSince = positionMs
-        }
-        if (!secondaryRaw.isNullOrBlank()) {
-            stickySecondary = secondaryRaw
-            secondaryBlankSince = -1L
-        } else if (secondaryBlankSince < 0L) {
-            secondaryBlankSince = positionMs
-        }
     }
 
     val keepMounted = shouldKeepSubtitleOverlayMounted(
