@@ -19,6 +19,7 @@ public final class CiIssueRegistry extends IssueRegistry {
         List<Issue> issues = new ArrayList<>(StyleDetector.ISSUES);
         issues.add(PerformanceDetector.ISSUE);
         issues.add(ModelStabilityDetector.ISSUE);
+        issues.add(LayerDependencyDetector.ISSUE);
         return List.copyOf(issues);
     }
 
