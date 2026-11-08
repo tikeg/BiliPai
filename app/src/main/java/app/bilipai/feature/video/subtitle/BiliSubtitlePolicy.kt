@@ -127,9 +127,5 @@ fun shouldKeepSubtitleOverlayMounted(
     suppressOverlay: Boolean,
 ): Boolean = app.bilipai.core.subtitle.shouldKeepSubtitleOverlayMounted(overlayEnabled = overlayEnabled, isInPipMode = isInPipMode, isAudioOnly = isAudioOnly, suppressOverlay = suppressOverlay)
 
-fun resolveStickySubtitleText(
-    currentText: String?,
-    previousText: String?,
-    blankGapMs: Long,
-    maxHoldMs: Long = 280L,
-): String? = app.bilipai.core.subtitle.resolveStickySubtitleText(currentText = currentText, previousText = previousText, blankGapMs = blankGapMs, maxHoldMs = maxHoldMs)
+fun resolveSubtitleDisplayTextAt(cues: List<SubtitleCue>, positionMs: Long): String? =
+    app.bilipai.core.subtitle.resolveSubtitleDisplayTextAt(cues, positionMs)
