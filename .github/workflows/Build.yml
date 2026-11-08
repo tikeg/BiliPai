@@ -55,7 +55,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [quality-guards, check-fcm]
-    if: needs.check-fcm.outputs.has_fcm == 'true'
+    if: needs.check-fcm.outputs.has_fcm == 'true' || github.event.inputs.build_type == 'dev'
     env:
       NATIVE_TARGET: "arm64-v8a"
     steps:
@@ -94,9 +94,15 @@ jobs:
         run: chmod +x gradlew
         
       - name: Set Up FCM Config
+        env:
+          FCM_BASE64: ${{ secrets.FCM }}
         run: |
-          cd ./app
-          echo "${{ secrets.FCM }}" | base64 -d > google-services.json
+          # app/build.gradle.kts 里 google-services 插件是可选的；dev 变体不需要 FCM。
+          if [ -n "$FCM_BASE64" ]; then
+            printf '%s' "$FCM_BASE64" | base64 -d > app/google-services.json
+          else
+            echo "FCM secret 未配置，跳过 google-services.json（dev 构建不需要）"
+          fi
 
       - name: Configure release signing
         if: steps.set_build_type.outputs.build_type == 'release'
@@ -303,7 +309,7 @@ jobs:
   skipped-due-to-no-fcm:
     runs-on: ubuntu-latest
     needs: check-fcm
-    if: needs.check-fcm.outputs.has_fcm == 'false'
+    if: needs.check-fcm.outputs.has_fcm == 'false' && github.event.inputs.build_type != 'dev'
     steps:
       - name: Workflow Skipped
         run: |
