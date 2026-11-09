@@ -12,6 +12,11 @@ on:
         options:
           - 'release'
           - 'dev'
+      skip_fcm:
+        type: boolean
+        description: '无 FCM/无 keystore 通道：跳过 google-services.json，缺失时用 debug 签名'
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -55,7 +60,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [quality-guards, check-fcm]
-    if: needs.check-fcm.outputs.has_fcm == 'true' || github.event.inputs.build_type == 'dev'
+    if: needs.check-fcm.outputs.has_fcm == 'true' || github.event.inputs.build_type == 'dev' || github.event.inputs.skip_fcm == 'true'
     env:
       NATIVE_TARGET: "arm64-v8a"
     steps:
@@ -105,7 +110,8 @@ jobs:
           fi
 
       - name: Configure release signing
-        if: steps.set_build_type.outputs.build_type == 'release'
+        # skip_fcm 通道没有 keystore secret，由 Gradle 回落 debug 签名，这里不拦。
+        if: steps.set_build_type.outputs.build_type == 'release' && github.event.inputs.skip_fcm != 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
           BILI_RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
@@ -150,6 +156,10 @@ jobs:
             "-Pbili.build.workflowRunUrl=${BILI_BUILD_WORKFLOW_RUN_URL}"
             "-Pbili.build.releaseTag=${BILI_BUILD_RELEASE_TAG}"
           )
+          if [ "${{ github.event.inputs.skip_fcm }}" = "true" ]; then
+            echo "skip_fcm=true：无 FCM、无 keystore，release 产物改用 debug 签名"
+            COMMON_ARGS+=("-Pbili.release.debugSigning=true")
+          fi
           if [ "${{ steps.set_build_type.outputs.build_type }}" = "release" ]; then
             ./gradlew "${COMMON_ARGS[@]}" -Pbili.firebase.uploadMapping=true assembleRelease
           else
@@ -319,7 +329,7 @@ jobs:
   skipped-due-to-no-fcm:
     runs-on: ubuntu-latest
     needs: check-fcm
-    if: needs.check-fcm.outputs.has_fcm == 'false' && github.event.inputs.build_type != 'dev'
+    if: needs.check-fcm.outputs.has_fcm == 'false' && github.event.inputs.build_type != 'dev' && github.event.inputs.skip_fcm != 'true'
     steps:
       - name: Workflow Skipped
         run: |

@@ -187,7 +187,13 @@ android {
 
     buildTypes {
         release {
+            // 正式包优先用 officialRelease keystore；CI 的无 secret 通道通过
+            // -Pbili.release.debugSigning=true 回落到 debug 签名，否则产物是未签名包，装不上。
+            val debugSigningFallback = providers.gradleProperty("bili.release.debugSigning")
+                .map { it.toBoolean() }
+                .getOrElse(false)
             signingConfig = signingConfigs.findByName("officialRelease")
+                ?: if (debugSigningFallback) signingConfigs.getByName("debug") else null
             // Disable PNG crunching to avoid AAPT errors
             isCrunchPngs = false
             buildConfigField("boolean", "ALLOW_HARDCODED_DNS_FALLBACK", "false")
