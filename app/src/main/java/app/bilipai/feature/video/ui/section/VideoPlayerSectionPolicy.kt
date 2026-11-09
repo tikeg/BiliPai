@@ -22,6 +22,7 @@ import app.bilipai.feature.video.playback.session.PlaybackSeekSessionState
 import app.bilipai.feature.video.playback.session.shouldUsePlaybackSeekSessionPosition
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 
 internal const val INITIAL_PLAYER_CONTROLS_VISIBLE = false
 internal const val INITIAL_PLAYER_CHROME_AUTO_HIDE_HANDLED = true
@@ -1520,7 +1521,7 @@ internal fun shouldEnableCoverOverlaySharedBounds(
     // 避免播放器画面和封面各自跑一段动画。
     val allowBySourceRoute = sourceRouteBase == null ||
         (
-            app.bilipai.navigation.isVideoCardReturnTargetRoute(sourceRouteBase) &&
+            app.bilipai.core.navigation.isVideoCardReturnTargetRoute(sourceRouteBase) &&
                 !app.bilipai.core.ui.transition.shouldSkipVideoCardSharedBoundsMorph(
                     sourceRouteBase
                 )
@@ -1534,7 +1535,7 @@ internal fun shouldEnableCoverOverlaySharedBounds(
 
 internal fun resolveForcedReturnCoverSharedElementSourceRoute(sourceRoute: String?): String? {
     val sourceRouteBase = sourceRoute?.substringBefore("?")
-    return if (app.bilipai.navigation.isVideoCardReturnTargetRoute(sourceRouteBase)) {
+    return if (app.bilipai.core.navigation.isVideoCardReturnTargetRoute(sourceRouteBase)) {
         sourceRouteBase?.takeIf { it.isNotBlank() }
     } else {
         null

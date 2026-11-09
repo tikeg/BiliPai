@@ -280,6 +280,7 @@ import app.bilipai.feature.video.ui.section.resolveForcedReturnCoverSharedElemen
 import app.bilipai.feature.video.viewmodel.PlayerToastPresentation
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import app.bilipai.core.navigation.ScreenRoutes
 
 /**
  * 评论区「一键回顶」恢复播放器事件:评论区 host 与竖屏播放器处于不同
@@ -844,7 +845,7 @@ internal fun VideoDetailScreenStateHolder(
         isVisible = isVisible,
         uiState = detailContentState ?: uiState,
         watchLaterSourceBvid = bvid.takeIf {
-            sourceRouteForSharedElement == app.bilipai.navigation.ScreenRoutes.WatchLater.route
+            sourceRouteForSharedElement == app.bilipai.core.navigation.ScreenRoutes.WatchLater.route
         },
         subjectSnapshotState = subjectSnapshotState,
         favoriteFolderSaveEventState = favoriteFolderSaveEventState,

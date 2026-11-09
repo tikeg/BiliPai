@@ -1,7 +1,7 @@
 package app.bilipai.navigation3
 
-import app.bilipai.navigation.ScreenRoutes
-import app.bilipai.navigation.VideoRoute
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
 import app.bilipai.feature.settings.SettingsRootCategory
 import java.net.URLDecoder
 import java.net.URLEncoder

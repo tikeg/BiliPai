@@ -5,7 +5,7 @@ import app.bilipai.data.model.response.FollowedLiveRoom
 import app.bilipai.data.model.response.SessionItem
 import app.bilipai.feature.dynamic.components.DynamicCardPrimaryAction
 import app.bilipai.feature.dynamic.components.resolveDynamicCardPrimaryAction
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 
 internal data class MessageNotificationTiming(
     val periodicMinutes: Long,

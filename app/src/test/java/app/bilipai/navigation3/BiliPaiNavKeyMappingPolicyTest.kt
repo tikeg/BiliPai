@@ -1,6 +1,6 @@
 package app.bilipai.navigation3
 
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs

@@ -22,16 +22,9 @@
         <ignore path="src/main/java/app/bilipai/feature/live/components/LiveSuperChatFlashOverlay.kt" />
     </issue>
     <!-- BiliPaiHardcodedShape has no approved paths: SHAPE_HITS was empty. -->
-    <!-- Approved legacy exemptions for the navigation3 -> navigation import cycle
-         (docs/wiki/LAYERS.md rule 5). Only these existing call sites may import navigation
-         keys; every new import of app.bilipai.navigation.* from navigation3 fails CI.
-         Remove each line when the shared key type moves to a lower layer. -->
-    <issue id="BiliPaiLayerDependency">
-        <ignore path="src/main/java/app/bilipai/navigation3/BiliPaiNavKeyMappingPolicy.kt" />
-        <ignore path="src/main/java/app/bilipai/navigation3/BiliPaiNavMotionPolicy.kt" />
-        <ignore path="src/main/java/app/bilipai/navigation3/BiliPaiCardMorphDestinationPolicy.kt" />
-        <ignore path="src/main/java/app/bilipai/navigation3/BiliPaiNavContentTransformPolicy.kt" />
-    </issue>
+    <!-- navigation3 no longer imports navigation: the shared route keys and policies moved to
+         app.bilipai.core.navigation (docs/wiki/LAYERS.md rule 5). Any new import of
+         app.bilipai.navigation.* from navigation3 fails CI with no exemption. -->
     <issue id="BiliPaiHardcodedMotion">
         <ignore path="src/main/java/app/bilipai/feature/login/LoginComponents.kt" />
         <ignore path="src/main/java/app/bilipai/feature/login/LoginScreen.kt" />

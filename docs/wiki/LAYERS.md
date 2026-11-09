@@ -21,7 +21,7 @@
 2. **repository 唯一所有者**：repository 只存在于 `core-data`（及 `data-*`）下，按 API 域组织（如 `SearchRepository`、`VideoCatalogRepository`）。`app/data/repository` 为历史遗留，新代码不得在此新增；存量逐个下沉，下沉期间可用 typealias 过渡。
 3. **domain 不得空壳**：`core-domain/usecase` 必须承载可复用流程（续播、稍后再看、弹幕过滤、WebDAV 同步、观看历史写入）。ViewModel 只做状态编排，业务分支下沉 use case。
 4. **Policy 只保留一种含义**：`*Policy` 仅表示无副作用的分支/适配规则；有副作用或跨对象编排的逻辑改名为 use case 或 repository 方法。禁止再新增"名字像规则、实际是编排"的 Policy。
-5. **导航单栈、职责分明**：全仓只有一个返回栈（`navigation/AppNavigation.kt` 的 `rememberNavBackStack<BiliPaiNavKey>` + `navigation3.BiliPaiNavDisplayHost`）。`navigation/`（`ScreenRoutes`）是唯一路由真相源，`navigation3/` 只做宿主、转场与返回手势，`navigation3` 不得反向 import `navigation`（改走公共键类型）。`miuix-navigation` 模块保留（Miuix 导航 + 视频返回补丁）。
+5. **导航单栈、职责分明**：全仓只有一个返回栈（`navigation/AppNavigation.kt` 的 `rememberNavBackStack<BiliPaiNavKey>` + `navigation3.BiliPaiNavDisplayHost`）。共享路由键与返回策略位于 `core/navigation`（`ScreenRoutes`、`VideoRoute`、`AppSystemBackAction`、`isVideoCardReturnTargetRoute` 等），它不属于 `navigation/` 也不属于 `navigation3/`；`navigation/` 是导航编排的真相源，`navigation3/` 只做宿主、转场与返回手势，`navigation3` 不得 import `navigation`（改走 `core/navigation` 共享类型）。`miuix-navigation` 模块保留（Miuix 导航 + 视频返回补丁）。
 
 ## 3. 依赖方向
 
@@ -42,7 +42,7 @@ app-tv ─> 同上（通过 :app 的公开面或 core-*，不得反向依赖 :ap
 ## 5. 阶段性验收（对应结构审查报告）
 
 - [ ] 阶段 1：`app/data/repository` 不再新增；存量逐个下沉至 `core-data`（或全部标注为 app 私有并有架构 lint 证明无跨层泄漏）
-- [ ] 阶段 1：`navigation3 → navigation` 反向 import 清零；全量手测返回栈行为不变
+- [x] 阶段 1：`navigation3 → navigation` 反向 import 清零（共享键已下沉 `core/navigation`，`app/lint.xml` 豁免已移除）；全量手测返回栈行为待补
 - [ ] 阶段 1：架构 lint 规则在 CI 生效（禁止反向依赖、禁止双份模型）
 - [ ] 阶段 2：试点 feature 的 `x-impl` 不被其他 feature 直接 import
 - [ ] 每阶段结束：`AppUiStyle.MIUIX` 与 `AppUiStyle.MATERIAL3` 两分支 grep 可达

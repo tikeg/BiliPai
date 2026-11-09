@@ -100,7 +100,7 @@ import app.bilipai.feature.home.components.cards.HorizontalVideoStatRow
 import app.bilipai.feature.home.resolveHomeFeedCardLayout
 import app.bilipai.feature.video.ui.FollowBadgeTone
 import app.bilipai.feature.video.ui.resolveVideoFollowVisualPolicy
-import app.bilipai.navigation.VideoRoute
+import app.bilipai.core.navigation.VideoRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -131,7 +131,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import app.bilipai.R
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.collectLatest
 import app.bilipai.core.ui.rememberDecorativeAnimationGate

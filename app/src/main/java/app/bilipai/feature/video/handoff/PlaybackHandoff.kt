@@ -6,8 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.PersistableBundle
 import androidx.annotation.RequiresApi
-import app.bilipai.navigation.ScreenRoutes
-import app.bilipai.navigation.VideoRoute
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
 
 internal sealed interface PlaybackHandoffPayload {
     val resumePositionMs: Long

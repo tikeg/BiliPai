@@ -9,6 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import app.bilipai.core.navigation.ScreenRoutes
 
 class VideoPlayerCoverPolicyTest {
 
@@ -575,7 +576,7 @@ class VideoPlayerCoverPolicyTest {
                 transitionEnabled = true,
                 hasSharedTransitionScope = true,
                 hasAnimatedVisibilityScope = true,
-                sourceRoute = app.bilipai.navigation.ScreenRoutes.Home.route
+                sourceRoute = app.bilipai.core.navigation.ScreenRoutes.Home.route
             )
         )
         assertTrue(
@@ -584,7 +585,7 @@ class VideoPlayerCoverPolicyTest {
                 transitionEnabled = true,
                 hasSharedTransitionScope = true,
                 hasAnimatedVisibilityScope = true,
-                sourceRoute = "${app.bilipai.navigation.ScreenRoutes.Home.route}?from=tab"
+                sourceRoute = "${app.bilipai.core.navigation.ScreenRoutes.Home.route}?from=tab"
             )
         )
     }

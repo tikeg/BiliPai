@@ -1,7 +1,7 @@
 package app.bilipai.navigation3
 
 import app.bilipai.feature.settings.SettingsRootCategory
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

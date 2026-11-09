@@ -8,6 +8,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
+import app.bilipai.core.navigation.AppSystemBackAction
+import app.bilipai.core.navigation.shouldInterceptSystemBackForAppAction
+import app.bilipai.core.navigation.resolveBottomPagerNavigationDurationMillis
 
 class AppTopLevelNavigationPolicyTest {
 

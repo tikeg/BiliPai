@@ -52,6 +52,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import app.bilipai.navigation3.toLegacyRoute
+import app.bilipai.core.navigation.ScreenRoutes
 
 
 private const val TAG = "BiliPlayerActivity"
@@ -320,7 +321,7 @@ open class VideoActivity : ComponentActivity() {
                     app.bilipai.feature.aicu.LocalAicuNavigation provides { uid: Long? ->
                         startActivity(android.content.Intent(this@VideoActivity, app.bilipai.MainActivity::class.java).apply {
                             putExtra(app.bilipai.EXTRA_PENDING_NAVIGATION_ROUTE,
-                                app.bilipai.navigation.ScreenRoutes.AicuQuery.createRoute(uid))
+                                app.bilipai.core.navigation.ScreenRoutes.AicuQuery.createRoute(uid))
                         })
                     },
                     LocalWindowSizeClass provides windowSizeClass,
@@ -370,7 +371,7 @@ open class VideoActivity : ComponentActivity() {
                         startActivity(Intent(this@VideoActivity, app.bilipai.MainActivity::class.java).apply {
                             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             putExtra(app.bilipai.EXTRA_PENDING_NAVIGATION_ROUTE,
-                                app.bilipai.navigation.ScreenRoutes.Home.route)
+                                app.bilipai.core.navigation.ScreenRoutes.Home.route)
                         })
                         finish()
                     },

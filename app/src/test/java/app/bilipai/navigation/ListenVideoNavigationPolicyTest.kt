@@ -9,6 +9,7 @@ import app.bilipai.navigation3.toLegacyRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import app.bilipai.core.navigation.ScreenRoutes
 
 class ListenVideoNavigationPolicyTest {
 

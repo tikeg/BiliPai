@@ -16,7 +16,7 @@ import app.bilipai.data.model.response.SessionItem
 import app.bilipai.data.model.response.SystemNoticeItem
 import app.bilipai.data.repository.MessageRepository
 import app.bilipai.feature.message.MessagePreviewParser
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException

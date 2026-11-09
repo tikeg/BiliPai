@@ -4,6 +4,7 @@ import app.bilipai.feature.home.HomeVideoClickRequest
 import app.bilipai.feature.home.HomeVideoClickSource
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import app.bilipai.core.navigation.VideoRoute
 
 internal data class HomeVideoNavigationIntent(
     val bvid: String,

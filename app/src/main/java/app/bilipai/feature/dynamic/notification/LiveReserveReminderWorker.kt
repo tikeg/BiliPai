@@ -14,7 +14,7 @@ import app.bilipai.MainActivity
 import app.bilipai.R
 import app.bilipai.app.LIVE_RESERVE_NOTIFICATION_CHANNEL_ID
 import app.bilipai.feature.dynamic.components.resolveLiveReserveNotificationTime
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 
 internal class LiveReserveReminderWorker(
     context: Context,

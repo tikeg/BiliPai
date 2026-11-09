@@ -1,8 +1,8 @@
 package app.bilipai.navigation3
 
 import app.bilipai.feature.settings.resolveSettingsNavPopTransition
-import app.bilipai.navigation.AppSystemBackAction
-import app.bilipai.navigation.shouldInterceptSystemBackForAppAction
+import app.bilipai.core.navigation.AppSystemBackAction
+import app.bilipai.core.navigation.shouldInterceptSystemBackForAppAction
 
 internal enum class BiliPaiNavMotionMode {
     CARD_DISABLED,

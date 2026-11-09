@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.navigation.ScreenRoutes
 
 class AdaptiveStateRestorationPolicyTest {
 

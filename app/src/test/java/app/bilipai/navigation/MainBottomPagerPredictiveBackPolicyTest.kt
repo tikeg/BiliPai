@@ -2,6 +2,7 @@ package app.bilipai.navigation
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.bilipai.core.navigation.resolveBottomPagerNavigationDurationMillis
 
 /**
  * BiliPai 底栏返回不跟手 seek，只在 onBackCompleted 用 animateScrollBy 切页。

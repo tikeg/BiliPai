@@ -176,8 +176,8 @@ import app.bilipai.feature.audio.screen.resolveAudioNowPlayingVisible
 import app.bilipai.feature.video.player.PlaylistManager
 import app.bilipai.feature.video.ui.overlay.MiniPlayerOverlay
 import app.bilipai.navigation.AppNavigation
-import app.bilipai.navigation.ScreenRoutes
-import app.bilipai.navigation.VideoRoute
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
 import app.bilipai.navigation3.BiliPaiNavKey
 import app.bilipai.navigation3.toLegacyRoute
 import kotlinx.coroutines.delay

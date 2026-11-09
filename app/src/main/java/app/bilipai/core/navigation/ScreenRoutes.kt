@@ -1,4 +1,4 @@
-package app.bilipai.navigation
+package app.bilipai.core.navigation
 
 import app.bilipai.core.util.encodeUrlComponentCompat
 import java.net.URLEncoder

@@ -15,7 +15,7 @@ import app.bilipai.R
 import app.bilipai.app.MESSAGE_NOTIFICATION_CHANNEL_ID
 import app.bilipai.app.MESSAGE_NOTIFICATION_SERVICE_CHANNEL_ID
 import app.bilipai.app.resolveAppNotificationChannels
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 
 internal object MessageNotificationNotifier {
     fun ensureChannels(context: Context) {

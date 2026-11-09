@@ -1,6 +1,6 @@
 package app.bilipai.navigation3
 
-import app.bilipai.navigation.isVideoCardReturnTargetRoute
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 
 /**
  * 卡片 sharedBounds / 景深过渡的目标页：普通 VideoDetail。

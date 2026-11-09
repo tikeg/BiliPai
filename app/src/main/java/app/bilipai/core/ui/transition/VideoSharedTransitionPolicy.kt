@@ -13,7 +13,7 @@ import app.bilipai.core.ui.adaptive.AdaptiveFoldPosture
 import app.bilipai.core.ui.adaptive.MotionTier
 import app.bilipai.core.ui.adaptive.resolveDeviceUiProfileSpec
 import app.bilipai.core.ui.adaptive.toAdaptiveWidthClass
-import app.bilipai.navigation.isVideoCardReturnTargetRoute
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 import kotlin.math.roundToInt
 import kotlin.math.hypot
 import kotlin.math.abs

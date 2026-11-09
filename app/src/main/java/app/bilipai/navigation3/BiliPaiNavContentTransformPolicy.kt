@@ -15,7 +15,7 @@ import app.bilipai.core.ui.motion.navigationSlideSpring
 import app.bilipai.core.ui.motion.resolveBottomBarLikeHorizontalContentTransform
 import app.bilipai.core.ui.motion.resolveSettingsIosPushForwardContentTransform
 import app.bilipai.core.ui.motion.resolveSettingsIosPushPopContentTransform
-import app.bilipai.navigation.resolveBottomPagerNavigationDurationMillis
+import app.bilipai.core.navigation.resolveBottomPagerNavigationDurationMillis
 
 private const val NAV3_FALLBACK_FADE_MILLIS = 180
 private const val NAV3_REDUCED_MOTION_FADE_MILLIS = 140

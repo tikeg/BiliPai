@@ -18,6 +18,7 @@ import app.bilipai.core.ui.transition.resolveVideoCardSharedTransitionReturnEasi
 import app.bilipai.core.ui.transition.resolveVideoSharedCoverCacheKey
 import app.bilipai.core.ui.transition.shouldHandVisualOwnershipToResidentCoverForOwnership
 import app.bilipai.core.ui.transition.shouldUseVideoCardLiveReturnMorph
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 
 private const val COVER_TAKEOVER_PRE_BACK_DELAY_MILLIS = 0L
 private const val RESIDENT_COVER_RETURN_TAKEOVER_DEPTH_SPAN = 0.82f
@@ -722,7 +723,7 @@ internal fun resolveVideoDetailRouteSheetMotion(
     transitionEnabled: Boolean
 ): VideoDetailRouteSheetMotion {
     val enabled = transitionEnabled &&
-        app.bilipai.navigation.isVideoCardReturnTargetRoute(sourceRoute)
+        app.bilipai.core.navigation.isVideoCardReturnTargetRoute(sourceRoute)
     return VideoDetailRouteSheetMotion(
         enabled = enabled,
         durationMillis = HOME_VIDEO_ROUTE_SHEET_DURATION_MILLIS,

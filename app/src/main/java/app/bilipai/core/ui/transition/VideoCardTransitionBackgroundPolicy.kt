@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import app.bilipai.core.ui.adaptive.MotionTier
-import app.bilipai.navigation.isVideoCardReturnTargetRoute
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 import kotlin.math.roundToInt
 
 // 景深层（与 Hero 卡片放大配合，progress 0→1 同源）：

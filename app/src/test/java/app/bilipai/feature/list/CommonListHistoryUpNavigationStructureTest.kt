@@ -3,6 +3,7 @@ package app.bilipai.feature.list
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import app.bilipai.core.navigation.ScreenRoutes
 
 class CommonListHistoryUpNavigationStructureTest {
 

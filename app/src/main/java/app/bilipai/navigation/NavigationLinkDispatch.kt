@@ -2,6 +2,8 @@ package app.bilipai.navigation
 
 import app.bilipai.core.util.BilibiliNavigationTarget
 import app.bilipai.navigation3.BiliPaiNavKey
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
 
 // 链接分发只构造目的地并调用宿主回调；返回栈、切页与视频过渡仍由导航宿主管理。
 internal fun dispatchNativeLinkNavigation(

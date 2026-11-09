@@ -291,64 +291,13 @@ import app.bilipai.feature.privacy.PrivacyNavigationTarget
 import app.bilipai.feature.privacy.shouldRequirePrivacyAuthentication
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.VideoRoute
+import app.bilipai.core.navigation.AppSystemBackAction
+import app.bilipai.core.navigation.isVideoDetailRoute
+import app.bilipai.core.navigation.isVideoCardReturnTargetRoute
 
 // 定义路由参数结构
-object VideoRoute {
-    const val base = "video"
-    const val route = "$base/{bvid}?cid={cid}&cover={cover}&startAudio={startAudio}&autoPortrait={autoPortrait}&fullscreen={fullscreen}&resumePositionMs={resumePositionMs}&commentRootRpid={commentRootRpid}&commentTargetRpid={commentTargetRpid}&initialVertical={initialVertical}&directPortraitEntry={directPortraitEntry}&title={title}"
-
-    internal fun resolveVideoRoutePath(
-        bvid: String,
-        cid: Long,
-        encodedCover: String,
-        startAudio: Boolean,
-        autoPortrait: Boolean,
-        fullscreen: Boolean = false,
-        resumePositionMs: Long = 0L,
-        commentRootRpid: Long = 0L,
-        commentTargetRpid: Long = 0L,
-        initialVertical: Boolean = false,
-        directPortraitEntry: Boolean = false,
-        title: String = "",
-    ): String {
-        val initialVerticalQuery = if (initialVertical) "&initialVertical=true" else ""
-        val directPortraitQuery = if (directPortraitEntry) "&directPortraitEntry=true" else ""
-        val titleQuery = if (title.isNotBlank()) "&title=${Uri.encode(title)}" else ""
-        return "$base/$bvid?cid=$cid&cover=$encodedCover&startAudio=$startAudio&autoPortrait=$autoPortrait&fullscreen=$fullscreen&resumePositionMs=${resumePositionMs.coerceAtLeast(0L)}&commentRootRpid=${commentRootRpid.coerceAtLeast(0L)}&commentTargetRpid=${commentTargetRpid.coerceAtLeast(0L)}$initialVerticalQuery$directPortraitQuery$titleQuery"
-    }
-
-    // 构建 helper
-    fun createRoute(
-        bvid: String,
-        cid: Long,
-        coverUrl: String,
-        startAudio: Boolean = false,
-        autoPortrait: Boolean = false,
-        fullscreen: Boolean = false,
-        resumePositionMs: Long = 0L,
-        commentRootRpid: Long = 0L,
-        commentTargetRpid: Long = 0L,
-        initialVertical: Boolean = false,
-        directPortraitEntry: Boolean = false,
-        title: String = "",
-    ): String {
-        val encodedCover = Uri.encode(coverUrl)
-        return resolveVideoRoutePath(
-            bvid = bvid,
-            cid = cid,
-            encodedCover = encodedCover,
-            startAudio = startAudio,
-            autoPortrait = autoPortrait,
-            fullscreen = fullscreen,
-            resumePositionMs = resumePositionMs,
-            commentRootRpid = commentRootRpid,
-            commentTargetRpid = commentTargetRpid,
-            initialVertical = initialVertical,
-            directPortraitEntry = directPortraitEntry,
-            title = title,
-        )
-    }
-}
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this

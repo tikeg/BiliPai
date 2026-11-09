@@ -5,6 +5,8 @@ import androidx.compose.runtime.saveable.listSaver
 import app.bilipai.feature.home.components.BottomNavItem
 import app.bilipai.navigation3.BiliPaiNavKey
 import app.bilipai.navigation3.toLegacyRoute
+import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.navigation.AppSystemBackAction
 
 internal enum class TopLevelNavigationAction {
     SKIP,
@@ -17,11 +19,6 @@ internal enum class BottomBarSelectionAction {
     RESELECT
 }
 
-internal enum class AppSystemBackAction {
-    RETURN_TO_HOME_TAB,
-    NAVIGATE_UP,
-    FINISH_ACTIVITY
-}
 
 internal data class BottomPagerRenderBudget(
     val isTransitionRunning: Boolean,
@@ -139,11 +136,6 @@ internal fun resolveAppSystemBackAction(
     return AppSystemBackAction.FINISH_ACTIVITY
 }
 
-internal fun shouldInterceptSystemBackForAppAction(
-    action: AppSystemBackAction
-): Boolean {
-    return action == AppSystemBackAction.RETURN_TO_HOME_TAB
-}
 
 internal fun resolveBottomPagerPageForRoute(
     route: String?,
@@ -263,10 +255,6 @@ internal fun resolveBottomPagerLayoutKey(page: Int, visibleItems: List<BottomNav
         ?: "bottom:removed-slot:$page"
 }
 
-internal fun resolveBottomPagerNavigationDurationMillis(pageDistance: Int): Int {
-    val distance = pageDistance.coerceAtLeast(2)
-    return distance * 100 + 100
-}
 
 internal fun resolveBottomPagerBeyondViewportPageCount(
     pageCount: Int,

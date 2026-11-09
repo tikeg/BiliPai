@@ -1,7 +1,7 @@
 package app.bilipai.feature.audio.bgm
 
 import app.bilipai.data.model.response.*
-import app.bilipai.navigation.ScreenRoutes
+import app.bilipai.core.navigation.ScreenRoutes
 import app.bilipai.navigation3.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
