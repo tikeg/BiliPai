@@ -3,6 +3,7 @@ package app.bilipai.feature.settings
 import app.bilipai.core.theme.AppUiStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.bilipai.core.settings.AppLanguage
 
 class SettingsLanguageStateTest {
 

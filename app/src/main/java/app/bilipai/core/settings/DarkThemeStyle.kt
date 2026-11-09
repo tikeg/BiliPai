@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings
+package app.bilipai.core.settings
 
 enum class DarkThemeStyle(val value: Int, val label: String) {
     DEFAULT(0, "普通黑"),

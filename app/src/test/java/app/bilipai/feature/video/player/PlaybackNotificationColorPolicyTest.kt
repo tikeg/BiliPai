@@ -3,7 +3,7 @@ package app.bilipai.feature.video.player
 import androidx.compose.ui.graphics.Color
 import app.bilipai.core.store.AppThemeSettings
 import app.bilipai.core.store.ThemeRoleOverrides
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

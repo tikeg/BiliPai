@@ -100,6 +100,11 @@ import app.bilipai.core.ui.components.*
 import app.bilipai.core.ui.animation.EntranceGroup
 import app.bilipai.core.ui.animation.entrance
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.shouldPromptAppRestartForLanguageChange
 
 /**
  *  外观设置二级页面

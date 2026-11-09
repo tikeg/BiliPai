@@ -3,7 +3,7 @@ package app.bilipai.core.theme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame

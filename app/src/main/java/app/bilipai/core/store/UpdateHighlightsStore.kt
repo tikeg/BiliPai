@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import app.bilipai.feature.settings.highlights.UpdateHighlightHistory
-import app.bilipai.feature.settings.highlights.prepareUpdateHighlights
+import app.bilipai.core.settings.UpdateHighlightHistory
+import app.bilipai.core.settings.prepareUpdateHighlights
 import kotlinx.coroutines.flow.map
 
 /** Installation-local history: exclude these keys from settings export/import. */

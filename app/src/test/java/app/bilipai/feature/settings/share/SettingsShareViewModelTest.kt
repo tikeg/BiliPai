@@ -15,6 +15,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import app.bilipai.core.settings.SettingsShareApplyResult
+import app.bilipai.core.settings.SettingsShareExportArtifact
+import app.bilipai.core.settings.SettingsShareImportPreview
+import app.bilipai.core.settings.SettingsShareImportSession
+import app.bilipai.core.settings.SettingsShareProfile
+import app.bilipai.core.settings.SettingsShareSection
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsShareViewModelTest {

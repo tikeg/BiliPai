@@ -4,6 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppScreenshotPointerPosition
+import app.bilipai.core.settings.AppScreenshotResult
+import app.bilipai.core.settings.buildAppScreenshotFileName
+import app.bilipai.core.settings.shouldOfferAppScreenshotShare
+import app.bilipai.core.settings.shouldTriggerThreeFingerSwipeDown
+import app.bilipai.core.settings.shouldTriggerTopRightTwoFingerLongPress
 
 class AppScreenshotGesturePolicyTest {
 

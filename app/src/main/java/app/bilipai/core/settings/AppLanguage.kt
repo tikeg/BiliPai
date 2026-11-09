@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings
+package app.bilipai.core.settings
 
 enum class AppLanguage(val value: Int) {
     FOLLOW_SYSTEM(0),

@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import app.bilipai.navigation3.toLegacyRoute
 import app.bilipai.core.navigation.ScreenRoutes
+import app.bilipai.core.settings.resolveThemePreferenceState
 
 
 private const val TAG = "BiliPlayerActivity"
@@ -159,7 +160,7 @@ open class VideoActivity : ComponentActivity() {
                 SettingsManager.getAppThemeSettings(this@VideoActivity)
             }.collectAsStateWithLifecycle(initialValue = SettingsManager.getInitialAppThemeSettings(this@VideoActivity))
             val scheduledDarkTheme = app.bilipai.core.theme.rememberScheduledDarkTheme(themeSettings.darkThemeSchedule)
-            val themePreference = app.bilipai.feature.settings.resolveThemePreferenceState(
+            val themePreference = app.bilipai.core.settings.resolveThemePreferenceState(
                 themeMode = themeSettings.themeMode,
                 darkThemeStyle = themeSettings.darkThemeStyle,
                 systemInDark = androidx.compose.foundation.isSystemInDarkTheme(),

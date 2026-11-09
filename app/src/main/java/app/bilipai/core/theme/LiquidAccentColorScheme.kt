@@ -3,7 +3,7 @@ package app.bilipai.core.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 
 /**
  * Glass chrome uses the picked color, so ordinary content beside it must use the same

@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.SettingsShareProfile
 
 class BundledDefaultSettingsProfileTest {
     private fun readProfile(): SettingsShareProfile {

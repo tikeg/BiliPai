@@ -1,4 +1,4 @@
-package app.bilipai.feature.screenshot
+package app.bilipai.core.settings
 
 import java.time.Instant
 import java.time.ZoneId

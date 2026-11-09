@@ -3,6 +3,7 @@ package app.bilipai.feature.settings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppLanguage
 
 class AppLanguageLocalePolicyTest {
 

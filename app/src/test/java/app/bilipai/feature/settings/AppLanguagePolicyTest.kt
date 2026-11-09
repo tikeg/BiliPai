@@ -5,6 +5,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.resolveAppLanguageLocaleTags
+import app.bilipai.core.settings.resolveAppLanguagePreference
+import app.bilipai.core.settings.shouldPromptAppRestartForLanguageChange
 
 class AppLanguagePolicyTest {
 

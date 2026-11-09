@@ -22,8 +22,8 @@ import app.bilipai.core.ui.components.AppPreference
 import app.bilipai.core.ui.components.AppSwitchPreference
 import app.bilipai.core.ui.components.AppText
 import app.bilipai.core.ui.components.AppTextButton
-import app.bilipai.feature.settings.DarkThemeSchedule
-import app.bilipai.feature.settings.formatThemeScheduleTime
+import app.bilipai.core.settings.DarkThemeSchedule
+import app.bilipai.core.settings.formatThemeScheduleTime
 
 /** Plain preference UI; persistence is owned by SettingsViewModel. */
 @OptIn(ExperimentalMaterial3Api::class)

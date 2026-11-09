@@ -4,6 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeSchedule
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.formatThemeScheduleTime
+import app.bilipai.core.settings.isScheduledDarkTheme
+import app.bilipai.core.settings.normalizeDarkThemeSchedule
+import app.bilipai.core.settings.resolveThemePreferenceState
 
 class DarkThemeScheduleTest {
     @Test

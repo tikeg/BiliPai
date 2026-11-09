@@ -65,8 +65,8 @@ import app.bilipai.core.util.LocalWindowSizeClass
 import app.bilipai.core.util.LocalAppWindowAdaptiveInfo
 import app.bilipai.feature.settings.ui.SettingsPageScaffold
 import app.bilipai.core.store.TokenManager
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
-import app.bilipai.feature.screenshot.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotGestureMode
 import app.bilipai.feature.video.subtitle.SubtitleAutoPreference
 import app.bilipai.feature.video.subtitle.isSubtitleFeatureEnabledForUser
 import app.bilipai.feature.plugin.PlaybackCdnPreference

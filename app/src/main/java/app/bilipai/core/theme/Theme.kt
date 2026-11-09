@@ -42,9 +42,9 @@ import app.bilipai.core.ui.findHostActivity
 import app.bilipai.core.ui.resolveAppIconStyle
 import app.bilipai.core.ui.resolveAppListItemStyle
 import app.bilipai.core.store.ThemeRoleOverrides
-import app.bilipai.feature.settings.AppThemeMode
-import app.bilipai.feature.settings.Md3ColorSource
-import app.bilipai.feature.settings.normalizeMd3CustomColorHex
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.normalizeMd3CustomColorHex
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.material3.dynamicColorScheme

@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import app.bilipai.core.store.ThemeModeRoleOverrides
 import app.bilipai.core.store.ThemeRoleOverrides
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

@@ -1,4 +1,4 @@
-package app.bilipai.feature.screenshot
+package app.bilipai.core.settings
 
 import kotlin.math.max
 import kotlin.math.min

@@ -109,8 +109,8 @@ import app.bilipai.feature.settings.AppUpdateDialogHost
 import app.bilipai.feature.settings.AppUpdateDownloadState
 import app.bilipai.feature.settings.AppUpdateDownloadStatus
 import app.bilipai.feature.settings.AppUpdateInstallAction
-import app.bilipai.feature.settings.AppLanguage
-import app.bilipai.feature.settings.applyAppLanguage
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.applyAppLanguage
 import app.bilipai.core.theme.resolveEffectiveDynamicColorEnabled
 import app.bilipai.core.theme.buildDisplayMetricsSnapshot
 import app.bilipai.core.theme.withDensityScale
@@ -146,12 +146,12 @@ import app.bilipai.feature.settings.resolveBuildSourceValue
 import app.bilipai.feature.settings.resolveUpdateReleaseNotesText
 import app.bilipai.feature.settings.selectPreferredAppUpdateAsset
 import app.bilipai.feature.settings.shouldRunAppEntryAutoCheck
-import app.bilipai.feature.settings.resolveThemePreferenceState
-import app.bilipai.feature.settings.AppThemeMode
+import app.bilipai.core.settings.resolveThemePreferenceState
+import app.bilipai.core.settings.AppThemeMode
 import app.bilipai.core.theme.resolveMd3DynamicColorEnabled
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotCaptureMode
 import app.bilipai.feature.screenshot.AppScreenshotGestureBlockState
-import app.bilipai.feature.screenshot.AppScreenshotResult
+import app.bilipai.core.settings.AppScreenshotResult
 import app.bilipai.feature.screenshot.AppScreenshotSavedImage
 import app.bilipai.feature.screenshot.AppScreenshotRegionOverlay
 import app.bilipai.feature.screenshot.appScreenshotGestureDetector
@@ -160,7 +160,7 @@ import app.bilipai.feature.screenshot.captureCurrentAppWindow
 import app.bilipai.feature.screenshot.cropAppScreenshotBitmap
 import app.bilipai.feature.screenshot.saveAppScreenshotBitmapToGalleryUri
 import app.bilipai.feature.screenshot.shareAppScreenshot
-import app.bilipai.feature.screenshot.shouldOfferAppScreenshotShare
+import app.bilipai.core.settings.shouldOfferAppScreenshotShare
 import app.bilipai.feature.privacy.PrivacyAuthenticationReason
 import app.bilipai.feature.privacy.PrivacyAuthenticationRequest
 import app.bilipai.feature.privacy.PrivacyAuthenticationResult

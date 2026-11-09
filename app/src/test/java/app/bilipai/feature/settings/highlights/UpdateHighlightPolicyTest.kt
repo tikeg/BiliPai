@@ -3,12 +3,19 @@ package app.bilipai.feature.settings.highlights
 import app.bilipai.core.store.AppThemeSettings
 import app.bilipai.core.theme.AppUiStyle
 import app.bilipai.core.theme.SeedPaletteStyle
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import com.materialkolor.PaletteStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.UpdateHighlight
+import app.bilipai.core.settings.UpdateHighlightHistory
+import app.bilipai.core.settings.canPreviewUpdateHighlight
+import app.bilipai.core.settings.isUpdateHighlightAlreadyEnabled
+import app.bilipai.core.settings.latestReleaseHighlights
+import app.bilipai.core.settings.prepareUpdateHighlights
+import app.bilipai.core.settings.updateHighlightCatalog
 
 class UpdateHighlightPolicyTest {
     private val feature = updateHighlightCatalog.first { it.id == "cmf_spec_2026" }

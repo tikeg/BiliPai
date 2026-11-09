@@ -10,8 +10,8 @@ import app.bilipai.core.store.TabletCommentPanelWidthPreset
 import app.bilipai.core.store.TabletSecondaryDefaultTab
 import app.bilipai.core.ui.components.AppSegmentOption
 import app.bilipai.core.ui.components.AppTagChipSize
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
-import app.bilipai.feature.screenshot.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotGestureMode
 
 internal fun <T> resolveSelectionIndex(
     options: List<AppSegmentOption<T>>,

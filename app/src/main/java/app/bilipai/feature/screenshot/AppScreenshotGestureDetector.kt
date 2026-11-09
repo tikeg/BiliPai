@@ -8,6 +8,10 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import app.bilipai.core.settings.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppScreenshotPointerPosition
+import app.bilipai.core.settings.shouldTriggerThreeFingerSwipeDown
+import app.bilipai.core.settings.shouldTriggerTopRightTwoFingerLongPress
 
 @Stable
 fun Modifier.appScreenshotGestureDetector(

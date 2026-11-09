@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
-import app.bilipai.feature.settings.AppThemeMode
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.Md3ColorSource
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertFalse

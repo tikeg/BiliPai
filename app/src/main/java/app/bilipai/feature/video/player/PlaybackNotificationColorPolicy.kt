@@ -15,10 +15,11 @@ import app.bilipai.core.theme.createBiliPaiStyleColorScheme
 import app.bilipai.core.theme.resolveLiquidControlAccentColor
 import app.bilipai.core.theme.resolveMd3ThemeSeedColor
 import app.bilipai.core.theme.readSystemWallpaperSeed
-import app.bilipai.feature.settings.Md3ColorSource
-import app.bilipai.feature.settings.isScheduledDarkTheme
-import app.bilipai.feature.settings.resolveThemePreferenceState
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.isScheduledDarkTheme
+import app.bilipai.core.settings.resolveThemePreferenceState
 import java.util.Calendar
+import app.bilipai.core.settings.DarkThemeStyle
 
 /** A notification is a primary playback accent, independent of native component palette tones. */
 internal fun resolvePlaybackNotificationAccentColor(
@@ -31,7 +32,7 @@ internal fun resolvePlaybackNotificationAccentColor(
         settings.md3ColorSource, settings.md3CustomColorHex, settings.themeColorIndex, wallpaperSeed,
     )
     if (settings.seedPaletteStyle.enabled) {
-        val pureBlack = darkTheme && settings.darkThemeStyle == app.bilipai.feature.settings.DarkThemeStyle.AMOLED
+        val pureBlack = darkTheme && settings.darkThemeStyle == app.bilipai.core.settings.DarkThemeStyle.AMOLED
         if (settings.md3ColorSource == Md3ColorSource.FOLLOW_WALLPAPER && wallpaperAccent != null) {
             // Wallpaper input has already received the selected dark-mode adjustment.
             return wallpaperAccent
@@ -51,7 +52,7 @@ internal fun resolvePlaybackNotificationAccentColor(
         val scheme = createBiliPaiStyleColorScheme(
             seedColor = seed,
             darkTheme = darkTheme,
-            amoledDarkTheme = settings.darkThemeStyle == app.bilipai.feature.settings.DarkThemeStyle.AMOLED,
+            amoledDarkTheme = settings.darkThemeStyle == app.bilipai.core.settings.DarkThemeStyle.AMOLED,
             paletteStyle = settings.colorStyle,
             colorSpec = settings.colorSpec,
             uiStyle = settings.uiStyle,
@@ -62,7 +63,7 @@ internal fun resolvePlaybackNotificationAccentColor(
             uiStyle = settings.uiStyle,
             source = settings.md3ColorSource,
             darkTheme = darkTheme,
-            amoledDarkTheme = settings.darkThemeStyle == app.bilipai.feature.settings.DarkThemeStyle.AMOLED,
+            amoledDarkTheme = settings.darkThemeStyle == app.bilipai.core.settings.DarkThemeStyle.AMOLED,
             wallpaperOverrides = settings.wallpaperPaletteOverrides,
         ).liquidAccent
     } else wallpaperAccent ?: seed

@@ -26,7 +26,7 @@ import app.bilipai.core.ui.AppDialogAction
 import app.bilipai.core.ui.components.AppOutlinedTextField
 import app.bilipai.core.ui.components.AppText
 import app.bilipai.core.ui.components.AppTextButton
-import app.bilipai.feature.settings.share.SavedSettingsProfile
+import app.bilipai.core.settings.SavedSettingsProfile
 import app.bilipai.feature.settings.share.SettingsShareService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch

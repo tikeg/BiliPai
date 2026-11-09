@@ -21,6 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
+import app.bilipai.core.settings.AppScreenshotCropRect
+import app.bilipai.core.settings.AppScreenshotResult
+import app.bilipai.core.settings.buildAppScreenshotFileName
 
 private const val APP_SCREENSHOT_TAG = "AppScreenshot"
 private const val APP_SCREENSHOT_RELATIVE_PATH = "Pictures/BiliPai/Screenshots"

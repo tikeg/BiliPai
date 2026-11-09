@@ -15,8 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import app.bilipai.feature.settings.DarkThemeSchedule
-import app.bilipai.feature.settings.isScheduledDarkTheme
+import app.bilipai.core.settings.DarkThemeSchedule
+import app.bilipai.core.settings.isScheduledDarkTheme
 import java.util.Calendar
 
 private fun currentLocalMinute(): Int = Calendar.getInstance().let {

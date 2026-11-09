@@ -43,6 +43,15 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.bilipai.core.ui.AppShapes
 import app.bilipai.core.ui.ContainerLevel
+import app.bilipai.core.settings.AppScreenshotCropRect
+import app.bilipai.core.settings.AppScreenshotPoint
+import app.bilipai.core.settings.AppScreenshotSelectionRect
+import app.bilipai.core.settings.RegionDragTarget
+import app.bilipai.core.settings.adjustRegionSelection
+import app.bilipai.core.settings.isAppScreenshotSelectionLargeEnough
+import app.bilipai.core.settings.mapAppScreenshotSelectionRectToBitmap
+import app.bilipai.core.settings.normalizeAppScreenshotSelectionRect
+import app.bilipai.core.settings.resolveRegionDragTarget
 
 @Composable
 fun AppScreenshotRegionOverlay(

@@ -13,6 +13,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import app.bilipai.core.settings.Md3ColorSource
 
 @RunWith(AndroidJUnit4::class)
 class ThemeColorTransitionTest {
@@ -126,7 +127,7 @@ class ThemeColorTransitionTest {
     @Test
     fun rootWallpaperThemesSettleAfterParentRefreshAndRoleEditsInBothRenderers() {
         org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31)
-        val source = mutableStateOf(app.bilipai.feature.settings.Md3ColorSource.FOLLOW_WALLPAPER)
+        val source = mutableStateOf(app.bilipai.core.settings.Md3ColorSource.FOLLOW_WALLPAPER)
         val style = mutableStateOf(AppUiStyle.MATERIAL3)
         val motion = mutableStateOf(true)
         val refresh = mutableIntStateOf(0)
@@ -160,9 +161,9 @@ class ThemeColorTransitionTest {
             }
         }
         for (nextSource in listOf(
-            app.bilipai.feature.settings.Md3ColorSource.FOLLOW_WALLPAPER,
-            app.bilipai.feature.settings.Md3ColorSource.WALLPAPER_RETONED,
-            app.bilipai.feature.settings.Md3ColorSource.CUSTOM,
+            app.bilipai.core.settings.Md3ColorSource.FOLLOW_WALLPAPER,
+            app.bilipai.core.settings.Md3ColorSource.WALLPAPER_RETONED,
+            app.bilipai.core.settings.Md3ColorSource.CUSTOM,
         )) for (nextStyle in AppUiStyle.entries) for (nextMotion in listOf(true, false)) {
             rule.runOnIdle {
                 source.value = nextSource
@@ -177,9 +178,9 @@ class ThemeColorTransitionTest {
                 settledCount = compositions
                 assertEquals(materialAccent, miuixAccent)
                 assertEquals(materialAccent, visibleAccent)
-                if (nextSource == app.bilipai.feature.settings.Md3ColorSource.WALLPAPER_RETONED) {
+                if (nextSource == app.bilipai.core.settings.Md3ColorSource.WALLPAPER_RETONED) {
                     assertEquals(Color(0xFF007AFF), visibleAccent)
-                } else if (nextSource == app.bilipai.feature.settings.Md3ColorSource.CUSTOM) {
+                } else if (nextSource == app.bilipai.core.settings.Md3ColorSource.CUSTOM) {
                     assertEquals(Color(0xFFFF5722), visibleAccent)
                 }
             }

@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings
+package app.bilipai.core.settings
 
 internal const val LEGACY_THEME_MODE_AMOLED = 3
 

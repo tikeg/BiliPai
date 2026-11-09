@@ -28,7 +28,7 @@ import app.bilipai.core.theme.*
 import app.bilipai.core.ui.AppAlertDialog
 import app.bilipai.core.ui.AppDialogAction
 import app.bilipai.core.ui.LocalAppThemeConfig
-import app.bilipai.feature.settings.DarkThemeStyle
+import app.bilipai.core.settings.DarkThemeStyle
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +36,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import app.bilipai.core.settings.UpdateHighlightAction
+import app.bilipai.core.settings.UpdateHighlightHistory
+import app.bilipai.core.settings.canPreviewUpdateHighlight
+import app.bilipai.core.settings.isUpdateHighlightAlreadyEnabled
+import app.bilipai.core.settings.latestReleaseHighlights
+import app.bilipai.core.settings.updateHighlightCatalog
 
 @Suppress("DEPRECATION")
 private fun isExistingInstallation(context: Context): Boolean {

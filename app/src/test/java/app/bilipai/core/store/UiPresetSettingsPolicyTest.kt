@@ -3,7 +3,7 @@ package app.bilipai.core.store
 import app.bilipai.core.theme.UiPreset
 import app.bilipai.core.theme.AppUiStyle
 import app.bilipai.core.theme.AndroidNativeVariant
-import app.bilipai.feature.settings.share.SettingsShareSection
+import app.bilipai.core.settings.SettingsShareSection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

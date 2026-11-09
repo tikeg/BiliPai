@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.lerp
 import app.bilipai.core.store.ThemeRoleOverrides
 import app.bilipai.core.store.WallpaperPaletteOverrides
 import app.bilipai.core.store.WallpaperPaletteRole
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 
 /** One endpoint resolver for app content, both component renderers, glass and notifications.
  * Call before animation and cache by settings/base palette, never by interpolated frame colors.

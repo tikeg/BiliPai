@@ -4,6 +4,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.DarkThemeSchedule
 
 /**
  * 守卫 `coreSettingsFlow` 的下标约定。

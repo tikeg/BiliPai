@@ -9,6 +9,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
 
 class AppearanceThemeSegmentPolicyTest {
 

@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings
+package app.bilipai.core.settings
 
 /** Minutes in the device's current local day. Disabled by default; ordinary theme mode is retained. */
 data class DarkThemeSchedule(

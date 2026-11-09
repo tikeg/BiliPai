@@ -41,7 +41,7 @@ import app.bilipai.core.ui.AppDialogAction
 import app.bilipai.core.ui.components.AppButton
 import app.bilipai.core.ui.components.AppOutlinedButton
 import app.bilipai.core.ui.components.AppText
-import app.bilipai.feature.screenshot.AppScreenshotCropRect
+import app.bilipai.core.settings.AppScreenshotCropRect
 import app.bilipai.feature.screenshot.AppScreenshotRegionOverlay
 import app.bilipai.feature.screenshot.cropAppScreenshotBitmap
 import kotlinx.coroutines.Dispatchers

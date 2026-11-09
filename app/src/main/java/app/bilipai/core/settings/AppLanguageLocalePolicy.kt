@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings
+package app.bilipai.core.settings
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat

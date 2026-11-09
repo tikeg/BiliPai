@@ -15,6 +15,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.Instant
+import app.bilipai.core.settings.SavedSettingsProfile
+import app.bilipai.core.settings.SettingsShareApplyResult
+import app.bilipai.core.settings.SettingsShareDeviceDebugInfo
+import app.bilipai.core.settings.SettingsShareExportArtifact
+import app.bilipai.core.settings.SettingsShareImportSession
+import app.bilipai.core.settings.SettingsShareProfile
 
 internal const val DEFAULT_SETTINGS_SHARE_PROFILE_NAME = "BiliPai 设置分享"
 internal const val LIQUID_GLASS_SETTINGS_SHARE_PROFILE_NAME = "BiliPai 液态玻璃设置"

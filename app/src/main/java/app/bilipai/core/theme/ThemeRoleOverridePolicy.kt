@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import app.bilipai.core.store.ThemeModeRoleOverrides
 import app.bilipai.core.store.ThemeRoleOverrides
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.material3.dynamicColorScheme

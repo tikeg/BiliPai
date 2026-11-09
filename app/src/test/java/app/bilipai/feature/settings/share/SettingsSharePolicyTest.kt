@@ -6,6 +6,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.SettingsShareEntryDefinition
+import app.bilipai.core.settings.SettingsShareProfile
+import app.bilipai.core.settings.SettingsShareSection
+import app.bilipai.core.settings.SettingsShareSections
 
 class SettingsSharePolicyTest {
 

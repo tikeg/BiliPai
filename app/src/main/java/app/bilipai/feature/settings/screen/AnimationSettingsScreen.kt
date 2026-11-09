@@ -43,7 +43,7 @@ import app.bilipai.core.ui.adaptive.resolveDeviceUiProfile
 import app.bilipai.core.ui.transition.VIDEO_SHARED_TRANSITION_CUSTOM_MAX_MILLIS
 import app.bilipai.feature.settings.ui.SettingsPageScaffold
 import app.bilipai.feature.settings.share.SettingsShareService
-import app.bilipai.feature.settings.share.SettingsShareImportSession
+import app.bilipai.core.settings.SettingsShareImportSession
 import app.bilipai.feature.settings.share.flattenSettingsShareSections
 import app.bilipai.core.ui.transition.VIDEO_SHARED_TRANSITION_CUSTOM_MIN_MILLIS
 import app.bilipai.core.ui.transition.VideoSharedTransitionSpeed

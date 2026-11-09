@@ -4,6 +4,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.isValidMd3CustomColorHex
+import app.bilipai.core.settings.normalizeMd3CustomColorHex
+import app.bilipai.core.settings.resolveDarkThemeStylePreference
+import app.bilipai.core.settings.resolveMd3ColorSourcePreference
+import app.bilipai.core.settings.resolveThemeModePreference
+import app.bilipai.core.settings.resolveThemePreferenceState
 
 class ThemePreferencePolicyTest {
 

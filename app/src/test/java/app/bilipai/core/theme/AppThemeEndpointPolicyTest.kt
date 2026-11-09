@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import app.bilipai.core.store.AppThemeSettings
 import app.bilipai.core.store.WallpaperPaletteOverrides
 import app.bilipai.core.store.WallpaperPaletteRole
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import app.bilipai.feature.video.player.resolvePlaybackNotificationAccentColor
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec

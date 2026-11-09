@@ -2,6 +2,7 @@ package app.bilipai.feature.settings
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.bilipai.core.settings.AppLanguage
 
 class AppearanceLanguageSegmentPolicyTest {
 

@@ -1,8 +1,7 @@
-package app.bilipai.feature.settings.highlights
+package app.bilipai.core.settings
 
 import app.bilipai.core.store.AppThemeSettings
 import app.bilipai.core.theme.AppUiStyle
-import app.bilipai.feature.settings.Md3ColorSource
 import com.materialkolor.PaletteStyle
 
 internal enum class UpdateHighlightAction { PREVIEW_CMF }

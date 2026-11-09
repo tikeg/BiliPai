@@ -6,6 +6,16 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotCropRect
+import app.bilipai.core.settings.AppScreenshotPoint
+import app.bilipai.core.settings.AppScreenshotSelectionRect
+import app.bilipai.core.settings.RegionDragTarget
+import app.bilipai.core.settings.adjustRegionSelection
+import app.bilipai.core.settings.isAppScreenshotSelectionLargeEnough
+import app.bilipai.core.settings.mapAppScreenshotSelectionRectToBitmap
+import app.bilipai.core.settings.normalizeAppScreenshotSelectionRect
+import app.bilipai.core.settings.resolveRegionDragTarget
 
 class AppScreenshotRegionPolicyTest {
 

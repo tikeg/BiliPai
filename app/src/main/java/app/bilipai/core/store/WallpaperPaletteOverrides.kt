@@ -2,8 +2,8 @@ package app.bilipai.core.store
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import app.bilipai.feature.settings.isValidMd3CustomColorHex
-import app.bilipai.feature.settings.normalizeMd3CustomColorHex
+import app.bilipai.core.settings.isValidMd3CustomColorHex
+import app.bilipai.core.settings.normalizeMd3CustomColorHex
 
 enum class WallpaperPaletteRole { PRIMARY, SECONDARY, TERTIARY, CONTAINER }
 

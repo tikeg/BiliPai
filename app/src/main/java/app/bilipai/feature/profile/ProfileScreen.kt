@@ -202,7 +202,7 @@ import app.bilipai.core.ui.common.rememberContentTabPager
 import app.bilipai.core.ui.common.stationaryPagerHeader
 import app.bilipai.core.ui.components.AppHorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import app.bilipai.feature.settings.AppThemeMode
+import app.bilipai.core.settings.AppThemeMode
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 import app.bilipai.core.ui.blur.rememberRecoverableHazeState

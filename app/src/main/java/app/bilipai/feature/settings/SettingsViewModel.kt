@@ -55,6 +55,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeSchedule
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
 
 enum class SettingsDiagnosticsLoadState {
     NOT_LOADED,

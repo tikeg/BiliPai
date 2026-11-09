@@ -48,6 +48,10 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.isValidMd3CustomColorHex
+import app.bilipai.core.settings.normalizeMd3CustomColorHex
 
 @Composable
 internal fun ThemeCustomColorPickerDialog(

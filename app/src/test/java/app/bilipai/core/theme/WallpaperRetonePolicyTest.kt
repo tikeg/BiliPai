@@ -2,7 +2,7 @@ package app.bilipai.core.theme
 
 import androidx.compose.ui.graphics.Color
 import app.bilipai.core.store.ThemeRoleOverrides
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import kotlin.test.Test

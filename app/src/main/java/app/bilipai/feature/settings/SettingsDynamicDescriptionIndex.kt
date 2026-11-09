@@ -1,8 +1,8 @@
 package app.bilipai.feature.settings
 
 import app.bilipai.core.store.*
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
-import app.bilipai.feature.screenshot.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotGestureMode
 
 // State-dependent descriptions use every supported state so search doesn't depend on a toggle.
 private val settingsDynamicDescriptionIndex = mapOf(

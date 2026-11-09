@@ -1,4 +1,4 @@
-package app.bilipai.feature.settings.share
+package app.bilipai.core.settings
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

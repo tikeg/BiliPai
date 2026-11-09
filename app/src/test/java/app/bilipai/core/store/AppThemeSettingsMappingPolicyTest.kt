@@ -11,15 +11,16 @@ import app.bilipai.core.theme.AppFontSizePreset
 import app.bilipai.core.theme.AppUiScalePreset
 import app.bilipai.core.theme.AppUiStyle
 import app.bilipai.core.theme.UiPreset
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
-import app.bilipai.feature.screenshot.AppScreenshotGestureMode
-import app.bilipai.feature.settings.AppLanguage
-import app.bilipai.feature.settings.AppThemeMode
-import app.bilipai.feature.settings.DarkThemeStyle
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotGestureMode
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import app.bilipai.core.settings.DarkThemeSchedule
 
 class AppThemeSettingsMappingPolicyTest {
 
@@ -41,7 +42,7 @@ class AppThemeSettingsMappingPolicyTest {
             intPreferencesKey("dark_theme_schedule_start_minute") to 22 * 60 + 15,
             intPreferencesKey("dark_theme_schedule_end_minute") to 6 * 60 + 45,
         ))
-        assertEquals(app.bilipai.feature.settings.DarkThemeSchedule(true, 1335, 405), settings.darkThemeSchedule)
+        assertEquals(app.bilipai.core.settings.DarkThemeSchedule(true, 1335, 405), settings.darkThemeSchedule)
     }
 
     @Test

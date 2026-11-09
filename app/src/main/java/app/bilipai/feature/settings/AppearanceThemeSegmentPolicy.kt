@@ -12,6 +12,10 @@ import app.bilipai.core.ui.components.AppSegmentOption
 import com.materialkolor.Contrast
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
 
 internal fun resolveThemeModeSegmentOptions(
     followSystemLabel: String = AppThemeMode.FOLLOW_SYSTEM.label,

@@ -49,22 +49,22 @@ import app.bilipai.core.theme.resolveColorContrastPreference
 import app.bilipai.core.theme.resolveColorSpecPreference
 import app.bilipai.core.theme.resolvePaletteStylePreference
 import app.bilipai.data.model.response.LiveFavoriteTagEntry
-import app.bilipai.feature.settings.share.SettingsShareApplyResult
-import app.bilipai.feature.settings.share.SettingsShareEntryDefinition
-import app.bilipai.feature.settings.share.SettingsShareSection
-import app.bilipai.feature.settings.AppLanguage
-import app.bilipai.feature.settings.AppThemeMode
-import app.bilipai.feature.settings.DarkThemeSchedule
-import app.bilipai.feature.settings.normalizeDarkThemeSchedule
-import app.bilipai.feature.settings.DarkThemeStyle
-import app.bilipai.feature.settings.Md3ColorSource
-import app.bilipai.feature.settings.normalizeMd3CustomColorHex
-import app.bilipai.feature.settings.resolveAppLanguagePreference
-import app.bilipai.feature.settings.resolveDarkThemeStylePreference
-import app.bilipai.feature.settings.resolveMd3ColorSourcePreference
-import app.bilipai.feature.settings.resolveThemeModePreference
-import app.bilipai.feature.screenshot.AppScreenshotCaptureMode
-import app.bilipai.feature.screenshot.AppScreenshotGestureMode
+import app.bilipai.core.settings.SettingsShareApplyResult
+import app.bilipai.core.settings.SettingsShareEntryDefinition
+import app.bilipai.core.settings.SettingsShareSection
+import app.bilipai.core.settings.AppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.DarkThemeSchedule
+import app.bilipai.core.settings.normalizeDarkThemeSchedule
+import app.bilipai.core.settings.DarkThemeStyle
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.normalizeMd3CustomColorHex
+import app.bilipai.core.settings.resolveAppLanguagePreference
+import app.bilipai.core.settings.resolveDarkThemeStylePreference
+import app.bilipai.core.settings.resolveMd3ColorSourcePreference
+import app.bilipai.core.settings.resolveThemeModePreference
+import app.bilipai.core.settings.AppScreenshotCaptureMode
+import app.bilipai.core.settings.AppScreenshotGestureMode
 import app.bilipai.feature.video.ui.components.CollectionSortMode
 import app.bilipai.feature.video.danmaku.DANMAKU_DEFAULT_OPACITY
 import app.bilipai.feature.video.danmaku.normalizeDanmakuOpacity
@@ -101,6 +101,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import kotlin.math.abs
+import app.bilipai.core.settings.isValidMd3CustomColorHex
 
 // 声明 DataStore 扩展属性
 internal val Context.settingsDataStore by preferencesDataStore(name = "settings_prefs")
@@ -2733,7 +2734,7 @@ private val KEY_APP_FONT_WEIGHT = intPreferencesKey("app_font_weight")
     ) = context.settingsDataStore.edit { preferences ->
         val key = wallpaperPalettePreferenceKeys.getValue(darkTheme to role)
         if (hex == null) preferences.remove(key)
-        else if (app.bilipai.feature.settings.isValidMd3CustomColorHex(hex)) {
+        else if (app.bilipai.core.settings.isValidMd3CustomColorHex(hex)) {
             preferences[key] = normalizeMd3CustomColorHex(hex)
         }
     }

@@ -9,7 +9,7 @@ import app.bilipai.core.theme.createBiliPaiStyleColorScheme
 import app.bilipai.core.theme.formatMd3CustomColorHex
 import app.bilipai.core.theme.resolveAppThemeEndpointPalette
 import app.bilipai.core.theme.resolveMd3ThemeSeedColor
-import app.bilipai.feature.settings.Md3ColorSource
+import app.bilipai.core.settings.Md3ColorSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

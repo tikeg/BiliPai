@@ -58,9 +58,9 @@ import app.bilipai.core.util.CacheUtils
 import app.bilipai.core.util.CrashReporter
 import app.bilipai.core.util.LogCollector
 import app.bilipai.core.util.Logger
-import app.bilipai.feature.settings.applyAppLanguage
-import app.bilipai.feature.settings.AppThemeMode
-import app.bilipai.feature.settings.resolveThemeModePreference
+import app.bilipai.core.settings.applyAppLanguage
+import app.bilipai.core.settings.AppThemeMode
+import app.bilipai.core.settings.resolveThemeModePreference
 import app.bilipai.feature.plugin.AdFilterPlugin
 import app.bilipai.feature.plugin.Anime4KPlugin
 import app.bilipai.feature.plugin.CdnRegionPlugin
@@ -77,6 +77,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import app.bilipai.core.settings.isScheduledDarkTheme
 
 internal fun shouldRefreshLauncherIconForNightModeChange(
     previousUiMode: Int,
@@ -723,7 +724,7 @@ class PureApplication : Application(), SingletonImageLoader.Factory, ComponentCa
         val localTime = java.util.Calendar.getInstance()
         val minuteOfDay = localTime.get(java.util.Calendar.HOUR_OF_DAY) * 60 + localTime.get(java.util.Calendar.MINUTE)
         val nightMode = if (schedule.enabled) {
-            if (app.bilipai.feature.settings.isScheduledDarkTheme(schedule, minuteOfDay)) {
+            if (app.bilipai.core.settings.isScheduledDarkTheme(schedule, minuteOfDay)) {
                 androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
             } else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
         } else when (themeMode) {

@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import app.bilipai.core.store.WallpaperPaletteOverrides
 import app.bilipai.core.store.WallpaperPaletteRole
-import app.bilipai.feature.settings.Md3ColorSource
-import app.bilipai.feature.settings.isValidMd3CustomColorHex
+import app.bilipai.core.settings.Md3ColorSource
+import app.bilipai.core.settings.isValidMd3CustomColorHex
 
 /** Exact role edits apply only to wallpaper re-toning, independently in light and dark modes.
  * Unedited roles and native neutral surfaces keep the generated/system defaults. */

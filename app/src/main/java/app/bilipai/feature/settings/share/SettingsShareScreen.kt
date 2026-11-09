@@ -58,6 +58,8 @@ import app.bilipai.core.ui.components.AppPreferenceDivider
 import app.bilipai.core.ui.components.AppPreferenceGroup
 import app.bilipai.core.ui.components.AppPreferenceSectionTitle
 import app.bilipai.core.ui.components.AppSwitchPreference
+import app.bilipai.core.settings.SETTINGS_SHARE_SCHEMA_VERSION
+import app.bilipai.core.settings.SettingsShareImportSession
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
