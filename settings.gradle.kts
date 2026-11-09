@@ -90,6 +90,8 @@ include(":design-system")
 include(":feature-agreement")
 // 纯策略模块：隐私校验（无任何模块依赖）
 include(":feature-privacy")
+// 跨 feature 共享的轻量 UI 与 key 策略
+include(":feature-common")
 include(":design-tokens")
 include(":brand-motion")
 include(":dolby-ffmpeg-decoder")

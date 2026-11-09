@@ -1,6 +1,6 @@
 # Feature 模块拆分路线
 
-> 状态：**阶段 2 进行中**，已抽出 `:feature-agreement`、`:feature-privacy`。
+> 状态：**阶段 2 进行中**，已抽出 `:feature-agreement`、`:feature-privacy`、`:feature-common`。
 > 相关：`docs/wiki/LAYERS.md`（依赖方向）、`docs/wiki/CI.md`（构建通道）
 
 ## 1. 拆分原则
@@ -39,7 +39,7 @@
 | privacy | 1 | 56 | 2 | 0 | **已抽出**（`shouldRequirePrivacyAuthentication` 提为 public） |
 | livesite | 4 | 526 | 7 | 0 | 外部 0 引用，先确认是否死代码 |
 | widget | 1 | 198 | 0 | audio、video | 依赖 :app 的 MainActivity |
-| common | 2 | 55 | 2 | 0 | 被 13 个文件引用，改动面大 |
+| common | 2 | 55 | 2 | 0 | **已抽出**（`ListLoadError`、`resolveIndexedVideoLazyKey` 均提为 public） |
 | download | 32 | 5802 | 86 | core/store | 中 |
 | search | 27 | 10533 | 152 | home、video | 大 |
 | settings | 152 | 40628 | 435 | 多处 | 最大，最后拆 |
@@ -49,7 +49,7 @@
 
 1. `:feature-agreement` ✅
 2. `:feature-privacy` ✅（56 行、零外部依赖；入口函数提为 public，单测仍留在 :app）
-3. `:feature-common`（先把 13 个调用点改成显式依赖，再拆）
+3. `:feature-common` ✅（55 行、只依赖 design-system；两个入口提为 public）
 4. `:core-ui-*` 之外的公共件下沉（`core/ui/transition` 等）
 5. 中等 feature：`download` → `message` → `live` → `search`
 6. 最后 `home` / `video` / `settings`（内部耦合最深，需要先拆出共享 UI 与 policy）

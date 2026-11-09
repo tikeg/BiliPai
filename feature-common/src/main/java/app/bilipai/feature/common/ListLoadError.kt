@@ -14,7 +14,7 @@ import app.bilipai.core.ui.components.AppText
 import app.bilipai.core.ui.components.AppTextButton
 
 @Composable
-internal fun ListLoadError(
+fun ListLoadError(
     message: String,
     modifier: Modifier = Modifier,
     onRetry: () -> Unit,

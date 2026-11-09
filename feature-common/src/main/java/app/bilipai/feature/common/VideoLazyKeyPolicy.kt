@@ -1,6 +1,6 @@
 package app.bilipai.feature.common
 
-internal fun resolveIndexedVideoLazyKey(
+fun resolveIndexedVideoLazyKey(
     namespace: String,
     index: Int,
     bvid: String,

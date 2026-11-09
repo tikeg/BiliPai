@@ -442,6 +442,7 @@ dependencies {
     implementation(project(":design-system"))
     implementation(project(":feature-agreement"))
     implementation(project(":feature-privacy"))
+    implementation(project(":feature-common"))
     implementation(project(":danmaku-engine"))
 
     // Baseline profile 生成模块：generateBaselineProfile 时在真机/托管设备上跑
