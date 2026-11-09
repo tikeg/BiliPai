@@ -24,7 +24,7 @@ sealed interface PrivacyAuthenticationResult {
     data class Failure(val message: String) : PrivacyAuthenticationResult
 }
 
-internal fun shouldRequirePrivacyAuthentication(
+fun shouldRequirePrivacyAuthentication(
     privacyAuthenticationEnabled: Boolean,
     privacySessionUnlocked: Boolean,
     target: PrivacyNavigationTarget

@@ -1,6 +1,6 @@
 # Feature 模块拆分路线
 
-> 状态：**阶段 2 已启动**，首个模块 `:feature-agreement` 已抽出。
+> 状态：**阶段 2 进行中**，已抽出 `:feature-agreement`、`:feature-privacy`。
 > 相关：`docs/wiki/LAYERS.md`（依赖方向）、`docs/wiki/CI.md`（构建通道）
 
 ## 1. 拆分原则
@@ -36,7 +36,7 @@
 | category | 1 | 427 | 0 | home（ElegantVideoCard） | 需先拆 home |
 | matchinfo | 2 | 335 | 2 | video | 需先拆 video |
 | story | 4 | 773 | 15 | video | 同上 |
-| privacy | 1 | 56 | 2 | 0 | 纯策略，可作第二个 |
+| privacy | 1 | 56 | 2 | 0 | **已抽出**（`shouldRequirePrivacyAuthentication` 提为 public） |
 | livesite | 4 | 526 | 7 | 0 | 外部 0 引用，先确认是否死代码 |
 | widget | 1 | 198 | 0 | audio、video | 依赖 :app 的 MainActivity |
 | common | 2 | 55 | 2 | 0 | 被 13 个文件引用，改动面大 |
@@ -48,7 +48,7 @@
 ## 4. 建议顺序
 
 1. `:feature-agreement` ✅
-2. `:feature-privacy`（56 行、零外部依赖；需要把 2 个 `internal` 提升为 public）
+2. `:feature-privacy` ✅（56 行、零外部依赖；入口函数提为 public，单测仍留在 :app）
 3. `:feature-common`（先把 13 个调用点改成显式依赖，再拆）
 4. `:core-ui-*` 之外的公共件下沉（`core/ui/transition` 等）
 5. 中等 feature：`download` → `message` → `live` → `search`
