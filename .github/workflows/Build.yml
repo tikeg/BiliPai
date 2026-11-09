@@ -119,6 +119,15 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
           echo "BILI_RELEASE_STORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
   
+      # R8 在 4GB 守护进程堆下会 OutOfMemoryError（GC overhead limit exceeded）：
+      # 这个应用 + Compose 的 minify 工作量远超 4GB。CI runner 有 16GB，
+      # 这里只抬高本次构建的堆，不改动开发机上的 gradle.properties。
+      - name: Tune Gradle heap for R8
+        run: |
+          sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=1536m -XX:+UseParallelGC -Dfile.encoding=UTF-8/' gradle.properties
+          sed -i 's/^kotlin.daemon.jvmargs=.*/kotlin.daemon.jvmargs=-Xmx4096m/' gradle.properties
+          grep -E '^(org.gradle.jvmargs|kotlin.daemon.jvmargs)=' gradle.properties
+
       - name: Build APK
         env:
           # GitHub Packages（Miuix SNAPSHOT）解析需要 token 鉴权，匿名 401。
