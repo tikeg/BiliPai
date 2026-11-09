@@ -105,6 +105,7 @@ import app.bilipai.core.settings.AppThemeMode
 import app.bilipai.core.settings.DarkThemeStyle
 import app.bilipai.core.settings.Md3ColorSource
 import app.bilipai.core.settings.shouldPromptAppRestartForLanguageChange
+import app.bilipai.core.settings.persistAndApplyAppLanguageBeforeRestart
 
 /**
  *  外观设置二级页面

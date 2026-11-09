@@ -9,6 +9,7 @@ import app.bilipai.core.settings.AppLanguage
 import app.bilipai.core.settings.resolveAppLanguageLocaleTags
 import app.bilipai.core.settings.resolveAppLanguagePreference
 import app.bilipai.core.settings.shouldPromptAppRestartForLanguageChange
+import app.bilipai.core.settings.persistAndApplyAppLanguageBeforeRestart
 
 class AppLanguagePolicyTest {
 
