@@ -103,7 +103,7 @@ private fun UserAgreementGateScreen(onAgree: () -> Unit) {
                     item { UserAgreementBody() }
                     item {
                         AppText(
-                            stringResource(app.bilipai.R.string.user_agreement_read_to_end),
+                            stringResource(app.bilipai.feature.agreement.R.string.user_agreement_read_to_end),
                             style = MaterialTheme.typography.labelSmall,
                             color = AppContentColors.secondaryText(),
                             modifier = Modifier.fillMaxWidth(),
@@ -119,15 +119,15 @@ private fun UserAgreementGateScreen(onAgree: () -> Unit) {
             ) {
                 AppText(
                     stringResource(
-                        if (reachedBottom) app.bilipai.R.string.user_agreement_agree_continue
-                        else app.bilipai.R.string.user_agreement_read_to_end_action
+                        if (reachedBottom) app.bilipai.feature.agreement.R.string.user_agreement_agree_continue
+                        else app.bilipai.feature.agreement.R.string.user_agreement_read_to_end_action
                     )
                 )
             }
             AppTextButton(
                 onClick = { activity?.finishAffinity() },
                 modifier = Modifier.fillMaxWidth().widthIn(max = 480.dp),
-            ) { AppText(stringResource(app.bilipai.R.string.user_agreement_decline_exit)) }
+            ) { AppText(stringResource(app.bilipai.feature.agreement.R.string.user_agreement_decline_exit)) }
         }
     }
 }
@@ -190,7 +190,7 @@ fun UserAgreementReviewDialog(onDismiss: () -> Unit) {
         },
         confirmButton = {
             AppDialogAction(onClick = onDismiss) {
-                AppText(stringResource(app.bilipai.R.string.common_close))
+                AppText(stringResource(app.bilipai.feature.agreement.R.string.common_close))
             }
         },
     )

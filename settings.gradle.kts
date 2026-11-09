@@ -86,6 +86,8 @@ include(":settings-core")
 include(":network-core")
 include(":plugin-sdk")
 include(":design-system")
+// 首个抽出的 feature 模块：用户协议门禁（只依赖 design-system）
+include(":feature-agreement")
 include(":design-tokens")
 include(":brand-motion")
 include(":dolby-ffmpeg-decoder")

@@ -1,7 +1,7 @@
 package app.bilipai.feature.agreement
 
 import androidx.annotation.StringRes
-import app.bilipai.R
+import app.bilipai.feature.agreement.R
 
 /** Resource-backed agreement copy so the mandatory first-launch gate follows the selected app language. */
 data class UserAgreementSection(

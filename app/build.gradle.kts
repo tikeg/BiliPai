@@ -440,6 +440,7 @@ dependencies {
     implementation(project(":core-player"))
     implementation(project(":plugin-sdk"))
     implementation(project(":design-system"))
+    implementation(project(":feature-agreement"))
     implementation(project(":danmaku-engine"))
 
     // Baseline profile 生成模块：generateBaselineProfile 时在真机/托管设备上跑
