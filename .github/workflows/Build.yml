@@ -77,6 +77,14 @@ jobs:
             echo "build_type=release" >> $GITHUB_OUTPUT
           fi
           echo "构建类型已设置"
+
+      # skip_fcm 通道的 release 包是 debug 签名、无 google-services，只能用来验证，
+      # 不能当作 tag 发布产物；在入口就拦住，避免误发。
+      - name: Guard verification-only channel
+        if: steps.set_build_type.outputs.build_type == 'release' && github.event.inputs.skip_fcm == 'true' && startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "::error::skip_fcm=true 产出的 release 包使用 debug 签名，不能用于 tag 发布。"
+          exit 1
   
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -287,7 +295,7 @@ jobs:
         if: env.GITHUB_APK_DISTRIBUTION_ENABLED == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: BiliPai
+          name: BiliPai${{ github.event.inputs.skip_fcm == 'true' && '-skipfcm' || '' }}
           path: ${{ github.workspace }}/build/release-evidence
           retention-days: 7
           if-no-files-found: error
